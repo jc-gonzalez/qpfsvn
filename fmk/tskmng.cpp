@@ -221,7 +221,7 @@ void TskMng::processTskRqstMsg(ScalabilityProtocolRole* c, MessageString & m)
 
         msg.buildBody(body);
 
-        send(ChnlTskProc + "_" + agName, msg.str);
+        send(ChnlTskProc + "_" + agName, msg.str());
         
         TraceMsg("Task " + taskName + "sent to " + agName);
         

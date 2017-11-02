@@ -439,16 +439,17 @@ void Deployer::createElementsNetwork()
     TRC("MasterAddress is " << masterAddress);
 
     //======================================================================
-    // 2. Create the elements and connections for the host we are running on
-    //======================================================================
+    // 2. Create the elements for the perspective of the host we are
+    // running on
+    // ======================================================================
 
     // Agent names, hosts and ports (port range starts with initialPort)
     const char * sAgName = 0;
     std::vector<std::string> & agName    = cfg.agentNames;
-    //std::vector<std::string> & agHost    = cfg.agHost;
+    std::vector<std::string> & agHost    = cfg.agHost;
     std::vector<int> &         agPortTsk = cfg.agPortTsk;
 
-    for (auto & a : agName) { TRC(" ===>> " << a); }
+    for (auto & a : agName)     { TRC(" ===>> " << a); }
     for (auto & ap : agPortTsk) { TRC(" ===>> " << ap); }
 
     // Connection addresses and channel
@@ -464,64 +465,67 @@ void Deployer::createElementsNetwork()
 
     int j = 0;
     
-    //=== If we are running on a processing host ==========================
-    if (! isMasterHost) {
-
-        //-----------------------------------------------------------------
-        // a. Fill agents vector with as agents for this host
-        //-----------------------------------------------------------------
-
-        int h = 1;
-        for (auto & kv : cfg.network.processingNodes()) {
-            int numOfTskAgents = kv.second;
-            if (thisHost == kv.first) {
-              for (unsigned int i = 0; i < numOfTskAgents; ++i, ++j) {
-                    sAgName = agName.at(i).c_str();
-                    TskAge * tskag = new TskAge(sAgName, thisHost, &synchro);
-                    // By default, task agents are assumed to live in remote hosts
-                    tskag->setRemote(true);
-                    tskag->setSysDir(Config::PATHRun);
-                    tskag->setWorkDir(Config::PATHTsk);
-                    ag.push_back(tskag);
-                }
-            } else {
-              for (unsigned int i = 0; i < numOfTskAgents; ++i, ++j) {
-                    ag.push_back(0);
-                }
+    //-----------------------------------------------------------------
+    // 2.a Container Agents
+    //-----------------------------------------------------------------
+    
+    for (auto & kv : cfg.network.processingNodes()) {
+        int numOfTskAgents = kv.second;
+        if (thisHost == kv.first) {
+            for (unsigned int i = 0; i < numOfTskAgents; ++i, ++j) {
+                sAgName = agName.at(j).c_str();
+                TskAge * tskag = new TskAge(sAgName, thisHost, &synchro);
+                // By default, task agents are assumed to live in remote hosts
+                tskag->setRemote(!isMasterHost);
+                tskag->setSysDir(Config::PATHRun);
+                tskag->setWorkDir(Config::PATHTsk);
+                ag.push_back(tskag);
             }
-            ++h;
-        }
-
-        //-----------------------------------------------------------------
-        // b. Create Swarm Manager if serviceNodes is not empty and the
-        //    current host is the first in the list (Swam Manager)
-        //-----------------------------------------------------------------
-
-        for (auto & it : cfg.network.swarms()) {
-            sAgName = agName.at(j).c_str();
-            CfgGrpSwarm & swrm = it.second;
-            if ((thisHost == swrm.serviceNodes().at(0)) && (swrm.serviceNodes().size() > 0)) {
-                TskAge::ServiceInfo * serviceInfo = new TskAge::ServiceInfo;
-                serviceInfo->service    = swrm.name();
-                serviceInfo->serviceImg = swrm.image();
-                serviceInfo->scale      = swrm.scale();
-                serviceInfo->exe        = swrm.exec();
-                for (auto & a: swrm.args()) {
-                        serviceInfo->args.push_back(a);
-                }
-                ag.push_back(new TskAge(sAgName, thisHost, &synchro,
-                                        SERVICE, swrm.serviceNodes(),
-                                        serviceInfo));
-            } else {
+        } else {
+            for (unsigned int i = 0; i < numOfTskAgents; ++i, ++j) {
                 ag.push_back(0);
             }
-            ++h;
-            ++j;
         }
+    }
 
-        //-----------------------------------------------------------------
-        // c. Create agent connections
-        //-----------------------------------------------------------------
+    //-----------------------------------------------------------------
+    // 2.b Swarm Managers
+    //-----------------------------------------------------------------
+    
+    for (auto & it : cfg.network.swarms()) {
+        CfgGrpSwarm & swrm = it.second;
+        if (swrm.serviceNodes().size() < 1) { continue; }
+
+        if (thisHost == swrm.serviceNodes().at(0)) { 
+            TskAge::ServiceInfo * serviceInfo = new TskAge::ServiceInfo;
+            serviceInfo->service    = swrm.name();
+            serviceInfo->serviceImg = swrm.image();
+            serviceInfo->scale      = swrm.scale();
+            serviceInfo->exe        = swrm.exec();
+            for (auto & a: swrm.args()) {
+                serviceInfo->args.push_back(a);
+            }
+            sAgName = agName.at(j).c_str();
+            ag.push_back(new TskAge(sAgName, thisHost, &synchro,
+                                    SERVICE, swrm.serviceNodes(),
+                                    serviceInfo));
+        } else {
+            ag.push_back(0);
+        }
+        ++j;
+    }
+
+    // Show agents created
+    for (int i = 0; i < ag.size(); ++i) {
+        TRC("Agent 0x" + std::to_string((long)(ag.at(i))));
+    }
+
+    //======================================================================
+    // 3. Create the connections
+    // ======================================================================
+
+    //=== PROCESSING HOSTS =========================================
+    if (! isMasterHost) {
 
         // CHANNEL CMD - PUBSUB
         // - Publisher: EvtMng
@@ -557,11 +561,12 @@ void Deployer::createElementsNetwork()
         // 3. Processing completion messages
         int j = 0;
         for (auto & p : cfg.agPortTsk) {
-            if (ag.at(j) != 0) {
+            auto & a = ag.at(j);
+            if (a != 0) {
                 chnl = ChnlTskProc + "_" + agName.at(j);
                 TRC("### Connections for channel " << chnl);
                 connAddr = "tcp://" + masterAddress + ":" + str::toStr<int>(p);
-                ag.at(j)->addConnection(chnl, new ReqRep(NN_REQ, connAddr));
+                a->addConnection(chnl, new ReqRep(NN_REQ, connAddr));
             }
             ++j;
         }
@@ -569,7 +574,7 @@ void Deployer::createElementsNetwork()
         return;
     }
 
-    //=== Else, we are running on the master host =========================
+    //=== MASTER HOST ==============================================
 
     //-----------------------------------------------------------------
     // a. Create master node elements
@@ -579,7 +584,6 @@ void Deployer::createElementsNetwork()
     m.logMng = new LogMng  ("LogMng", masterAddress, &synchro);
     m.tskOrc = new TskOrc  ("TskOrc", masterAddress, &synchro);
     m.tskMng = new TskMng  ("TskMng", masterAddress, &synchro);
-
 
     //-----------------------------------------------------------------
     // b. Create component connections
@@ -646,12 +650,21 @@ void Deployer::createElementsNetwork()
 
     // CHANNEL TASK-PROCESSING - REQREP
     // - Out/In: TskAge*/TskMng
+    // Note that this channel is used to send from TskAgents to TskManager:
+    // 1. Processing requests
+    // 2. Processing status reports
+    // 3. Processing completion messages
     int k = 0;
     for (auto & p : agPortTsk) {
         chnl = ChnlTskProc + "_" + agName.at(k);
         TRC("### Connections for channel " << chnl);
         bindAddr = "tcp://" + masterAddress + ":" + str::toStr<int>(p);
         m.tskMng->addConnection(chnl, new ReqRep(NN_REP, bindAddr));
+        auto & a = ag.at(k);
+        if (a != 0) {
+            connAddr = bindAddr;
+            a->addConnection(chnl, new ReqRep(NN_REQ, connAddr));
+        }
         ++k;
     }
 

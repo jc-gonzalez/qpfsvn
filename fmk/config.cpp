@@ -433,8 +433,10 @@ void Config::generateProcFmkInfoStructure()
     // Handy lambda to compute ports number, h=1:procHosts, i=0:agentsInHost
     // We will assume agentsInHost is < 10
     auto portnum = [](int start, int h, int i) -> int
-        { return start + 10 * (h - 1) + i; };
-
+        { return start + 10 * h + i; };
+    const int ContainerAgentsOffset = 1000;
+    const int SwarmAgentsOffset     = 2000;
+    
     char sAgName[100];
 
     HostInfo hi;
@@ -448,8 +450,12 @@ void Config::generateProcFmkInfoStructure()
     procFmkInfo->numSrvTasks = 0;
 
     agName.clear();
+    agHost.clear();
     agPortTsk.clear();
 
+    // Create, for each agent (container runner or swarm manager) a name, a port
+    // number, and same its host ip
+    
     int h = 1;
     for (auto & ckv : cfg.network.processingNodes()) {
         int numOfTskAgents = ckv.second;
@@ -466,14 +472,20 @@ void Config::generateProcFmkInfoStructure()
         for (int i = 0; i < ph->numAgents; ++i) {
             sprintf(sAgName, "TskAgent_%02d_%02d", h, i + 1);
             agName.push_back(std::string(sAgName));
-            agPortTsk.push_back(portnum(startingPort + 10, h, i));
-
+            agPortTsk.push_back(portnum(startingPort + ContainerAgentsOffset, h, i));
+            agHost.push_back(ip);
+            
             AgentInfo agInfo;
             agInfo.name       = agName.back();
             agInfo.taskStatus = TaskStatusSpectra();
             agInfo.load       = (rand() % 1000) * 0.01;
             ph->agInfo.push_back(agInfo);
             ph->numTasks += agInfo.taskStatus.total;
+
+            TRC(ip + ": " + std::to_string(i + 1) + "/" +
+                std::to_string(ph->numAgents) + "\t" +
+                agInfo.name + " : " + std::to_string(agPortTsk.back()));
+
         }
 
         procFmkInfo->hostsInfo[ph->name] = ph;
@@ -485,11 +497,14 @@ void Config::generateProcFmkInfoStructure()
     for (auto & skv : cfg.network.swarms()) {
         hi.update();
         CfgGrpSwarm & swrm = skv.second;
+        if (swrm.serviceNodes().size() < 1) { continue; }
+
         std::string ip = swrm.serviceNodes().at(0);
 
         sprintf(sAgName, "Swarm_%s", ip.c_str());
         agName.push_back(std::string(sAgName));
-        agPortTsk.push_back(portnum(startingPort + 10, h, 0));
+        agPortTsk.push_back(portnum(startingPort + SwarmAgentsOffset, h, 0));
+        agHost.push_back(ip);
 
         SwarmInfo * sw = new SwarmInfo;
         sw->name       = ip;
@@ -497,6 +512,8 @@ void Config::generateProcFmkInfoStructure()
         sw->hostInfo   = hi;
         sw->taskStatus = TaskStatusSpectra();
 
+        TRC(ip + ": \t\t" + sAgName + " : " + std::to_string(agPortTsk.back()));
+        
         procFmkInfo->swarmInfo[ip] = sw;
         procFmkInfo->numSrvTasks += sw->scale;
         agentMode[ip] = SERVICE;
@@ -504,6 +521,10 @@ void Config::generateProcFmkInfoStructure()
     }
 
     dump();
+
+    for (int i = 0; i < agName.size(); ++i) {
+        TRC(agHost.at(i) + ": \t" + agName.at(i) + " : " + std::to_string(agPortTsk.at(i)));
+    }
 }
 
 //----------------------------------------------------------------------

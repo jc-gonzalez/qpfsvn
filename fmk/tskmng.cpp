@@ -60,6 +60,8 @@ using Configuration::cfg;
 ////////////////////////////////////////////////////////////////////////////
 //namespace QPF {
 
+const int FMK_INFO_TIMER = 5000;
+
 //----------------------------------------------------------------------
 // Constructor
 //----------------------------------------------------------------------
@@ -242,10 +244,12 @@ void TskMng::processTskRepMsg(ScalabilityProtocolRole* c, MessageString & m)
     TaskInfo task(body["info"]);
 
     std::string taskName  = task.taskName();
-    std::string agName    = task.taskAgent();
-
-    TaskStatus taskStatus = TaskStatus(task.taskStatus());
     TaskStatus oldStatus  = taskRegistry[taskName];
+
+    if (oldStatus == TASK_FINISHED) { return; }
+    
+    std::string agName    = task.taskAgent();
+    TaskStatus taskStatus = TaskStatus(task.taskStatus());
 
     TraceMsg("Processing TaskReport: status: " + TaskStatusName[oldStatus] +
              " ==> " + TaskStatusName[taskStatus]);
@@ -282,7 +286,9 @@ void TskMng::processTskRepMsg(ScalabilityProtocolRole* c, MessageString & m)
         InfoMsg("Finished task " + taskName);
     }
 
-    sendTskRepDistMsg(m, MsgTskRepDist);
+    msg.buildHdr(ChnlTskRepDist, MsgTskRepDist, CHNLS_IF_VERSION,
+                 compName, "*", "", "", "");
+    this->send(ChnlTskRepDist, msg.str());
 }
 
 //----------------------------------------------------------------------
@@ -307,7 +313,7 @@ void TskMng::processHostMonMsg(ScalabilityProtocolRole* c, MessageString & m)
 //----------------------------------------------------------------------
 void TskMng::armProcFmkInfoMsgTimer()
 {
-    Timer * fmkSender = new Timer(3000, true,
+    Timer * fmkSender = new Timer(FMK_INFO_TIMER, true,
                                   &TskMng::sendProcFmkInfoUpdate, this);
 }
 
@@ -416,21 +422,9 @@ bool TskMng::sendTaskAgMsg(MessageString & m,
 //----------------------------------------------------------------------
 bool TskMng::sendTskRepDistMsg(MessageString & m, const MessageDescriptor & msgType)
 {
-    bool retVal = false;
-    // Set message header
-    Message<MsgBodyTSK> msg(m);
-    msg.buildHdr(ChnlTskRepDist, msgType, CHNLS_IF_VERSION,
-                 compName, "*", "", "", "");
     // Send msg
-    std::map<ChannelDescriptor, ScalabilityProtocolRole*>::iterator it;
-    ChannelDescriptor chnl(ChnlTskRepDist);
-    it = connections.find(chnl);
-    if (it != connections.end()) {
-        ScalabilityProtocolRole * conn = it->second;
-        conn->setMsgOut(msg.str());
-        retVal = true;
-    }
-    return retVal;
+    this->send(ChnlTskRepDist, m);
+    return true;;
 }
 
 //----------------------------------------------------------------------
@@ -453,24 +447,11 @@ void TskMng::sendProcFmkInfoUpdate()
     // Set message header
     msg.buildHdr(ChnlTskRepDist, MsgFmkMon, CHNLS_IF_VERSION,
                  compName, "*", "", "", "");
+
     // Send msg
-    std::map<ChannelDescriptor, ScalabilityProtocolRole*>::iterator it;
-    ChannelDescriptor chnl(ChnlTskRepDist);
-    it = connections.find(chnl);
-    if (it != connections.end()) {
-        ScalabilityProtocolRole * conn = it->second;
-        conn->setMsgOut(msg.str());
-        DbgMsg("@@@@@@@@@@ SENDING UPDATE OF FMK INFO @@@@@@@@@@");
-        TraceMsg(s);
-    } else {
-        ErrMsg("Couldn't send updated ProcessingFrameworkInfo data.");
-        RaiseSysAlert(Alert(Alert::System,
-                            Alert::Error,
-                            Alert::Comms,
-                            std::string(__FILE__ ":" Stringify(__LINE__)),
-                            "Couldn't send updated ProcFmkInfo data",
-                            0));
-    }
+    this->send(ChnlTskRepDist, msg.str());    
+    TraceMsg("@@@@@@@@@@ SENDING UPDATE OF FMK INFO @@@@@@@@@@");
+    TraceMsg(s);
 
     // Arm new timer
     if (sendingPeriodicFmkInfo) { armProcFmkInfoMsgTimer(); }

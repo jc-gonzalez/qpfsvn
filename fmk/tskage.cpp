@@ -69,6 +69,11 @@ using Configuration::cfg;
 const std::string TskAge::ProcStatusName[] { TLIST_PSTATUS };
 #undef T
 
+const int HOST_INFO_TIMER            = 10000;
+
+const int MAX_WAITING_CYCLES         = 50;
+const int IDLE_CYCLES_BEFORE_REQUEST = 50;
+
 //----------------------------------------------------------------------
 // Constructor
 //----------------------------------------------------------------------
@@ -102,9 +107,9 @@ void TskAge::fromRunningToOperational()
         dckMng = new ContainerMng;
 
         // Set parameters for requesting tasks and waiting
-        idleCycles              =  0;
-        maxWaitingCycles        = 20;
-        idleCyclesBeforeRequest = 30;
+        idleCycles              = 0;
+        maxWaitingCycles        = MAX_WAITING_CYCLES;
+        idleCyclesBeforeRequest = IDLE_CYCLES_BEFORE_REQUEST;
 
         TraceMsg("Agent Mode: CONTAINER");
 
@@ -179,13 +184,13 @@ void TskAge::runEachIterationForContainers()
                              "", "", "");
                 
                 std::string chnl(ChnlTskProc + "_" + compName);
-                send(chnl, msg.str());
-                DBG("Sending request via channel " + chnl);
-                DbgMsg("Sending request via channel " + chnl);
-                
                 pStatus = WAITING;
                 InfoMsg("Switching to status " + ProcStatusName[pStatus]);
                 waitingCycles = 0;
+                send(chnl, msg.str());
+
+                DBG("Sending request via channel " + chnl);
+                DbgMsg("Sending request via channel " + chnl);
             }
         }
         break;
@@ -242,7 +247,7 @@ void TskAge::runEachIterationForServices()
 //----------------------------------------------------------------------
 void TskAge::armHostInfoTimer()
 {
-    Timer * hstnfoSender = new Timer(10000, true,
+    Timer * hstnfoSender = new Timer(HOST_INFO_TIMER, true,
                                      &TskAge::sendHostInfoUpdate, this);
 }
 
@@ -429,6 +434,11 @@ void TskAge::applyActionOnContainer(std::string & act, std::string & contId)
 //----------------------------------------------------------------------
 void TskAge::sendTaskReport(std::string contId)
 {
+    static TaskStatus  prevTaskStatus(TASK_UNKNOWN_STATE);
+    static int         prevProgress(-1);
+    static std::string prevInspStatus("");
+    static int         prevInspCode(-127);
+        
     // Define and set task object
     auto const & itTaskInfo = containerToTaskMap.find(contId);
     if (itTaskInfo == containerToTaskMap.end()) { return; }
@@ -443,6 +453,16 @@ void TskAge::sendTaskReport(std::string contId)
 
     JValue jinfo(info.str());
     json taskData = jinfo.val()[0];
+
+    // Clean-up sections not needed
+    json removedItem;
+    for (auto & sec : {"AppArmorProfile", "HostsPath", "RestartCount",
+                "ExecIDs", "ResolvConfPath", "LogPath", "HostnamePath", "Driver",
+                "GraphDriver", "NetworkSettings", "Config", "HostConfig"}) {        
+        taskData.removeMember(sec, &removedItem);
+    }
+
+    // Once taskData is clean, include in the task structure
     task["taskData"] = taskData;
 
     json jstate = taskData["State"];
@@ -467,13 +487,25 @@ void TskAge::sendTaskReport(std::string contId)
         (taskStatus == TASK_FAILED) ||
         (taskStatus == TASK_FINISHED) ||
         (taskStatus == TASK_UNKNOWN_STATE)) {
-        if (taskStatus == TASK_FINISHED) { endProgress(); }
-        pStatus = FINISHING;
-        InfoMsg("Switching to status " + ProcStatusName[pStatus]);
+        InfoMsg("Task container monitoring finished");
+        if (taskStatus == TASK_FINISHED) {
+            endProgress();
+        }
     } else {
         workingDuring++;
         updateProgress();
     }
+
+    // Avoid unnecessary messages
+    if ((taskStatus == prevTaskStatus) && 
+        (progress   == prevProgress) &&
+        (inspStatus == prevInspStatus) &&
+        (inspCode   == prevInspCode)) { return; }
+    
+    prevTaskStatus = taskStatus; 
+    prevProgress   = progress; 
+    prevInspStatus = inspStatus; 
+    prevInspCode   = inspCode;
 
     // Update progress
     task["taskData"]["State"]["Progress"] = std::to_string(progress);
@@ -484,7 +516,7 @@ void TskAge::sendTaskReport(std::string contId)
     task["taskData"]["State"]["TaskStatus"] = taskStatus;
 
     if (taskStatus == TASK_FINISHED) {
-        retrieveOutputProducts(task);
+        transferOutputProducts(task);
     }
 
     // Include additional info
@@ -504,15 +536,17 @@ void TskAge::sendTaskReport(std::string contId)
         (taskStatus == TASK_FAILED) ||
         (taskStatus == TASK_FINISHED) ||
         (taskStatus == TASK_UNKNOWN_STATE)) {
+        pStatus = FINISHING;
+        InfoMsg("Switching to status " + ProcStatusName[pStatus]);
     }
 }
 
 //----------------------------------------------------------------------
-// Method: retrieveOutputProducts
+// Method: transferOutputProducts
 //----------------------------------------------------------------------
-void TskAge::retrieveOutputProducts(TaskInfo & task)
+void TskAge::transferOutputProducts(TaskInfo & task)
 {
-    DBG("Retrieving output products for task: " << task.taskName());
+    DBG("Transferring output products for task: " << task.taskName());
 
     //-------------------------------------------------------------------
     // Get output data

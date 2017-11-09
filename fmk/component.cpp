@@ -55,8 +55,6 @@ using Configuration::cfg;
 //#include <unistd.h>
 //#include <time.h>
 
-//#define WRITE_MESSAGE_FILES
-
 ////////////////////////////////////////////////////////////////////////////
 // Namespace: QPF
 // -----------------------
@@ -91,8 +89,10 @@ void Component::init(std::string name, std::string addr, Synchronizer * s)
     compAddress = addr;
     synchro     = s;
 
+    writeMsgsToDisk = false;
+
     iteration = 0;
-    stepSize  = 100;
+    stepSize  = 300;
 
     // Every component must respond to MONIT_RQST messages (at least the
     // state might be requested)
@@ -208,6 +208,9 @@ void Component::processIncommingMessages()
             if ((tgt != "*") && (tgt != compName)) { continue; }
             std::string type(msg.header.type());
             DbgMsg("(FROM component.cpp:) "  + compName + " received the message [" + m + "]");
+
+            if (writeMsgsToDisk) { writeMsgToFile(Recv, chnl, m); }
+
             if      (chnl == ChnlCmd)        { processCmdMsg(conn, m); }
             else if (chnl == ChnlEvtMng)     { processEvtMngMsg(conn, m); }
             else if (chnl == ChnlHMICmd)     { processHMICmdMsg(conn, m); }
@@ -242,13 +245,8 @@ void Component::sendPeriodicMsgs()
         for (auto & kkv: kv.second) {
             int period = kkv.first;
             if (((iteration + 1) % period) == 0) {
-                std::map<ChannelDescriptor, ScalabilityProtocolRole*>::iterator it;
-                it = connections.find(chnl);
-                if (it != connections.end()) {
-                    ScalabilityProtocolRole * conn = it->second;
-                    MessageString & msg = kkv.second;
-                    conn->setMsgOut(msg);
-                }
+                MessageString & msg = kkv.second;
+                this->send(chnl, msg);
             }
         }
     }
@@ -293,6 +291,7 @@ void Component::send(ChannelDescriptor chnl, MessageString m)
     if (it != connections.end()) {
         ScalabilityProtocolRole * conn = it->second;
         conn->setMsgOut(m);
+        if (writeMsgsToDisk) { writeMsgToFile(Recv, chnl, m); }
     } else {
         WarnMsg("Couldn't send message via channel " + chnl);
         RaiseSysAlert(Alert(Alert::System,
@@ -441,12 +440,7 @@ void Component::processEvtMngMsg(ScalabilityProtocolRole * c, MessageString & m)
         body["cmd"]   = CmdStates;
         body["state"] = getStateName(getState());
         msg.buildBody(body);
-        std::map<ChannelDescriptor, ScalabilityProtocolRole*>::iterator it;
-        it = connections.find(ChnlEvtMng);
-        if (it != connections.end()) {
-            ScalabilityProtocolRole * conn = it->second;
-            conn->setMsgOut(msg.str());
-        }
+        this->send(ChnlEvtMng, msg.str());
 
     } else if (cmd == CmdStates) { // This should be EvtMng
 
@@ -573,6 +567,45 @@ void Component::raise(Alert a, Alert::Group grp)
         }
     }
     Log::log(compName, lvl, alertMsg);
+}
+
+//----------------------------------------------------------------------
+// Method: step
+//----------------------------------------------------------------------
+void Component::writeMsgToFile(SendOrRecv sor,
+                               ChannelDescriptor chnl, MessageString m)
+{
+    struct timespec timesp;
+    if (clock_gettime(CLOCK_REALTIME_COARSE, &timesp) != 0) {
+        perror("clock_gettime");
+        exit(1);
+    }
+
+    char fileName[256];
+    sprintf(fileName, "%s/%lld.%09ld_%s_%c_%s.mson",
+            Config::PATHSession.c_str(),
+            (long long)timesp.tv_sec, timesp.tv_nsec,
+            compName.c_str(), 
+            (sor == Send ? 'S' : 'R'), chnl.c_str());
+    FILE * fHdl = fopen(fileName, "w");
+    fprintf(fHdl, m.c_str());
+    fclose(fHdl);
+}
+
+//----------------------------------------------------------------------
+// Method: setWriteMsgsToDisk
+//----------------------------------------------------------------------
+void Component::setWriteMsgsToDisk(bool b)
+{
+    writeMsgsToDisk = b;
+}
+
+//----------------------------------------------------------------------
+// Method: getWriteMsgsToDisk
+//----------------------------------------------------------------------
+bool Component::getWriteMsgsToDisk()
+{
+    return writeMsgsToDisk;
 }
 
 

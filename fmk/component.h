@@ -186,6 +186,16 @@ public:
     //----------------------------------------------------------------------
     virtual std::string getAddress() { return compAddress; }
 
+    //----------------------------------------------------------------------
+    // Method: setWriteMsgsToDisk
+    //----------------------------------------------------------------------
+    void setWriteMsgsToDisk(bool b = true);
+
+    //----------------------------------------------------------------------
+    // Method: getWriteMsgsToDisk
+    //----------------------------------------------------------------------
+    bool getWriteMsgsToDisk();
+
 protected:
     //----------------------------------------------------------------------
     // Method: send
@@ -286,6 +296,14 @@ private:
     //----------------------------------------------------------------------
     virtual void step();
 
+    enum SendOrRecv {Send, Recv};
+
+    //----------------------------------------------------------------------
+    // Method: step
+    //----------------------------------------------------------------------
+    void writeMsgToFile(SendOrRecv sor,
+                        ChannelDescriptor chnl, MessageString m);
+    
 protected:
     std::map<ChannelDescriptor, ScalabilityProtocolRole*> connections;
     std::map<ChannelDescriptor, std::map<int, MessageString>> periodicMsgs;
@@ -300,6 +318,8 @@ protected:
     Synchronizer * synchro;
     int iteration;
     int stepSize;
+
+    bool writeMsgsToDisk;
 };
 
 #endif

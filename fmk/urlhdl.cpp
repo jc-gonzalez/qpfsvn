@@ -295,7 +295,7 @@ ProductMetadata & URLHandler::fromProcessing2Gateway()
 
     // Get extension
     std::string extension = str::mid(file,file.find_last_of('.') + 1);
-    std::string subdir = "/out"; //(extension == "log") ? "/log" : "/out";
+    std::string subdir = (extension == "log") ? "/log" : "/out";
 
     std::string section("/out");
 
@@ -308,7 +308,7 @@ ProductMetadata & URLHandler::fromProcessing2Gateway()
 
     if (isRemote) {
         (void)relocate(file, newFile, COPY_TO_MASTER);
-        runlink(file);
+        unlink(file.c_str());
     } else {
         (void)relocate(file, newFile, LINK);
     }

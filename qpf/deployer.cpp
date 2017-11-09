@@ -450,6 +450,7 @@ void Deployer::createElementsNetwork()
     std::vector<int> &         agPortTsk = cfg.agPortTsk;
 
     for (auto & a : agName)     { TRC(" ===>> " << a); }
+    for (auto & a : agHost)     { TRC(" ===>> " << a); }
     for (auto & ap : agPortTsk) { TRC(" ===>> " << ap); }
 
     // Connection addresses and channel
@@ -673,8 +674,7 @@ void Deployer::createElementsNetwork()
     // - Subscriber: DataMng EvtMng QPFHMI
     chnl     = ChnlTskRepDist;
     TRC("### Connections for channel " << chnl);
-    bindAddr = "tcp://" + masterAddress + ":" + str::toStr<int>(initialPort + PortTskRepDist);
-    //bindAddr = "inproc://" + chnl;
+    bindAddr = "ipc:///tmp/" + masterAddress + ":" + str::toStr<int>(initialPort + PortTskRepDist) + ".ipc";
     connAddr = bindAddr;
     m.tskMng->addConnection(chnl, new PubSub(NN_PUB, bindAddr));
     for (auto & c: std::vector<CommNode*> {m.datMng, m.evtMng}) {

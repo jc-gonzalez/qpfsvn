@@ -203,39 +203,32 @@ void TskMng::processTskRqstMsg(ScalabilityProtocolRole* c, MessageString & m)
         return;
     }
 
+    // Select task to send
+    TraceMsg("Pool of tasks has size of " + std::to_string(containerTasks.size()));
+    if (containerTasks.size() < 1) { return; }        
+
+    json taskInfoData = containerTasks.front().val();
+    containerTasks.pop_front();
+    
+    std::string taskName = agName + "_" + taskInfoData["taskName"].asString();
+    taskInfoData["taskName"] = taskName;
+    
     // Create message
     msg.buildHdr(ChnlTskProc, MsgTskProc, CHNLS_IF_VERSION,
                  compName, agName, "", "", "");
     MsgBodyTSK body;
-
-    // Select task to send
-    bool isTaskSent = false;
-    std::string taskName;
-
-    TraceMsg("Pool of tasks has size of " + std::to_string(containerTasks.size()));
-
-    if (containerTasks.size() > 0) {        
-        json taskInfoData = containerTasks.front().val();
-
-        std::string taskName = agName + "_" + taskInfoData["taskName"].asString();
-        taskInfoData["taskName"] = taskName;
-        
-        body["info"] = taskInfoData;
-        containerTasks.pop_front();
-
-        msg.buildBody(body);
-
-        send(ChnlTskProc + "_" + agName, msg.str());
-        
-        DBG("Task " + taskName + "sent to " + agName);
-
-        if (!sendingTskRegInfo) { armTskRepMsgTimer(); }
-        
-        TaskStatus  taskStatus = TASK_SCHEDULED; //TaskStatus(taskInfoData["taskStatus"].asInt());
-        taskRegistry[taskName] = taskStatus;
-        containerTaskStatus[taskStatus]++;
-        containerTaskStatusPerAgent[std::make_pair(agName, taskStatus)]++;
-    }
+    
+    body["info"] = taskInfoData;
+    msg.buildBody(body);
+    send(ChnlTskProc + "_" + agName, msg.str());
+    
+    taskRegistry[taskName] = TASK_SCHEDULED;
+    containerTaskStatus[TASK_SCHEDULED]++;
+    containerTaskStatusPerAgent[std::make_pair(agName, TASK_SCHEDULED)]++;
+    
+    DBG("Task " + taskName + "sent to " + agName);
+    
+    if (!sendingTskRegInfo) { armTskRepMsgTimer(); }       
 }
 
 //----------------------------------------------------------------------

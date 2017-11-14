@@ -71,8 +71,8 @@ const std::string TskAge::ProcStatusName[] { TLIST_PSTATUS };
 
 const int HOST_INFO_TIMER            = 10000;
 
-const int MAX_WAITING_CYCLES         = 20;
-const int IDLE_CYCLES_BEFORE_REQUEST = 40;
+const int MAX_WAITING_CYCLES         = 200;
+const int IDLE_CYCLES_BEFORE_REQUEST = 0;
 
 //----------------------------------------------------------------------
 // Constructor
@@ -259,7 +259,7 @@ void TskAge::processTskProcMsg(ScalabilityProtocolRole* c, MessageString & m)
     // Return if not recipient
     if (msg.header.target() != compName) { return; }
 
-    if (pStatus != WAITING) { return; }
+    if ((pStatus != WAITING) && (pStatus != IDLE)) { return; }
 
     // Define and set task object
     MsgBodyTSK & body = msg.body;

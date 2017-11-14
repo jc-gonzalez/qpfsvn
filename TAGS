@@ -1457,6 +1457,31 @@ class ScalabilityProtocolRole 34,635
     int         endPoint;ScalabilityProtocolRole::endPoint63,1598
     int         incMsgsMask;ScalabilityProtocolRole::incMsgsMask64,1624
     std::mutex  mtxMsgLists;ScalabilityProtocolRole::mtxMsgLists65,1653
+    ScalabilityProtocolRole(ScalabilityProtocolRole::ScalabilityProtocolRole36,666
+    ~ScalabilityProtocolRole(ScalabilityProtocolRole::~ScalabilityProtocolRole37,697
+    virtual void createSocket(ScalabilityProtocolRole::createSocket38,729
+    virtual void update(ScalabilityProtocolRole::update39,794
+    virtual bool next(ScalabilityProtocolRole::next40,821
+    virtual void setMsgOut(ScalabilityProtocolRole::setMsgOut41,863
+    virtual int getClass(ScalabilityProtocolRole::getClass42,908
+    virtual std::string getClassName(ScalabilityProtocolRole::getClassName43,936
+    virtual std::string getName(ScalabilityProtocolRole::getName44,976
+    virtual void setName(ScalabilityProtocolRole::setName45,1011
+    virtual std::string getAddress(ScalabilityProtocolRole::getAddress46,1057
+    virtual void getIncommingMessageStrings(ScalabilityProtocolRole::getIncommingMessageStrings49,1165
+    static int getevents(ScalabilityProtocolRole::getevents52,1283
+    Socket *    sck;ScalabilityProtocolRole::sck54,1352
+    MsgList     iMsgList;ScalabilityProtocolRole::iMsgList55,1373
+    MsgList     oMsgList;ScalabilityProtocolRole::oMsgList56,1399
+    bool        readyToGo;ScalabilityProtocolRole::readyToGo57,1425
+    int         elemClass;ScalabilityProtocolRole::elemClass58,1452
+    std::string elemName;ScalabilityProtocolRole::elemName59,1479
+    std::string address;ScalabilityProtocolRole::address60,1505
+    char        buf[ScalabilityProtocolRole::buf61,1530
+    int         rc;ScalabilityProtocolRole::rc62,1569
+    int         endPoint;ScalabilityProtocolRole::endPoint63,1589
+    int         incMsgsMask;ScalabilityProtocolRole::incMsgsMask64,1615
+    std::mutex  mtxMsgLists;ScalabilityProtocolRole::mtxMsgLists65,1644
 
 nncomm/survey.h,545
 #define SURVEY_H4,33

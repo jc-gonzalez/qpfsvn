@@ -203,6 +203,21 @@ void TskMng::processTskRqstMsg(ScalabilityProtocolRole* c, MessageString & m)
         return;
     }
 
+    // Check that no previous message was sent (and the Agent was not
+    // aware of if).  In that case, resend it.
+    std::map<std::string, MessageString>::iterator it = containerTaskLastMessage.find(agName);
+    if (it != containerTaskLastMessage.end()) {
+        // There is a message send to this agent.  A new request by
+        // this agent without a removal of this last message from the
+        // map containerTaskLastMessage means that the message was not
+        // noticed by the agent.  Therefore, we resend the same
+        // message.
+        MessageString & msgStr = it->second;
+        send(ChnlTskProc + "_" + agName, msgStr);
+        DBG("Task message resent to " + agName);
+        return;
+    }
+    
     // Select task to send
     TraceMsg("Pool of tasks has size of " + std::to_string(containerTasks.size()));
     if (containerTasks.size() < 1) { return; }        
@@ -220,7 +235,11 @@ void TskMng::processTskRqstMsg(ScalabilityProtocolRole* c, MessageString & m)
     
     body["info"] = taskInfoData;
     msg.buildBody(body);
-    send(ChnlTskProc + "_" + agName, msg.str());
+
+    MessageString msgStr(msg.str());
+    send(ChnlTskProc + "_" + agName, msgStr);
+
+    containerTaskLastMessage[agName] = msgStr;
     
     taskRegistry[taskName] = TASK_SCHEDULED;
     containerTaskStatus[TASK_SCHEDULED]++;
@@ -262,6 +281,13 @@ void TskMng::processTskRepMsg(ScalabilityProtocolRole* c, MessageString & m)
             containerTaskStatus[taskStatus]++;
             containerTaskStatusPerAgent[std::make_pair(agName, oldStatus)]--;
             containerTaskStatusPerAgent[std::make_pair(agName, taskStatus)]++;
+
+            if ((taskStatus == TASK_STOPPED) ||
+                (taskStatus == TASK_FAILED) ||
+                (taskStatus == TASK_FINISHED) ||
+                (taskStatus == TASK_UNKNOWN_STATE)){
+                containerTaskLastMessage.erase(containerTaskLastMessage.find(agName));
+            }
 
             TaskStatusSpectra spec = convertTaskStatusToSpectra(agName);
 

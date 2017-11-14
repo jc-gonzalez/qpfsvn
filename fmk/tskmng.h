@@ -199,6 +199,7 @@ private:
     std::map<TaskStatus, int> serviceTaskStatus;
 
     std::map<TaskStatusPerAgent, int> containerTaskStatusPerAgent;
+    std::map<std::string, MessageString> containerTaskLastMessage;
 
     HttpServer * httpSrv;
 

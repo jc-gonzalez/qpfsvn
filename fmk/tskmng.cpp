@@ -462,8 +462,6 @@ void TskMng::sendTskRepMsgUpdate()
 
         // Send msg
         this->send(ChnlTskReg, msg.str());    
-        TraceMsg("@@@@@@@@@@ SENDING UPDATE OF TSK REG @@@@@@@@@@");
-        
     }
     
     // Arm new timer
@@ -489,12 +487,10 @@ void TskMng::sendProcFmkInfoUpdate()
 
     // Set message header
     msg.buildHdr(ChnlFmkMon, MsgFmkMon, CHNLS_IF_VERSION,
-                 compName, "QPFHMI", "", "", "");
+                 compName, "HMIProxy", "", "", "");
 
     // Send msg
     this->send(ChnlFmkMon, msg.str());    
-    TraceMsg("@@@@@@@@@@ SENDING UPDATE OF FMK INFO @@@@@@@@@@");
-    TraceMsg(s);
     
     // Arm new timer
     if (sendingPeriodicFmkInfo) { armProcFmkInfoMsgTimer(); }

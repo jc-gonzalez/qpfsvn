@@ -155,8 +155,6 @@ void HMIProxy::processFmkMonMsg(ScalabilityProtocolRole* c, MessageString & m)
     TraceMsg(Config::procFmkInfo->toJsonStr());
     Config::procFmkInfo->fromStr(fmkInfoData.str());
     TraceMsg("@@@@@@@@@@ RECEIVED UOPDATE OF FMK INFO @@@@@@@@@@");
-    
-    sendAns(ChnlFmkMon, MsgFmkMon, "TskMng", "ACK");
 }
 
 //----------------------------------------------------------------------

@@ -216,7 +216,7 @@ void EvtMng::processHMICmdMsg(ScalabilityProtocolRole* c, MessageString & m)
                     
         // Build HMICmd answer
         msg.buildHdr(ChnlHMICmd, MsgHMICmd, CHNLS_IF_VERSION,
-                     compName, "*",
+                     compName, "HMIProxy",
                      "", "", "");
         body["ans"] = "OK";
         

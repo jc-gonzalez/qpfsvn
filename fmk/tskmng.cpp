@@ -294,20 +294,6 @@ void TskMng::processTskRepMsg(ScalabilityProtocolRole* c, MessageString & m)
 }
 
 //----------------------------------------------------------------------
-// Method: processFmkMonMsg
-//----------------------------------------------------------------------
-void TskMng::processFmkMonMsg(ScalabilityProtocolRole* c, MessageString & m)
-{
-    waitingForFmkMonAck = false;
-
-    if (pendingFmkMonMsgs.size() > 0) {
-        this->send(ChnlFmkMon, pendingFmkMonMsgs.front());
-        waitingForFmkMonAck = true;
-        pendingFmkMonMsgs.pop_front();
-    }
-}
-
-//----------------------------------------------------------------------
 // Method: processHostMonMsg
 //----------------------------------------------------------------------
 void TskMng::processHostMonMsg(ScalabilityProtocolRole* c, MessageString & m)
@@ -505,17 +491,11 @@ void TskMng::sendProcFmkInfoUpdate()
     msg.buildHdr(ChnlFmkMon, MsgFmkMon, CHNLS_IF_VERSION,
                  compName, "QPFHMI", "", "", "");
 
-    if (! waitingForFmkMonAck) {
-        // Send msg
-        this->send(ChnlFmkMon, msg.str());    
-        TraceMsg("@@@@@@@@@@ SENDING UPDATE OF FMK INFO @@@@@@@@@@");
-        TraceMsg(s);
-        
-        waitingForFmkMonAck = true;
-    } else {
-        pendingFmkMonMsgs.push_back(msg.str());
-    }
-
+    // Send msg
+    this->send(ChnlFmkMon, msg.str());    
+    TraceMsg("@@@@@@@@@@ SENDING UPDATE OF FMK INFO @@@@@@@@@@");
+    TraceMsg(s);
+    
     // Arm new timer
     if (sendingPeriodicFmkInfo) { armProcFmkInfoMsgTimer(); }
 }

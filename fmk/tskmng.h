@@ -124,11 +124,6 @@ protected:
     void processTskRepMsg(ScalabilityProtocolRole* c, MessageString & m);
 
     //----------------------------------------------------------------------
-    // Method: processFmkMonMsg
-    //----------------------------------------------------------------------
-    void processFmkMonMsg(ScalabilityProtocolRole* c, MessageString & m);
-
-    //----------------------------------------------------------------------
     // Method: processHostMonMsg
     //----------------------------------------------------------------------
     void processHostMonMsg(ScalabilityProtocolRole* c, MessageString & m);
@@ -210,8 +205,6 @@ private:
     std::mutex mtxHostInfo;
 
     bool sendingPeriodicFmkInfo;
-    bool waitingForFmkMonAck;
-    std::list<MessageString> pendingFmkMonMsgs;
 
     std::mutex mtxTskRegMsg;
 

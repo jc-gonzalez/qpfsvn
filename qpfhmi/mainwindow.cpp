@@ -1124,14 +1124,12 @@ void MainWindow::init()
     std::string connAddr = qconnAddr.toStdString();
     hmiNode->addConnection(chnl, new ReqRep(NN_REQ, connAddr));
 
-    // CHANNEL TASK-REPORTING-DISTRIBUTION - PUBSUB
-    // - Publisher: TskMng
-    // - Subscriber: DataMng EvtMng QPFHMI
-    chnl      = ChnlTskRepDist;
-    qconnAddr = QString("ipc:///tmp/%1:%2.ipc")
-      .arg(masterAddress).arg(startingPort + PortTskRepDist);
-    connAddr  = qconnAddr.toStdString();
-    hmiNode->addConnection(chnl, new PubSub(NN_SUB, connAddr));
+    // CHANNEL FRAMEWORK MONITORING - REQREP
+    // - Requester: TskMng
+    // - Replier: QPFHMI
+    chnl      = ChnlFmkMon;
+    connAddr  = "ipc:///tmp/" + chnl + ".ipc";
+    hmiNode->addConnection(chnl, new ReqRep(NN_REP, connAddr));
 
     // START!
     std::this_thread::sleep_for(std::chrono::milliseconds(500));

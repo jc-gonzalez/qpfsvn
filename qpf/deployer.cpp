@@ -669,17 +669,25 @@ void Deployer::createElementsNetwork()
         ++k;
     }
 
-    // CHANNEL TASK-REPORTING-DISTRIBUTION - PUBSUB
-    // - Publisher: TskMng
-    // - Subscriber: DataMng EvtMng QPFHMI
-    chnl     = ChnlTskRepDist;
+    // CHANNEL TASK-REGISTRATION - PIPELINE
+    // - Requester: TskMng
+    // - Replier: DataMng
+    chnl     = ChnlTskReg;
     TRC("### Connections for channel " << chnl);
-    bindAddr = "ipc:///tmp/" + masterAddress + ":" + str::toStr<int>(initialPort + PortTskRepDist) + ".ipc";
+    bindAddr = "ipc:///tmp/" + chnl + ".ipc";
     connAddr = bindAddr;
-    m.tskMng->addConnection(chnl, new PubSub(NN_PUB, bindAddr));
-    for (auto & c: std::vector<CommNode*> {m.datMng, m.evtMng}) {
-        c->addConnection(chnl, new PubSub(NN_SUB, connAddr));
-    }
+    m.tskMng->addConnection(chnl, new Pipeline(NN_PUSH, bindAddr));
+    m.datMng->addConnection(chnl, new Pipeline(NN_PULL, connAddr));
+
+    // CHANNEL FRAMEWORK MONITORING - REQREP
+    // - Requester: TskMng
+    // - Replier: QPFHMI
+    chnl     = ChnlFmkMon;
+    TRC("### Connections for channel " << chnl);
+    bindAddr = "ipc:///tmp/" + chnl + ".ipc";
+    connAddr = bindAddr;
+    m.tskMng->addConnection(chnl, new ReqRep(NN_REQ, bindAddr));
+    // Rep end is created by HMIProxy
 
 }
 

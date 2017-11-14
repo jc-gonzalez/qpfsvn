@@ -63,6 +63,16 @@ using Configuration::cfg;
 ////////////////////////////////////////////////////////////////////////////
 //namespace QPF {
 
+const int HEART_BEAT_STEP_SIZE = 250;
+
+#include <csignal>
+
+void signalHandler( int signum ) {
+    std::cout << "Interrupt signal (" << signum << ") received.\n";
+
+    exit(signum);  
+}
+
 //----------------------------------------------------------------------
 // Constructor
 //----------------------------------------------------------------------
@@ -89,10 +99,13 @@ void Component::init(std::string name, std::string addr, Synchronizer * s)
     compAddress = addr;
     synchro     = s;
 
-    writeMsgsToDisk = false;
+    writeMsgsToDisk = true;
+
+    // register signal SIGINT and signal handler  
+    signal(SIGABRT, signalHandler);  
 
     iteration = 0;
-    stepSize  = 300;
+    stepSize  = HEART_BEAT_STEP_SIZE;
 
     // Every component must respond to MONIT_RQST messages (at least the
     // state might be requested)
@@ -216,12 +229,12 @@ void Component::processIncommingMessages()
             else if (chnl == ChnlHMICmd)     { processHMICmdMsg(conn, m); }
             else if (chnl == ChnlInData)     { processInDataMsg(conn, m); }
             else if (chnl == ChnlTskSched)   { processTskSchedMsg(conn, m); }
+            else if (chnl == ChnlTskReg)     { processTskRegMsg(conn, m); }
+            else if (chnl == ChnlFmkMon)     { processFmkMonMsg(conn, m); }
             else if (type == MsgTskRqst)     { processTskRqstMsg(conn, m); }
             else if (type == MsgTskProc)     { processTskProcMsg(conn, m); }
             else if (type == MsgTskRep)      { processTskRepMsg(conn, m); }
             else if (type == MsgHostMon)     { processHostMonMsg(conn, m); }
-            else if (type == MsgFmkMon)      { processFmkMonMsg(conn, m); }
-            else if (type == MsgTskRepDist)  { processTskRepDistMsg(conn, m); }
             else    {
                 WarnMsg("Message from unidentified channel " + chnl);
                 RaiseSysAlert(Alert(Alert::System,
@@ -458,6 +471,24 @@ void Component::processEvtMngMsg(ScalabilityProtocolRole * c, MessageString & m)
                             0));
 
     }
+}
+
+//----------------------------------------------------------------------
+// Method: sendAns
+// Send basic answer as a REP node
+//----------------------------------------------------------------------
+void Component::sendAns(ChannelDescriptor chnl, MessageDescriptor msgd, 
+                        std::string to, std::string ans)
+{
+    // Send reply
+    Message<MsgBodyTSK> msgAns;
+    msgAns.buildHdr(chnl, msgd, CHNLS_IF_VERSION,
+                   compName, to,
+                   "", "", "");
+    MsgBodyTSK bodyAns;
+    bodyAns["ans"] = ans;
+    msgAns.buildBody(bodyAns);
+    this->send(chnl, msgAns.str());
 }
 
 //----------------------------------------------------------------------

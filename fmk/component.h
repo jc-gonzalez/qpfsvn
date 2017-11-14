@@ -272,13 +272,21 @@ protected:
     virtual void processTskRqstMsg(ScalabilityProtocolRole* c, MessageString & m) {}
     virtual void processTskProcMsg(ScalabilityProtocolRole* c, MessageString & m) {}
     virtual void processTskRepMsg(ScalabilityProtocolRole* c, MessageString & m) {}
-    virtual void processTskRepDistMsg(ScalabilityProtocolRole* c, MessageString & m) {}
     virtual void processHostMonMsg(ScalabilityProtocolRole* c, MessageString & m) {}
+
+    virtual void processTskRegMsg(ScalabilityProtocolRole* c, MessageString & m) {}
     virtual void processFmkMonMsg(ScalabilityProtocolRole* c, MessageString & m) {}
 
     virtual void processSubcmdMsg(MessageString & m) {}
 
 protected:
+    //----------------------------------------------------------------------
+    // Method: sendAns
+    // Send basic answer as a REP node
+    //----------------------------------------------------------------------
+    void sendAns(ChannelDescriptor chnl, MessageDescriptor msgd, 
+                 std::string to, std::string ans);
+
     //----------------------------------------------------------------------
     // Method: raise
     // Raise alert, shows it in the log, and stored in DB

@@ -166,25 +166,23 @@ void TskOrc::processInDataMsg(ScalabilityProtocolRole* c, MessageString & m)
 
     // Synthetic INDATA messages, that means reading products from folder
     URLHandler urlh;
-    for (auto & m : msg.body.products) {
-        urlh.setProduct(m);
-        m = urlh.fromInbox2LocalArch(false);
-
+    for (auto & md : msg.body.products) {
+        urlh.setProduct(md);
+        md = urlh.fromInbox2LocalArch(false);
         // Append product to catalogue
-        std::string prodType = m.productType();
-        catalogue.products[prodType] = m;
+        std::string prodType = md.productType();
+        catalogue.products[prodType] = md;
 
         // Check the product type as input for any rule
         RuleInputs ruleInputs;
         if (checkRulesForProductType(prodType, ruleInputs)) {
             for (auto & kv : ruleInputs) {
-                InfoMsg("Product type " + prodType + " fires rule: " +
+                DbgMsg("Product type " + prodType + " fires rule: " +
                         orcMaps.ruleDesc[kv.first]);
                 for (auto & itInp : kv.second.products) {
-                    InfoMsg("Input: " + itInp.productId());
+                    DbgMsg("Input: " + itInp.productId());
                 }
                 // Generate and send processing task to TskMng
-                InfoMsg("Sending task scheduling message");
                 sendTaskSchedMsg(kv.first, kv.second);
             }
         }
@@ -378,5 +376,6 @@ bool TskOrc::sendTaskSchedMsg(Rule * rule,
     msg.buildBody(body);
 
     this->send(ChnlTskSched, msg.str());
+    TRC("Sending: " + msg.str());
     return true;
 }

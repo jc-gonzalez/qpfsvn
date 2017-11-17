@@ -96,8 +96,8 @@ void TskOrc::defineOrchestrationParams()
         Rule * rule = new Rule;
         std::string ipTypes = jobj[i]["inputs"].asString();
         std::string opTypes = jobj[i]["outputs"].asString();
-        rule->name              = "Rule_" + str::toStr<int>(i);
-        rule->tag               = jobj[i]["tag"].asString();
+        //rule->name              = "Rule_" + str::toStr<int>(i);
+        rule->name              = jobj[i]["name"].asString();
         rule->inputs            = str::split(ipTypes, ',');
         rule->outputs           = str::split(opTypes, ',');
         rule->processingElement = jobj[i]["processing"].asString();
@@ -372,7 +372,7 @@ bool TskOrc::sendTaskSchedMsg(Rule * rule,
 
     MsgBodyTSK body;
     body["info"] = task.val();
-    body["tag"]  = rule->tag;
+    body["tag"]  = rule->name;
     msg.buildBody(body);
 
     this->send(ChnlTskSched, msg.str());

@@ -44,6 +44,10 @@
 #include "tools.h"
 
 #include "exttooledit.h"
+#include "conthostedit.h"
+#include "swarmedit.h"
+#include "ruleedit.h"
+
 #include "config.h"
 #include "tskorc.h"
 
@@ -75,7 +79,7 @@ Qt::ItemFlags StandardItemModel::flags(const QModelIndex&index) const
 {
     Qt::ItemFlags flags;
     if (index.isValid()) {
-        flags =  Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsEnabled | Qt::ItemIsEditable;
+        flags =  Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsEnabled; // | Qt::ItemIsEditable;
     } else {
         flags =  Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled  | Qt::ItemIsEnabled;
     }
@@ -206,6 +210,11 @@ ConfigTool::ConfigTool(QWidget *parent) :
     ui->btngrpCfgSections->setId(ui->tbtnOrchestration , PageOrchestration);
     ui->btngrpCfgSections->setId(ui->tbtnExtTools      , PageExtTools);
     ui->btngrpCfgSections->setId(ui->tbtnFlags         , PageFlags);
+
+    connect(ui->tblwdgUserDefTools, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editTool(QModelIndex)));
+    connect(ui->tblviewHosts, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editHost(QModelIndex)));
+    connect(ui->tblviewSwarms, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editSwarm(QModelIndex)));
+    connect(ui->tblviewRules, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editRule(QModelIndex)));
 }
 
 //----------------------------------------------------------------------
@@ -377,14 +386,31 @@ void ConfigTool::setWorkingPaths(QString newPath)
     ui->nedUserReprocArea->setText(newPath + "/data/user");
 }
 
+//==[ HOST ]===================================================================
+
 //----------------------------------------------------------------------
 // Slot: addHost
-// Adds a new row to the hosts table to allow the addition of a new host
+// Opens a dialog to add a new used defined host
 //----------------------------------------------------------------------
 void ConfigTool::addHost()
 {
+    ContHostEdit dlg;
+    QString ip;
+    bool isMaster;
+    int numAg;
     QTableView * vw = ui->tblviewHosts;
-    vw->model()->insertRow(vw->model()->rowCount());
+    QAbstractItemModel * model = vw->model();
+    int row = model->rowCount();
+    if (dlg.exec()) {
+        // Create new tool and append to list in table
+        model->insertRows(row, 1, QModelIndex());
+        dlg.getContHost(ip, isMaster, numAg);
+        model->setData(model->index(row, 0, QModelIndex()), ip);
+        model->setData(model->index(row, 1, QModelIndex()), (isMaster ?
+                                                           "Master Host" :
+                                                           "Processing Host"));
+        model->setData(model->index(row, 2, QModelIndex()), numAg);
+    }
 }
 
 //----------------------------------------------------------------------
@@ -397,13 +423,61 @@ void ConfigTool::removeHost()
 }
 
 //----------------------------------------------------------------------
+// Slot: editHost
+// Edits the host in the table with a given model index
+//----------------------------------------------------------------------
+void ConfigTool::editHost(QModelIndex idx)
+{
+    ContHostEdit dlg;
+    QTableView * vw = ui->tblviewHosts;
+    QAbstractItemModel * model = vw->model();
+    int row = idx.row();
+    QString ip = model->index(row,0).data().toString();
+    bool isMaster = model->index(row,1).data().toString() == "Master Host";
+    int numAg = model->index(row,2).data().toInt();
+    dlg.setContHost(ip, isMaster, numAg);
+    if (dlg.exec()) {
+        // Create new tool and append to list in table
+        dlg.getContHost(ip, isMaster, numAg);
+        model->setData(model->index(row, 0, QModelIndex()), ip);
+        model->setData(model->index(row, 1, QModelIndex()), (isMaster ?
+                                                           "Master Host" :
+                                                           "Processing Host"));
+        model->setData(model->index(row, 2, QModelIndex()), numAg);
+    }
+}
+                               
+//==[ SWARM ]===================================================================
+
+//----------------------------------------------------------------------
 // Slot: addSwarm
 // Adds a new row to the swarms table to allow the addition of a new swarm
 //----------------------------------------------------------------------
 void ConfigTool::addSwarm()
 {
-    QTableView * vw = ui->tblviewSwarms;
-    vw->model()->insertRow(vw->model()->rowCount());
+    SwarmEdit dlg;
+    QString name;
+    QString ip;
+    QStringList wips;
+    int scale;
+    QString image;
+    QString exe;
+    QString args;        
+    QTableView * vw = ui->tblviewHosts;
+    QAbstractItemModel * model = vw->model();
+    int row = model->rowCount();
+    if (dlg.exec()) {
+        // Create new tool and append to list in table
+        model->insertRows(row, 1, QModelIndex());
+        dlg.getSwarm(name, ip, wips, scale, image, exe, args);
+        model->setData(model->index(row, 0, QModelIndex()), name);
+        model->setData(model->index(row, 1, QModelIndex()), ip);
+        model->setData(model->index(row, 2, QModelIndex()), wips.join(" "));
+        model->setData(model->index(row, 3, QModelIndex()), scale);
+        model->setData(model->index(row, 4, QModelIndex()), image);
+        model->setData(model->index(row, 5, QModelIndex()), exe);
+        model->setData(model->index(row, 6, QModelIndex()), args);
+    }
 }
 
 //----------------------------------------------------------------------
@@ -414,6 +488,39 @@ void ConfigTool::removeSwarm()
 {
     removeFromTable(ui->tblviewSwarms, "swarm");
 }
+
+//----------------------------------------------------------------------
+// Slot: editSwarm
+// Edits the swarm in the table with a given model index
+//----------------------------------------------------------------------
+void ConfigTool::editSwarm(QModelIndex idx)
+{
+    SwarmEdit dlg;
+    QTableView * vw = ui->tblviewSwarms;
+    QAbstractItemModel * model = vw->model();
+    int row = idx.row();
+    QString name = model->index(row,0).data().toString();
+    QString ip = model->index(row,1).data().toString();
+    QStringList wips = model->index(row,2).data().toString().split(QRegExp("\\W+"), QString::SkipEmptyParts);
+    int scale = model->index(row,3).data().toInt();
+    QString image = model->index(row,4).data().toString();
+    QString exe = model->index(row,5).data().toString();
+    QString args = model->index(row,6).data().toString();
+    dlg.setSwarm(name, ip, wips, scale, image, exe, args);
+    if (dlg.exec()) {
+        // Replace swarm values
+        dlg.getSwarm(name, ip, wips, scale, image, exe, args);
+        model->setData(model->index(row, 0, QModelIndex()), name);
+        model->setData(model->index(row, 1, QModelIndex()), ip);
+        model->setData(model->index(row, 2, QModelIndex()), wips.join(" "));
+        model->setData(model->index(row, 3, QModelIndex()), scale);
+        model->setData(model->index(row, 4, QModelIndex()), image);
+        model->setData(model->index(row, 5, QModelIndex()), exe);
+        model->setData(model->index(row, 6, QModelIndex()), args);
+    }
+}
+
+//==[ PRODUCTS ]=============================================================
 
 //----------------------------------------------------------------------
 // Slot: addProduct
@@ -434,6 +541,8 @@ void ConfigTool::removeProduct()
     removeFromTable(ui->listProductTypes, "product type");
 }
 
+//==[ PROCESSORS ]=============================================================
+
 //----------------------------------------------------------------------
 // Slot: addProcessor
 // Adds a new row to the processors list to allow the addition of a new one
@@ -453,14 +562,44 @@ void ConfigTool::removeProcessor()
     removeFromTable(ui->listProcs, "processor");
 }
 
+//==[ RULES ]=================================================================
+
 //----------------------------------------------------------------------
 // Slot: addRule
 // Adds a new row to the rules table to allow the addition of a new rule
 //----------------------------------------------------------------------
 void ConfigTool::addRule()
 {
+    RuleEdit dlg;
     QTableView * vw = ui->tblviewRules;
-    vw->model()->insertRow(vw->model()->rowCount());
+    QAbstractItemModel * model = vw->model();
+    int row = model->rowCount();
+    QString name;
+    QStringList ins;
+    QString cond;
+    QString proc;
+    QStringList outs;
+
+    QStringList products;
+    for (auto & s : cfg.products.productTypes()) { products << QS(s); }
+
+    QStringList processors;
+    for (auto & kv : cfg.orchestration.processors()) { processors << QS(kv.first); }
+
+    QVector<int> inputs;
+    QVector<int> outputs;
+    
+    dlg.setRule(name, products, inputs, outputs, cond, processors, proc);
+    if (dlg.exec()) {
+        // Create new tool and append to list in table
+        model->insertRows(row, 1, QModelIndex());
+        dlg.getRule(name, ins, outs, cond, proc);
+        model->setData(model->index(row, 0, QModelIndex()), name);
+        model->setData(model->index(row, 1, QModelIndex()), ins.join(","));
+        model->setData(model->index(row, 2, QModelIndex()), cond);
+        model->setData(model->index(row, 3, QModelIndex()), proc);
+        model->setData(model->index(row, 4, QModelIndex()), outs.join(","));
+    }
 }
 
 //----------------------------------------------------------------------
@@ -473,13 +612,55 @@ void ConfigTool::removeRule()
 }
 
 //----------------------------------------------------------------------
+// Slot: editRule
+// Edits the rule in the table with a given model index
+//----------------------------------------------------------------------
+void ConfigTool::editRule(QModelIndex idx)
+{
+    RuleEdit dlg;
+    QTableView * vw = ui->tblviewRules;
+    QAbstractItemModel * model = vw->model();
+    int row = idx.row();
+    QString name = model->index(row,0).data().toString();
+    QStringList ins = model->index(row,1).data().toString().split(",");
+    QString cond = model->index(row,2).data().toString();
+    QString proc = model->index(row,3).data().toString();
+    QStringList outs = model->index(row,4).data().toString().split(",");
+
+    QStringList products;
+    for (auto & s : cfg.products.productTypes()) { products << QS(s); }
+
+    QStringList processors;
+    for (auto & kv : cfg.orchestration.processors()) { processors << QS(kv.first); }
+
+    QVector<int> inputs;
+    QVector<int> outputs;
+    for (int i = 0; i < products.size(); ++i) {
+        QString prod = products.at(i);
+        foreach (const QString & s, ins) { if (s == prod) { inputs << i; } }
+        foreach (const QString & s, outs) { if (s == prod) { outputs << i; } }
+    }
+    
+    dlg.setRule(name, products, inputs, outputs, cond, processors, proc);
+    if (dlg.exec()) {
+        // Create new tool and append to list in table
+        dlg.getRule(name, ins, outs, cond, proc);
+        model->setData(model->index(row, 0, QModelIndex()), name);
+        model->setData(model->index(row, 1, QModelIndex()), ins.join(","));
+        model->setData(model->index(row, 2, QModelIndex()), cond);
+        model->setData(model->index(row, 3, QModelIndex()), proc);
+        model->setData(model->index(row, 4, QModelIndex()), outs.join(","));
+    }
+}
+
+//----------------------------------------------------------------------
 // Slot: removeFromTable
 // Removes the selected row from a table/list view, if confirmed by user
 //----------------------------------------------------------------------
 void ConfigTool::removeFromTable(QAbstractItemView * vw, QString item)
 {
     QMessageBox msgBox;
-    msgBox.setText(QString("Yoy requested to remove a host from the list.").arg(item));
+    msgBox.setText(QString("Yoy requested to remove a %1 from the list.").arg(item));
     msgBox.setInformativeText(QString("Do you really want to delete the selected %1? "
                                       " Its information will be lost.").arg(item));
     QPushButton *removeButton = msgBox.addButton(QString("Remove %1").arg(item), QMessageBox::ActionRole);
@@ -643,11 +824,7 @@ void ConfigTool::transferCfgToGUI()
              << QString("%1").arg(kv.second);
         hostsTable.append(data);
     }
-    /*
-    Peer * peer = cfg.peersCfgByName[std::string("QPFHMI")];
-    QString qpfhmiServerAddr = QS(peer->serverAddr);
-    int basePort = qpfhmiServerAddr.mid(qpfhmiServerAddr.lastIndexOf(":") + 1).toInt();
-    */
+
     for (auto & kv : cfg.network.swarms()) {
         CfgGrpSwarm & swrm = kv.second;
         std::string manager("");
@@ -762,6 +939,24 @@ void ConfigTool::transferCfgToGUI()
 //----------------------------------------------------------------------
 void ConfigTool::transferGUIToCfg()
 {
+    // 1. GENERAL
+    // 1.1 General
+
+    // 1.2 Environment
+
+    // 2. MACHINES
+
+    // 3. DATABASE
+
+    // 4. PRODUCTS & PROCESSORS
+    
+    // 4.1 Products
+
+    // 4.2 Processors
+    
+    // 5. RULES
+
+    // 6. USER DEFINED TOOLS
 
     // 7. FLAGS
     transferFlagsFromGUIToCfg();
@@ -802,26 +997,25 @@ ModelView * ConfigTool::createTableModelView(QAbstractItemView * v,
 //----------------------------------------------------------------------
 void ConfigTool::transferFlagsFromCfgToGUI()
 {
-    /*
-    std::string msgName;
+    json & msgsToDisk = cfg.flags["msgsToDisk"];
 
-    std::map<std::string, bool> & fmapDsk = cfg.flags.monit.msgsToDisk;
-    std::map<std::string, bool> & fmapDB  = cfg.flags.monit.msgsToDB;
-
-    for (int i = (int)(MSG_START_IDX); i < (int)(MSG_UNKNOWN_IDX); ++i) {
-        msgName = monitMsgFlags.at(i).msgName;
-        monitMsgFlags.at(i).chkDisk->setChecked(!(fmapDsk.find(msgName) == fmapDsk.end()));
-        monitMsgFlags.at(i).chkDB->setChecked(!(fmapDB.find(msgName) == fmapDB.end()));
+    for (auto & v : monitMsgFlags) {
+        std::string & msgName = v.msgName;
+        for (const json & msg : msgsToDisk) {
+            if (msg.asString() == msgName) {
+                v.chkDisk->setChecked(true);
+                break;
+            }
+        }
     }
 
-    ui->chkMsgsIncommingInLog->setChecked(cfg.flags.monit.notifyMsgArrival);
-    ui->chkGroupTskAgentLogs->setChecked(cfg.flags.monit.groupTaskAgentLogs);
+    ui->chkMsgsIncommingInLog->setChecked(cfg.flags.notifyMsgArrival());
+    ui->chkGroupTskAgentLogs->setChecked(cfg.flags.groupTaskAgentLogs());
 
-    ui->chkAllowReproc->setChecked(cfg.flags.proc.allowReprocessing);
-    ui->chkGenerateIntermedProd->setChecked(cfg.flags.proc.intermedProducts);
+    ui->chkAllowReproc->setChecked(cfg.flags.allowReprocessing());
+    ui->chkGenerateIntermedProd->setChecked(cfg.flags.intermediateProducts());
 
-    ui->chkSendOutputsToArchive->setChecked(cfg.flags.arch.sendOutputsToMainArchive);
-    */
+    ui->chkSendOutputsToArchive->setChecked(cfg.flags.sendOutputsToMainArchive());
 }
 
 //----------------------------------------------------------------------
@@ -830,28 +1024,21 @@ void ConfigTool::transferFlagsFromCfgToGUI()
 //----------------------------------------------------------------------
 void ConfigTool::transferFlagsFromGUIToCfg()
 {
-    /*
-    std::string msgName;
+    json & msgsToDisk = cfg.flags["msgsToDisk"];
+    msgsToDisk.clear();
+    
+    for (auto & v : monitMsgFlags) {
+        std::string & msgName = v.msgName;
+        if (v.chkDisk->isChecked()) { msgsToDisk.append(msgName); }
+    }        
 
-    std::map<std::string, bool> & fmapDsk = cfg.flags.monit.msgsToDisk;
-    std::map<std::string, bool> & fmapDB = cfg.flags.monit.msgsToDB;
-    fmapDsk.clear();
-    fmapDB.clear();
+    cfg.flags["notifyMsgArrival"]   = ui->chkMsgsIncommingInLog->isChecked();
+    cfg.flags["groupTaskAgentLogs"] = ui->chkGroupTskAgentLogs->isChecked();
 
-    for (int i = (int)(MSG_START_IDX); i < (int)(MSG_UNKNOWN_IDX); ++i) {
-        msgName = monitMsgFlags.at(i).msgName;
-        if (monitMsgFlags.at(i).chkDisk->isChecked()) { fmapDsk[msgName] = true; }
-        if (monitMsgFlags.at(i).chkDB->isChecked()) { fmapDB[msgName] = true; }
-    }
+    cfg.flags["allowReprocessing"] = ui->chkAllowReproc->isChecked();
+    cfg.flags["intermediateProducts"]  = ui->chkGenerateIntermedProd->isChecked();
 
-    cfg.flags.monit.notifyMsgArrival   = ui->chkMsgsIncommingInLog->isChecked();
-    cfg.flags.monit.groupTaskAgentLogs = ui->chkGroupTskAgentLogs->isChecked();
-
-    cfg.flags.proc.allowReprocessing = ui->chkAllowReproc->isChecked();
-    cfg.flags.proc.intermedProducts  = ui->chkGenerateIntermedProd->isChecked();
-
-    cfg.flags.arch.sendOutputsToMainArchive = ui->chkSendOutputsToArchive->isChecked();
-    */
+    cfg.flags["sendOutputsToMainArchive"] = ui->chkSendOutputsToArchive->isChecked();
 }
 
 // Auxiliary vector with information about config. flags

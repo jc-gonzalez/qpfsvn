@@ -28,6 +28,9 @@ set (qpfGuiLib_src
   dlgalert.cpp
   dlgdataing.cpp
   dlgshowtaskinfo.cpp
+  conthostedit.cpp
+  swarmedit.cpp
+  ruleedit.cpp
   exttooledit.cpp
   exttoolsdef.cpp
   frm_filter.cpp
@@ -66,6 +69,9 @@ set (qpfGuiLib_hdr
   dlgalert.h
   dlgdataing.h
   dlgshowtaskinfo.h
+  conthostedit.h
+  swarmedit.h
+  ruleedit.h
   exttooledit.h
   exttoolsdef.h
   filters.h
@@ -104,6 +110,9 @@ set (qpfGuiLib_ui
   browserwidget.ui
   dbbrowser.ui
   dlgalert.ui
+  conthostedit.ui
+  swarmedit.ui
+  ruleedit.ui
   exttooledit.ui
   exttoolsdef.ui
   frm_filterset.ui

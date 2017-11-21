@@ -152,9 +152,11 @@ public slots:
 private slots:
     void addHost();
     void removeHost();
+    void editHost(QModelIndex idx);
 
     void addSwarm();
     void removeSwarm();
+    void editSwarm(QModelIndex idx);
 
     void addProduct();
     void removeProduct();
@@ -164,6 +166,7 @@ private slots:
 
     void addRule();
     void removeRule();
+    void editRule(QModelIndex idx);
 
     void removeFromTable(QAbstractItemView * vw, QString item);
 

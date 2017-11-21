@@ -285,7 +285,7 @@ Processors</string>
         <enum>QFrame::Raised</enum>
        </property>
        <property name="currentIndex">
-        <number>6</number>
+        <number>0</number>
        </property>
        <widget class="QWidget" name="pageGeneral">
         <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -823,15 +823,15 @@ Processors</string>
            <item>
             <widget class="QGroupBox" name="gpboxHosts">
              <property name="title">
-              <string>Host machines &amp; Swarms Network</string>
+              <string>Host machines &amp;&amp; Swarms Network</string>
              </property>
-             <layout class="QVBoxLayout" name="verticalLayout_8" stretch="1000,1">
+             <layout class="QVBoxLayout" name="verticalLayout_8">
               <item>
                <widget class="QSplitter" name="splitter">
                 <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
+                 <enum>Qt::Vertical</enum>
                 </property>
-                <widget class="QWidget" name="">
+                <widget class="QWidget" name="layoutWidget">
                  <layout class="QVBoxLayout" name="verticalLayout_5">
                   <item>
                    <widget class="QLabel" name="label_2">
@@ -954,7 +954,7 @@ Processors</string>
                   </item>
                  </layout>
                 </widget>
-                <widget class="QWidget" name="">
+                <widget class="QWidget" name="layoutWidget_1">
                  <layout class="QVBoxLayout" name="verticalLayout_6">
                   <item>
                    <widget class="QLabel" name="label_3">
@@ -1560,6 +1560,9 @@ Processors</string>
             </property>
             <item>
              <widget class="QTableView" name="tblviewRules">
+              <property name="editTriggers">
+               <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed</set>
+              </property>
               <property name="dragEnabled">
                <bool>true</bool>
               </property>
@@ -2160,22 +2163,6 @@ Processors</string>
    </hints>
   </connection>
   <connection>
-   <sender>tblwdgUserDefTools</sender>
-   <signal>doubleClicked(QModelIndex)</signal>
-   <receiver>ConfigTool</receiver>
-   <slot>editTool(QModelIndex)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>416</x>
-     <y>175</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>517</x>
-     <y>4</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>btnApply</sender>
    <signal>clicked()</signal>
    <receiver>ConfigTool</receiver>
@@ -2198,8 +2185,8 @@ Processors</string>
    <slot>addHost()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>225</x>
-     <y>537</y>
+     <x>216</x>
+     <y>504</y>
     </hint>
     <hint type="destinationlabel">
      <x>664</x>
@@ -2214,8 +2201,8 @@ Processors</string>
    <slot>removeHost()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>253</x>
-     <y>537</y>
+     <x>234</x>
+     <y>504</y>
     </hint>
     <hint type="destinationlabel">
      <x>776</x>
@@ -2426,6 +2413,9 @@ Processors</string>
   <slot>closeDoNothing()</slot>
   <slot>addSwarm()</slot>
   <slot>removeSwarm()</slot>
+  <slot>editContHost(QModelIndex)</slot>
+  <slot>editSwarm(QModelIndex)</slot>
+  <slot>editRule(QModelIndex)</slot>
  </slots>
  <buttongroups>
   <buttongroup name="btngrpCfgSections"/>

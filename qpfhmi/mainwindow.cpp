@@ -936,7 +936,9 @@ void MainWindow::showConfigTool()
     if (cfgTool.exec()) {
         DMsg("Updating user tools!");
         cfgTool.getExtTools(userDefTools);
-        hmiNode->sendNewCfgInfo();
+        if (hmiNode != 0) {
+            hmiNode->sendNewCfgInfo();
+        }
     }
 }
 

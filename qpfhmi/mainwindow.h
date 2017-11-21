@@ -113,6 +113,7 @@ protected:
 public slots:
     void setAppInfo(QString name, QString rev, QString bld);
     void updateMenus();
+    void showConfigTool();
     void setActiveSubWindow(QWidget *window);
     void updateSystemView();
     void localarchViewUpdate();
@@ -149,7 +150,6 @@ private slots:
 
     void transitToOperational();
 
-    void showConfigTool();
     void showDBBrowser();
     void showExtToolsDef();
     void showVerbLevel();

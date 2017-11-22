@@ -425,6 +425,21 @@ void Config::processConfig()
 }
 
 //----------------------------------------------------------------------
+// Method: consolidate
+// Injects changes in the components of the cfg structure into the value
+//----------------------------------------------------------------------
+void Config::consolidate()
+{
+    value["general"]       = general.val();
+    value["network"]       = network.val();
+    value["db"]            = db.val();
+    value["products"]      = products.val();
+    value["orchestration"] = orchestration.val();
+    value["userDefTools"]  = userDefTools.val();
+    value["flags"]         = flags.val();
+}
+
+//----------------------------------------------------------------------
 // Method: generateProcFmkInfoStructure
 // Generates a new ProcFmkInfo structure
 //----------------------------------------------------------------------

@@ -181,7 +181,7 @@ private slots:
 
 private:
     void transferCfgToGUI();
-    void transferGUIToCfg();
+    bool transferGUIToCfg();
 
     ModelView * createListModelView(QAbstractItemView * v,
                                     QStringList & dlist,

@@ -61,10 +61,12 @@ SwarmEdit::~SwarmEdit()
     delete ui;
 }
 
-void SwarmEdit::setSwarm(QString name, QString ip, QStringList wips, int scale,
+void SwarmEdit::setSwarm(QString id, QString name,
+                         QString ip, QStringList wips, int scale,
                          QString image, QString exe, QString args)
 {
-    ui->edSwarmName->setText(name);
+    ui->edSwarmId->setText(id);
+    ui->edSrvName->setText(name);
     ui->edManagerIP->setText(ip);
     ui->edWorkerIPs->setText(wips.join(" "));
     ui->spbxScale->setValue(scale);
@@ -73,10 +75,12 @@ void SwarmEdit::setSwarm(QString name, QString ip, QStringList wips, int scale,
     ui->edArgs->setText(args);
 }
     
-void SwarmEdit::getSwarm(QString & name, QString & ip, QStringList & wips, int & scale,
+void SwarmEdit::getSwarm(QString & id, QString & name,
+                         QString & ip, QStringList & wips, int & scale,
                          QString & image, QString & exe, QString & args)
 {
-    name  = ui->edSwarmName->text();
+    id    = ui->edSwarmId->text();
+    name  = ui->edSrvName->text();
     ip    = ui->edManagerIP->text();
     wips  = ui->edWorkerIPs->text().split(QRegExp("\\W+"), QString::SkipEmptyParts);
     scale = ui->spbxScale->value();

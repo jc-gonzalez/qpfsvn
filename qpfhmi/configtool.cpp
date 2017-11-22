@@ -308,8 +308,6 @@ void ConfigTool::save()
 //----------------------------------------------------------------------
 void ConfigTool::saveAs()
 {
-
-
     QFileInfo fs(QString::fromStdString(cfg.cfgFileName));
     QString filter("*.json");
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save As"),
@@ -326,12 +324,11 @@ void ConfigTool::saveAs()
 void ConfigTool::saveAsFilename(QString & fName)
 {
     if (! fName.isEmpty()) {
-        transferGUIToCfg();
-        QString cfgJsonContent(cfg.str().c_str());
+        if (!transferGUIToCfg()) { return; }
         QFile file( fName );
         if (file.open(QIODevice::ReadWrite)) {
             QTextStream stream(&file);
-            stream << cfgJsonContent << endl;
+            stream << QS(cfg.str(true)) << endl;
         }
     }
 }
@@ -342,8 +339,9 @@ void ConfigTool::saveAsFilename(QString & fName)
 //----------------------------------------------------------------------
 void ConfigTool::apply()
 {
-    transferGUIToCfg();
-    accept();
+    if (transferGUIToCfg()) {
+        accept();
+    }
 }
 
 //----------------------------------------------------------------------
@@ -361,17 +359,15 @@ void ConfigTool::closeDoNothing()
 //----------------------------------------------------------------------
 void ConfigTool::selectBasePath()
 {
-
-
     QString pathName(QS(cfg.general.workArea()));
     pathName = QFileDialog::getExistingDirectory(this,
                                                  tr("Select QPF base path"),
                                                  pathName);
     QFileInfo fs(pathName);
     if (fs.exists()) {
-        //ui->edBasePath->setText(pathName);
+        ui->edBasePath->setText(pathName);
+        setWorkingPaths(pathName);
     }
-
 }
 
 //----------------------------------------------------------------------
@@ -456,6 +452,7 @@ void ConfigTool::editHost(QModelIndex idx)
 void ConfigTool::addSwarm()
 {
     SwarmEdit dlg;
+    QString id;
     QString name;
     QString ip;
     QStringList wips;
@@ -469,14 +466,15 @@ void ConfigTool::addSwarm()
     if (dlg.exec()) {
         // Create new tool and append to list in table
         model->insertRows(row, 1, QModelIndex());
-        dlg.getSwarm(name, ip, wips, scale, image, exe, args);
-        model->setData(model->index(row, 0, QModelIndex()), name);
-        model->setData(model->index(row, 1, QModelIndex()), ip);
-        model->setData(model->index(row, 2, QModelIndex()), wips.join(" "));
-        model->setData(model->index(row, 3, QModelIndex()), scale);
-        model->setData(model->index(row, 4, QModelIndex()), image);
-        model->setData(model->index(row, 5, QModelIndex()), exe);
-        model->setData(model->index(row, 6, QModelIndex()), args);
+        dlg.getSwarm(id, name, ip, wips, scale, image, exe, args);
+        model->setData(model->index(row, 0, QModelIndex()), id);
+        model->setData(model->index(row, 1, QModelIndex()), name);
+        model->setData(model->index(row, 2, QModelIndex()), ip);
+        model->setData(model->index(row, 3, QModelIndex()), wips.join(" "));
+        model->setData(model->index(row, 4, QModelIndex()), scale);
+        model->setData(model->index(row, 5, QModelIndex()), image);
+        model->setData(model->index(row, 6, QModelIndex()), exe);
+        model->setData(model->index(row, 7, QModelIndex()), args);
     }
 }
 
@@ -499,24 +497,26 @@ void ConfigTool::editSwarm(QModelIndex idx)
     QTableView * vw = ui->tblviewSwarms;
     QAbstractItemModel * model = vw->model();
     int row = idx.row();
-    QString name = model->index(row,0).data().toString();
-    QString ip = model->index(row,1).data().toString();
-    QStringList wips = model->index(row,2).data().toString().split(QRegExp("\\W+"), QString::SkipEmptyParts);
-    int scale = model->index(row,3).data().toInt();
-    QString image = model->index(row,4).data().toString();
-    QString exe = model->index(row,5).data().toString();
-    QString args = model->index(row,6).data().toString();
-    dlg.setSwarm(name, ip, wips, scale, image, exe, args);
+    QString id = model->index(row,0).data().toString();
+    QString name = model->index(row,1).data().toString();
+    QString ip = model->index(row,2).data().toString();
+    QStringList wips = model->index(row,3).data().toString().split(QRegExp("\\W+"), QString::SkipEmptyParts);
+    int scale = model->index(row,4).data().toInt();
+    QString image = model->index(row,5).data().toString();
+    QString exe = model->index(row,6).data().toString();
+    QString args = model->index(row,7).data().toString();
+    dlg.setSwarm(id, name, ip, wips, scale, image, exe, args);
     if (dlg.exec()) {
         // Replace swarm values
-        dlg.getSwarm(name, ip, wips, scale, image, exe, args);
-        model->setData(model->index(row, 0, QModelIndex()), name);
-        model->setData(model->index(row, 1, QModelIndex()), ip);
-        model->setData(model->index(row, 2, QModelIndex()), wips.join(" "));
-        model->setData(model->index(row, 3, QModelIndex()), scale);
-        model->setData(model->index(row, 4, QModelIndex()), image);
-        model->setData(model->index(row, 5, QModelIndex()), exe);
-        model->setData(model->index(row, 6, QModelIndex()), args);
+        dlg.getSwarm(id, name, ip, wips, scale, image, exe, args);
+        model->setData(model->index(row, 0, QModelIndex()), id);
+        model->setData(model->index(row, 1, QModelIndex()), name);
+        model->setData(model->index(row, 2, QModelIndex()), ip);
+        model->setData(model->index(row, 3, QModelIndex()), wips.join(" "));
+        model->setData(model->index(row, 4, QModelIndex()), scale);
+        model->setData(model->index(row, 5, QModelIndex()), image);
+        model->setData(model->index(row, 6, QModelIndex()), exe);
+        model->setData(model->index(row, 7, QModelIndex()), args);
     }
 }
 
@@ -843,6 +843,7 @@ void ConfigTool::transferCfgToGUI()
 
         data.clear();
         data << QS(kv.first)
+             << QS(swrm.name())
              << QS(manager) << QS(workers)
              << QS(std::to_string(swrm.scale()))
              << QS(swrm.image())
@@ -874,6 +875,7 @@ void ConfigTool::transferCfgToGUI()
     ui->edLastAccess->setText(C(cfg.general.lastAccess()));
 
     ui->edBasePath->setText(C(cfg.general.workArea()));
+    ui->nedRunFolder->setText(C(Config::PATHRun));
     ui->nedLocalArchiveFolder->setText(C(cfg.storage.archive));
     ui->nedInbox->setText(C(cfg.storage.inbox));
     ui->nedOutbox->setText(C(cfg.storage.gateway));
@@ -893,9 +895,11 @@ void ConfigTool::transferCfgToGUI()
     (void)(mvHosts);
 
     hdr.clear();
-    hdr << "Swarm name" << "Manager" << "Workers" << "Scale" << "Image" << "Exec" << "Args";
+    hdr << "Swarm Id" << "Srv. name" << "Manager" << "Workers" << "Scale" << "Image" << "Exec" << "Args";
     ModelView * mvSwarms = createTableModelView(ui->tblviewSwarms, swarmsTable, hdr);
     (void)(mvSwarms);
+
+    ui->spboxStartingPort->setValue(cfg.network["startingPort"].asInt());
 
     // 3. DATABASE
     ui->edDBHost->setText(C(cfg.db.host()));
@@ -937,29 +941,105 @@ void ConfigTool::transferCfgToGUI()
 // Method: transferGUIToCfg
 // Transfer config settings in GUI to internal configuration info
 //----------------------------------------------------------------------
-void ConfigTool::transferGUIToCfg()
+bool ConfigTool::transferGUIToCfg()
 {
     // 1. GENERAL
     // 1.1 General
+    cfg.general["workArea"] = ui->edBasePath->text().toStdString();
 
     // 1.2 Environment
 
     // 2. MACHINES
 
+    cfg.network["processingNodes"].clear();
+    cfg.network["swarms"].clear();
+
+    int numOfMasterNodes = 0;
+    QAbstractItemModel * model = ui->tblviewHosts->model();
+    for (int i = 0; i < model->rowCount(); ++i) {
+        std::string ip = model->index(i,0).data().toString().toStdString();
+        bool isMaster = model->index(i,1).data().toString() == "Master Host";
+        int numAg = model->index(i,2).data().toInt();
+        if (isMaster) {
+            cfg.network["masterNode"] = ip;
+            numOfMasterNodes++;
+        }
+        cfg.network["processingNodes"][ip] = numAg;
+    }
+    cfg.network["startingPort"] = ui->spboxStartingPort->value();
+
+    if (numOfMasterNodes != 1) {
+        int ret = QMessageBox::question(this, tr("Error in processing nodes"),
+                                        tr("There is an error in the definition of the processing nodes.\n\n"
+                                           "There must be exactly 1 processing node declared as MASTER, \n"
+                                           "but in the current configuration there are %1 declared.\n\n"
+                                           "The configuration will not be saved.").arg(numOfMasterNodes),
+                                        QMessageBox::Ok);
+        return false;
+    }
+        
+    model = ui->tblviewSwarms->model();
+    for (int i = 0; i < model->rowCount(); ++i) {
+        std::string id = model->index(i,0).data().toString().toStdString();
+        std::string name = model->index(i,1).data().toString().toStdString();
+        QStringList nodes;
+        nodes << model->index(i,2).data().toString();
+        nodes << model->index(i,3).data().toString()
+            .split(QRegExp("\\W+"), QString::SkipEmptyParts);
+        int scale = model->index(i,4).data().toInt();
+        std::string image = model->index(i,5).data().toString().toStdString();;
+        std::string exe  = model->index(i,6).data().toString().toStdString();;
+        std::string args  = model->index(i,7).data().toString().toStdString();;
+        
+        CfgGrpSwarm swrm;
+        swrm["name"] = name;
+        swrm["scale"] = scale;
+        swrm["image"] = image;
+        swrm["exec"] = exe;
+        swrm["args"] = args;
+        foreach (QString s, nodes) { swrm["serviceNodes"].append(s.toStdString()); }
+        
+        cfg.network["swarms"][id] = swrm.val();
+    }
+    cfg.network["startingPort"] = ui->spboxStartingPort->value();
+
     // 3. DATABASE
+    cfg.db["host"] = ui->edDBHost->text().toStdString();
+    cfg.db["port"] = ui->edDBPort->text().toStdString();
+    cfg.db["name"] = ui->edDBName->text().toStdString();
+    cfg.db["user"] = ui->edDBUser->text().toStdString();
+    cfg.db["pwd"]  = ui->edDBPwd->text().toStdString();
 
     // 4. PRODUCTS & PROCESSORS
-    
     // 4.1 Products
-
+    model = ui->listProductTypes->model();
+    json & prds = cfg.products["productTypes"];
+    prds.clear();
+    for (int i = 0; i < model->rowCount(); ++i) {
+        prds.append(model->index(i,0).data().toString().toStdString());
+    }
+        
     // 4.2 Processors
-    
+    model = ui->listProcs->model();
+    json & procs = cfg.orchestration["processors"];
+    procs.clear();
+    for (int i = 0; i < model->rowCount(); ++i) {
+        std::string name = model->index(i,0).data().toString().toStdString();
+        procs[name] = name;
+    }
+        
     // 5. RULES
 
     // 6. USER DEFINED TOOLS
 
     // 7. FLAGS
     transferFlagsFromGUIToCfg();
+
+    //=== CONSOLIDATE ===
+    cfg.consolidate();
+    cfg.processConfig();
+
+    return true;
 }
 
 //----------------------------------------------------------------------
@@ -1001,6 +1081,7 @@ void ConfigTool::transferFlagsFromCfgToGUI()
 
     for (auto & v : monitMsgFlags) {
         std::string & msgName = v.msgName;
+        v.chkDisk->setChecked(false);
         for (const json & msg : msgsToDisk) {
             if (msg.asString() == msgName) {
                 v.chkDisk->setChecked(true);
@@ -1009,6 +1090,8 @@ void ConfigTool::transferFlagsFromCfgToGUI()
         }
     }
 
+    ui->grpboxWriteMsgsDisk->setChecked(cfg.flags.writeMsgsToDisk());
+    
     ui->chkMsgsIncommingInLog->setChecked(cfg.flags.notifyMsgArrival());
     ui->chkGroupTskAgentLogs->setChecked(cfg.flags.groupTaskAgentLogs());
 
@@ -1016,6 +1099,8 @@ void ConfigTool::transferFlagsFromCfgToGUI()
     ui->chkGenerateIntermedProd->setChecked(cfg.flags.intermediateProducts());
 
     ui->chkSendOutputsToArchive->setChecked(cfg.flags.sendOutputsToMainArchive());
+
+    ui->edProgressString->setText(QS(cfg.flags.progressString()));
 }
 
 //----------------------------------------------------------------------
@@ -1024,14 +1109,13 @@ void ConfigTool::transferFlagsFromCfgToGUI()
 //----------------------------------------------------------------------
 void ConfigTool::transferFlagsFromGUIToCfg()
 {
-    json & msgsToDisk = cfg.flags["msgsToDisk"];
-    msgsToDisk.clear();
-    
+    cfg.flags["msgsToDisk"].clear();
     for (auto & v : monitMsgFlags) {
-        std::string & msgName = v.msgName;
-        if (v.chkDisk->isChecked()) { msgsToDisk.append(msgName); }
-    }        
+        if (v.chkDisk->isChecked()) { cfg.flags["msgsToDisk"].append(v.msgName); }
+    }
 
+    cfg.flags["writeMsgsToDisk"] = ui->grpboxWriteMsgsDisk->isChecked();
+    
     cfg.flags["notifyMsgArrival"]   = ui->chkMsgsIncommingInLog->isChecked();
     cfg.flags["groupTaskAgentLogs"] = ui->chkGroupTskAgentLogs->isChecked();
 
@@ -1039,6 +1123,8 @@ void ConfigTool::transferFlagsFromGUIToCfg()
     cfg.flags["intermediateProducts"]  = ui->chkGenerateIntermedProd->isChecked();
 
     cfg.flags["sendOutputsToMainArchive"] = ui->chkSendOutputsToArchive->isChecked();
+
+    cfg.flags["progressString"] = ui->edProgressString->text().toStdString();
 }
 
 // Auxiliary vector with information about config. flags

@@ -65,6 +65,7 @@ void ContHostEdit::setContHost(QString ip, bool isMaster, int numAg)
 {
     ui->edHostIP->setText(ip);
     ui->rbtnMaster->setChecked(isMaster);
+    ui->rbtnProcessing->setChecked(!isMaster);
     ui->spbxNumAgents->setValue(numAg);
 }
 

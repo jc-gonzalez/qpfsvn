@@ -60,9 +60,11 @@ public:
     ~SwarmEdit();
 
 public:
-    void setSwarm(QString name, QString ip, QStringList wips, int scale,
+    void setSwarm(QString id, QString name,
+                  QString ip, QStringList wips, int scale,
                   QString image, QString exe, QString args);
-    void getSwarm(QString & name, QString & ip, QStringList & wips, int & scale,
+    void getSwarm(QString & id, QString & name,
+                  QString & ip, QStringList & wips, int & scale,
                   QString & image, QString & exe, QString & args);
 
 private:

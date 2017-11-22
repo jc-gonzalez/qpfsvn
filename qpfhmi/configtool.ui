@@ -1976,6 +1976,23 @@ Processors</string>
                </widget>
               </item>
               <item>
+               <widget class="QGroupBox" name="groupBox_9">
+                <property name="title">
+                 <string>String to look for progress in log files</string>
+                </property>
+                <layout class="QVBoxLayout" name="verticalLayout_25">
+                 <item>
+                  <widget class="QLineEdit" name="edProgressString">
+                   <property name="toolTip">
+                    <string>It is expected that in logs from processing tasks this string is followed by a 
+number indicating the percentage of progress of the task.files the </string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item>
                <spacer name="verticalSpacer_3">
                 <property name="orientation">
                  <enum>Qt::Vertical</enum>

@@ -235,7 +235,7 @@ public:
     CfgGrpFlags() {}
     CfgGrpFlags(json v) : JRecord(v) {}
     virtual void dump() {
-        DUMPJSTR(writeMsgsToDisk);
+        DUMPJBOOL(writeMsgsToDisk);
         DUMPJSTRVEC(msgsToDisk);
         DUMPJBOOL(notifyMsgArrival);
         DUMPJBOOL(groupTaskAgentLogs);
@@ -244,7 +244,7 @@ public:
         DUMPJBOOL(sendOutputsToMainArchive);
         DUMPJSTR(progressString);
     }
-    JSTR(writeMsgsToDisk);
+    JBOOL(writeMsgsToDisk);
     JSTRVEC(msgsToDisk);
     JBOOL(notifyMsgArrival);
     JBOOL(groupTaskAgentLogs);
@@ -326,6 +326,18 @@ public:
     //----------------------------------------------------------------------
     void generateProcFmkInfoStructure();
 
+    //----------------------------------------------------------------------
+    // Method: processConfig
+    // Convert data in cfg (Json) to cfgInfo structure
+    //----------------------------------------------------------------------
+    void processConfig();
+
+    //----------------------------------------------------------------------
+    // Method: consolidate
+    // Injects changes in the components of the cfg structure into the value
+    //----------------------------------------------------------------------
+    void consolidate();
+
 private:
 
     //----------------------------------------------------------------------
@@ -351,12 +363,6 @@ private:
     // Store the configuration into the DB
     //----------------------------------------------------------------------
     void saveConfigToDB();
-
-    //----------------------------------------------------------------------
-    // Method: processConfig
-    // Convert data in cfg (Json) to cfgInfo structure
-    //----------------------------------------------------------------------
-    void processConfig();
 
     //----------------------------------------------------------------------
     // Method: getRegExFromCfg

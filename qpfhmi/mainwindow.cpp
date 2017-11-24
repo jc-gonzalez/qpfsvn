@@ -934,10 +934,11 @@ void MainWindow::showConfigTool()
 
     cfgTool.prepare(userDefTools, userDefProdTypes);
     if (cfgTool.exec()) {
-        DMsg("Updating user tools!");
+        TRC("Updating user tools!");
         cfgTool.getExtTools(userDefTools);
         if (hmiNode != 0) {
-            hmiNode->sendNewCfgInfo();
+            hmiNode->sendNewConfig();
+            TRC("Sending new configuration to all the nodes");
         }
     }
 }
@@ -2255,9 +2256,9 @@ void MainWindow::initTasksMonitView()
     acTaskResume      = new QAction(tr("Resume Task"),                    ui->tblvwTaskMonit);
     acTaskCancel      = new QAction(tr("Cancel Task"),                    ui->tblvwTaskMonit);
 
-    acAgentSuspend    = new QAction(tr("Suspend Agent Processing"),       ui->tblvwTaskMonit);
-    acAgentStop       = new QAction(tr("Stop Agent Processing"),          ui->tblvwTaskMonit);
-    acAgentReactivate = new QAction(tr("Reactivate Agent Processing"),    ui->tblvwTaskMonit);
+    // acAgentSuspend    = new QAction(tr("Suspend Agent Processing"),       ui->tblvwTaskMonit);
+    // acAgentStop       = new QAction(tr("Stop Agent Processing"),          ui->tblvwTaskMonit);
+    // acAgentReactivate = new QAction(tr("Reactivate Agent Processing"),    ui->tblvwTaskMonit);
 
     acHostSuspend     = new QAction(tr("Suspend Host Processing"),        ui->tblvwTaskMonit);
     acHostStop        = new QAction(tr("Stop Host Processing"),           ui->tblvwTaskMonit);
@@ -2272,9 +2273,9 @@ void MainWindow::initTasksMonitView()
     connect(acTaskResume,      SIGNAL(triggered()), this, SLOT(doTaskResume()));
     connect(acTaskCancel,      SIGNAL(triggered()), this, SLOT(doTaskCancel()));
 
-    connect(acAgentSuspend,    SIGNAL(triggered()), this, SLOT(doAgentSuspend()));
-    connect(acAgentStop,       SIGNAL(triggered()), this, SLOT(doAgentStop()));
-    connect(acAgentReactivate, SIGNAL(triggered()), this, SLOT(doAgentReactivate()));
+    // connect(acAgentSuspend,    SIGNAL(triggered()), this, SLOT(doAgentSuspend()));
+    // connect(acAgentStop,       SIGNAL(triggered()), this, SLOT(doAgentStop()));
+    // connect(acAgentReactivate, SIGNAL(triggered()), this, SLOT(doAgentReactivate()));
 
     connect(acHostSuspend,     SIGNAL(triggered()), this, SLOT(doHostSuspend()));
     connect(acHostStop,        SIGNAL(triggered()), this, SLOT(doHostStop()));
@@ -2319,10 +2320,10 @@ void MainWindow::showTaskMonitContextMenu(const QPoint & p)
         cmTask->addAction(acTaskResume);
         cmTask->addAction(acTaskCancel);
         
-        QMenu * cmAgent = cm.addMenu("Agent processing ...");
-        cmAgent->addAction(acAgentSuspend);
-        cmAgent->addAction(acAgentStop);
-        cmAgent->addAction(acAgentReactivate);
+        // QMenu * cmAgent = cm.addMenu("Agent processing ...");
+        // cmAgent->addAction(acAgentSuspend);
+        // cmAgent->addAction(acAgentStop);
+        // cmAgent->addAction(acAgentReactivate);
 
         QMenu * cmHost = cm.addMenu("Host processing ...");
         cmHost->addAction(acHostSuspend);

@@ -216,7 +216,7 @@ void HMIProxy::sendNewConfig()
 
     msg.buildBody(body);
     send(ChnlHMICmd, msg.str()); 
-    TraceMsg("Sending message: " + msg.str());
+    TRC("Sending message: " + msg.str());
 }
 
 //----------------------------------------------------------------------

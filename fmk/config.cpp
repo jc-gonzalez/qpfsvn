@@ -43,6 +43,8 @@
 
 #include "config.h"
 
+#include "channels.h"
+
 #include "dbg.h"
 #include "str.h"
 #include "tools.h"
@@ -395,6 +397,19 @@ std::string Config::getRegExFromCfg(std::string & regexStr)
 //----------------------------------------------------------------------
 void Config::processConfig()
 {
+    static std::map<Message_Tag, std::string> msgTags = {
+        {Tag_ChnlCmd,      "CMD"},    
+        {Tag_ChnlEvtMng,   "EVTMNG"}, 
+        {Tag_ChnlHMICmd,   "HMICMD"}, 
+        {Tag_ChnlInData,   "INDATA"}, 
+        {Tag_ChnlTskSched, "TSKSCHED"},
+        {Tag_ChnlTskReg,   "TSKREG"}, 
+        {Tag_MsgTskRqst,   "TSKRQST"},
+        {Tag_MsgTskProc,   "TSKPROC"},
+        {Tag_MsgTskRep,    "TSKREP"}, 
+        {Tag_ChnlFmkMon,   "FMKMON"}, 
+        {Tag_MsgHostMon,   "HOSTMON"}};
+
     fillData();
     
     PATHBase    = general.workArea();
@@ -422,6 +437,17 @@ void Config::processConfig()
     storage.archive  = PATHData + "/archive";
     storage.gateway  = PATHData + "/gateway";
     storage.userArea = PATHData + "/user";
+
+    writeMsgsMask = 0;
+    
+    for (auto & kv : msgTags) {
+        for (const json & msgType : flags["msgsToDisk"]) {
+            if (msgType.asString() == kv.second) {
+                writeMsgsMask |= static_cast<int>(kv.first);
+                break;
+            }
+        }
+    }        
 }
 
 //----------------------------------------------------------------------

@@ -398,6 +398,8 @@ public:
 
     std::map<std::string, std::string> nodeStates;
 
+    int writeMsgsMask;
+    
     static std::map<std::string, AgentMode>   agentMode; 
     
     struct {

@@ -176,7 +176,7 @@ void HMIProxy::quit()
 }
 
 //----------------------------------------------------------------------
-// Method: sendCmd
+// Method: sendProcHdlCmd
 // Send a processing handling command to an agent
 //----------------------------------------------------------------------
 void HMIProxy::sendProcHdlCmd(SubjectId subj, std::string subjName, SubcmdId subCmd)
@@ -192,6 +192,27 @@ void HMIProxy::sendProcHdlCmd(SubjectId subj, std::string subjName, SubcmdId sub
     body["subcmd"]      = SubcmdName[(int)(subCmd)];
     body["target_type"] = (int)(subj);
     body["target"]      = subjName;
+
+    msg.buildBody(body);
+    send(ChnlHMICmd, msg.str()); 
+    TraceMsg("Sending message: " + msg.str());
+}
+
+//----------------------------------------------------------------------
+// Method: sendNewConfig
+// Send a processing handling command to an agent
+//----------------------------------------------------------------------
+void HMIProxy::sendNewConfig()
+{
+    Message<MsgBodyCMD> msg;
+    MsgBodyCMD body;
+    msg.buildHdr(ChnlHMICmd, MsgHMICmd, CHNLS_IF_VERSION,
+                 compName, "*",
+                 "", "", "");
+
+    // Create message and send
+    body["cmd"]         = CmdConfig;
+    body["config"]      = cfg.str();
 
     msg.buildBody(body);
     send(ChnlHMICmd, msg.str()); 

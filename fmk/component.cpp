@@ -259,7 +259,7 @@ void Component::processIncommingMessages()
             }
 
             if (writeMsgsToDisk &&
-                (static_cast<int>(incommMsgTag) & writeMsgsMask != 0)) {
+                ((static_cast<int>(incommMsgTag) & writeMsgsMask) != 0)) {
                 writeMsgToFile(Recv, chnl, m);
             }
         }
@@ -436,6 +436,13 @@ void Component::processCmdMsg(ScalabilityProtocolRole * c, MessageString & m)
             cfg.synchronizeSessionId(sessId);
         }
 
+    } else if (cmd == CmdConfig) { // This should be any component
+
+        std::string newConfigString = msg.body["config"].asString();
+        cfg.fromStr(newConfigString);
+        cfg.processConfig();        
+        TraceMsg("New configuration applied");
+
     } else if (cmd == CmdProcHdl) {
 
         processSubcmdMsg(m);
@@ -477,14 +484,6 @@ void Component::processEvtMngMsg(ScalabilityProtocolRole * c, MessageString & m)
 
         cfg.nodeStates[msg.header.source()] = msg.body["state"].asString();
         TraceMsg(compName + " received from " + msg.header.source() + " from " + compName);
-
-    } else if (cmd == CmdMsgMask) { // This should be any component
-
-        writeMsgsToDisk = msg.body["write_to_disk"].asBool(); 
-        writeMsgsMask   = msg.body["mask"].asInt();
-        TraceMsg("Message writing to disk " +
-                 std::string(writeMsgsToDisk ? "ACTIVATED" : "DEACTIVATED") +
-                 " (mask = " + std::to_string(writeMsgsMask) + ")");
 
     } else {
 

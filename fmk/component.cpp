@@ -99,8 +99,6 @@ void Component::init(std::string name, std::string addr, Synchronizer * s)
     compAddress = addr;
     synchro     = s;
 
-    writeMsgsToDisk = true;
-
     // register signal SIGINT and signal handler  
     signal(SIGABRT, signalHandler);  
 
@@ -258,8 +256,8 @@ void Component::processIncommingMessages()
                                     0));
             }
 
-            if (writeMsgsToDisk &&
-                ((static_cast<int>(incommMsgTag) & writeMsgsMask) != 0)) {
+            if (cfg.writeMsgsToDisk &&
+                ((static_cast<int>(incommMsgTag) & cfg.writeMsgsMask) != 0)) {
                 writeMsgToFile(Recv, chnl, m);
             }
         }
@@ -322,7 +320,6 @@ void Component::send(ChannelDescriptor chnl, MessageString m)
     if (it != connections.end()) {
         ScalabilityProtocolRole * conn = it->second;
         conn->setMsgOut(m);
-        if (writeMsgsToDisk) { writeMsgToFile(Recv, chnl, m); }
     } else {
         WarnMsg("Couldn't send message via channel " + chnl);
         RaiseSysAlert(Alert(Alert::System,
@@ -646,38 +643,6 @@ void Component::writeMsgToFile(SendOrRecv sor,
     FILE * fHdl = fopen(fileName, "w");
     fprintf(fHdl, m.c_str());
     fclose(fHdl);
-}
-
-//----------------------------------------------------------------------
-// Method: setWriteMsgsToDisk
-//----------------------------------------------------------------------
-void Component::setWriteMsgsToDisk(bool b)
-{
-    writeMsgsToDisk = b;
-}
-
-//----------------------------------------------------------------------
-// Method: getWriteMsgsToDisk
-//----------------------------------------------------------------------
-bool Component::getWriteMsgsToDisk()
-{
-    return writeMsgsToDisk;
-}
-
-//----------------------------------------------------------------------
-// Method: setWriteMsgsMask
-//----------------------------------------------------------------------
-void Component::setWriteMsgsMask(int msk)
-{
-    writeMsgsMask = msk;
-}
-
-//----------------------------------------------------------------------
-// Method: getWriteMsgsMask
-//----------------------------------------------------------------------
-int Component::getWriteMsgsMask()
-{
-    return writeMsgsMask;
 }
 
 //}

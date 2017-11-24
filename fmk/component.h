@@ -336,9 +336,6 @@ protected:
     Synchronizer * synchro;
     int iteration;
     int stepSize;
-
-    int  writeMsgsMask;
-    bool writeMsgsToDisk;
 };
 
 #endif

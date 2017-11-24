@@ -439,7 +439,6 @@ void Config::processConfig()
     storage.userArea = PATHData + "/user";
 
     writeMsgsMask = 0;
-    
     for (auto & kv : msgTags) {
         for (const json & msgType : flags["msgsToDisk"]) {
             if (msgType.asString() == kv.second) {
@@ -447,7 +446,9 @@ void Config::processConfig()
                 break;
             }
         }
-    }        
+    }
+
+    writeMsgsToDisk = flags.writeMsgsToDisk();
 }
 
 //----------------------------------------------------------------------

@@ -391,15 +391,16 @@ public:
     bool                  weAreOnMaster;
 
     int                   startingPort;
-
+    
+    int                   writeMsgsMask;
+    bool                  writeMsgsToDisk;
+    
     std::vector<std::string> agentNames;
     std::vector<std::string> agHost;
     std::vector<int>         agPortTsk;
 
     std::map<std::string, std::string> nodeStates;
 
-    int writeMsgsMask;
-    
     static std::map<std::string, AgentMode>   agentMode; 
     
     struct {

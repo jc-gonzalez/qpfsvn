@@ -211,6 +211,10 @@ ConfigTool::ConfigTool(QWidget *parent) :
     ui->btngrpCfgSections->setId(ui->tbtnExtTools      , PageExtTools);
     ui->btngrpCfgSections->setId(ui->tbtnFlags         , PageFlags);
 
+    ui->btngrpUserWA->setId(ui->rbtnUserWAAuto    , Auto);
+    ui->btngrpUserWA->setId(ui->rbtnUserWALocal   , LocalFolder);
+    ui->btngrpUserWA->setId(ui->rbtnUserWAVOSpace , VOSpaceFolder);
+
     connect(ui->tblwdgUserDefTools, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editTool(QModelIndex)));
     connect(ui->tblviewHosts, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editHost(QModelIndex)));
     connect(ui->tblviewSwarms, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editSwarm(QModelIndex)));
@@ -380,6 +384,47 @@ void ConfigTool::setWorkingPaths(QString newPath)
     ui->nedInbox->setText(newPath + "/data/inbox");
     ui->nedOutbox->setText(newPath + "/data/outbox");
     ui->nedUserReprocArea->setText(newPath + "/data/user");
+}
+
+//----------------------------------------------------------------------
+// Slot: setWorkingPaths
+// Sets working paths for a given base path
+//----------------------------------------------------------------------
+void ConfigTool::selectUserDefAreaPath()
+{
+    QString pathName(QS(cfg.general.workArea()));
+    pathName = QFileDialog::getExistingDirectory(this,
+                                                 tr("Select folder to be set as user-defined area"),
+                                                 pathName);
+    QFileInfo fs(pathName);
+    if (fs.exists()) {
+        ui->nedUserReprocArea->setText(pathName);
+    }
+}    
+
+//----------------------------------------------------------------------
+// Slot: setWorkingPaths
+// Sets working paths for a given base path
+//----------------------------------------------------------------------
+void ConfigTool::defineUserWA(int btn)
+{
+    switch (btn) {
+    case Auto:
+        ui->tbtnUserDefAreaPath->setEnabled(false);
+        ui->nedUserReprocArea->setReadOnly(true);
+        break;
+    case LocalFolder:
+        ui->tbtnUserDefAreaPath->setEnabled(true);
+        ui->nedUserReprocArea->setReadOnly(false);
+        break;
+    case VOSpaceFolder:
+        ui->tbtnUserDefAreaPath->setEnabled(false);
+        ui->nedUserReprocArea->setReadOnly(false);
+        break;
+    default:
+        break;
+    }
+
 }
 
 //==[ HOST ]===================================================================
@@ -880,7 +925,24 @@ void ConfigTool::transferCfgToGUI()
     ui->nedInbox->setText(C(cfg.storage.inbox));
     ui->nedOutbox->setText(C(cfg.storage.gateway));
 
-    // 1.2 Environment
+    std::string userWAType = cfg.general.userAreaType();
+    if (userWAType == "auto") {
+        ui->btngrpUserWA->button(Auto)->setChecked(true);
+    } else if (userWAType == "local") {
+        ui->btngrpUserWA->button(LocalFolder)->setChecked(true);
+    } else if (userWAType == "vospace") {
+        ui->btngrpUserWA->button(VOSpaceFolder)->setChecked(true);
+    } else {
+        // Nothing
+    }
+    
+    // 1.2 VOSpace
+    ui->edVOSpaceURL->setText(C(cfg.vospace.url()));
+    ui->edVOSpaceUser->setText(C(cfg.vospace.user()));
+    ui->edVOSpacePwd->setText(C(cfg.vospace.pwd()));
+    ui->edVOSpaceFolder->setText(C(cfg.vospace.folder()));
+
+    // 1.3 Environment
     ui->edUser->setText(qgetenv("USER"));
     ui->edHost->setText(QHostInfo::localHostName());
 
@@ -946,8 +1008,31 @@ bool ConfigTool::transferGUIToCfg()
     // 1. GENERAL
     // 1.1 General
     cfg.general["workArea"] = ui->edBasePath->text().toStdString();
-
-    // 1.2 Environment
+    switch (ui->btngrpUserWA->checkedId()) {
+    case Auto:
+        cfg.general["userAreaType"] = "auto";
+        cfg.general["userArea"]     = ui->edBasePath->text().toStdString() + "/data/user";
+        break;
+    case LocalFolder:
+        cfg.general["userAreaType"] = "local";
+        cfg.general["userArea"]     = ui->nedUserReprocArea->text().toStdString();
+        break;
+    case VOSpaceFolder:
+        cfg.general["userAreaType"] = "vospace";
+        cfg.general["userArea"]     = ui->edVOSpaceFolder->text().toStdString();
+        break;
+    default:
+        break;
+    }
+        
+    
+    // 1.2 VOSpace
+    cfg.vospace["url"]    = ui->edVOSpaceURL->text().toStdString();
+    cfg.vospace["user"]   = ui->edVOSpaceUser->text().toStdString();
+    cfg.vospace["pwd"]    = ui->edVOSpacePwd->text().toStdString();
+    cfg.vospace["folder"] = ui->edVOSpaceFolder->text().toStdString();
+    
+    // 1.3 Environment
 
     // 2. MACHINES
 
@@ -1018,7 +1103,7 @@ bool ConfigTool::transferGUIToCfg()
     for (int i = 0; i < model->rowCount(); ++i) {
         prds.append(model->index(i,0).data().toString().toStdString());
     }
-        
+    
     // 4.2 Processors
     model = ui->listProcs->model();
     json & procs = cfg.orchestration["processors"];
@@ -1029,7 +1114,22 @@ bool ConfigTool::transferGUIToCfg()
     }
         
     // 5. RULES
-
+    model = ui->tblviewRules->model();
+    json & rules = cfg.orchestration.rules.val();
+    rules = nullJson;
+    for (int i = 0; i < model->rowCount(); ++i) {
+        std::string tag = model->index(i,0).data().toString().toStdString();
+        std::string inputs = model->index(i,1).data().toString().toStdString();
+        std::string outputs = model->index(i,4).data().toString().toStdString();;
+        std::string condition  = model->index(i,2).data().toString().toStdString();;
+        std::string processing  = model->index(i,3).data().toString().toStdString();;
+        rules["tag"].append(tag);
+        rules["inputs"].append(inputs);
+        rules["outputs"].append(outputs);
+        rules["processing"].append(processing);
+        rules["condition"].append(condition);
+    }
+    
     // 6. USER DEFINED TOOLS
 
     // 7. FLAGS

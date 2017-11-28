@@ -73,11 +73,15 @@ public:
         DUMPJSTR(appVersion);
         DUMPJSTR(lastAccess);
         DUMPJSTR(workArea);
+        DUMPJSTR(userAreaType);
+        DUMPJSTR(userArea);
     }
     JSTR(appName);
     JSTR(appVersion);
     JSTR(lastAccess);
     JSTR(workArea);
+    JSTR(userAreaType);
+    JSTR(userArea);
 };
 
 //==========================================================================
@@ -141,6 +145,25 @@ public:
     JSTR(name);
     JSTR(user);
     JSTR(pwd);
+};
+
+//==========================================================================
+// Class: CfgGrpVOSpace
+//==========================================================================
+class CfgGrpVOSpace : public JRecord {
+public:
+    CfgGrpVOSpace() {}
+    CfgGrpVOSpace(json v) : JRecord(v) {}
+    virtual void dump() {
+        DUMPJSTR(url);
+        DUMPJSTR(user);
+        DUMPJSTR(pwd);
+        DUMPJSTR(folder);
+    }
+    JSTR(url);
+    JSTR(user);
+    JSTR(pwd);
+    JSTR(folder);
 };
 
 //==========================================================================
@@ -268,6 +291,7 @@ public:
     GRP(CfgGrpGeneral,          general);
     GRP(CfgGrpNetwork,          network);
     GRP(CfgGrpDB,               db);
+    GRP(CfgGrpVOSpace,          vospace);
     GRP(CfgGrpProducts,         products);
     GRP(CfgGrpOrchestration,    orchestration);
     GRP(CfgGrpUserDefToolsList, userDefTools);
@@ -293,6 +317,7 @@ public:
         general.dump();
         network.dump();
         db.dump();
+        vospace.dump();
         products.dump();
         orchestration.dump();
         userDefTools.dump();

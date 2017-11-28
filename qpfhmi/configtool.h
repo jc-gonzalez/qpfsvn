@@ -136,6 +136,12 @@ public:
         PageFlags,
     };
 
+    enum UserWAIndex {
+        Auto,
+        LocalFolder,
+        VOSpaceFolder,
+    };
+
     void prepare(MapOfUserDefTools & userTools, QStringList pts);
 
     void initExtTools(MapOfUserDefTools & userTools, QStringList pts);
@@ -148,6 +154,8 @@ public slots:
     void closeDoNothing();
     void selectBasePath();
     void setWorkingPaths(QString newPath);
+    void selectUserDefAreaPath();
+    void defineUserWA(int btn);
 
 private slots:
     void addHost();

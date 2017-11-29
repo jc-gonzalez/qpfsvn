@@ -29,6 +29,9 @@ set (qpfGuiLib_src
   dlgdataing.cpp
   dlgshowtaskinfo.cpp
   dlgreproc.cpp
+  anasession.cpp
+  exporthdl.cpp
+  voshdl.cpp
   conthostedit.cpp
   swarmedit.cpp
   ruleedit.cpp
@@ -71,6 +74,9 @@ set (qpfGuiLib_hdr
   dlgdataing.h
   dlgshowtaskinfo.h
   dlgreproc.h
+  anasession.h
+  exporthdl.h
+  voshdl.h
   conthostedit.h
   swarmedit.h
   ruleedit.h

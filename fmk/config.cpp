@@ -166,7 +166,7 @@ void Config::fillData()
     SET_GRP(CfgGrpGeneral,          general);
     SET_GRP(CfgGrpNetwork,          network);
     SET_GRP(CfgGrpDB,               db);
-    SET_GRP(CfgGrpVOSpace,          vospace);
+    SET_GRP(CfgGrpConnectivity,     connectivity);
     SET_GRP(CfgGrpProducts,         products);
     SET_GRP(CfgGrpOrchestration,    orchestration);
     SET_GRP(CfgGrpUserDefToolsList, userDefTools);
@@ -461,7 +461,9 @@ void Config::consolidate()
     value["general"]       = general.val();
     value["network"]       = network.val();
     value["db"]            = db.val();
-    value["vospace"]       = vospace.val();
+    value["connectivity"]  = connectivity.val();
+    value["connectivity"]["vospace"] = connectivity.vospace.val();
+    value["connectivity"]["jupyter"] = connectivity.jupyter.val();
     value["products"]      = products.val();
     value["orchestration"] = orchestration.val();
     value["userDefTools"]  = userDefTools.val();

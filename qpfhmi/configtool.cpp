@@ -209,6 +209,7 @@ ConfigTool::ConfigTool(QWidget *parent) :
     ui->btngrpCfgSections->setId(ui->tbtnProdProc      , PageProdProc);
     ui->btngrpCfgSections->setId(ui->tbtnOrchestration , PageOrchestration);
     ui->btngrpCfgSections->setId(ui->tbtnExtTools      , PageExtTools);
+    ui->btngrpCfgSections->setId(ui->tbtnConnectivity  , PageConnectivity);
     ui->btngrpCfgSections->setId(ui->tbtnFlags         , PageFlags);
 
     ui->btngrpUserWA->setId(ui->rbtnUserWAAuto    , Auto);
@@ -426,6 +427,22 @@ void ConfigTool::defineUserWA(int btn)
     }
 
 }
+
+//----------------------------------------------------------------------
+// Slot: selectIPythonExec
+// Select executable in local host corresponding to IPython binary
+//----------------------------------------------------------------------
+void ConfigTool::selectIPythonExec()
+{
+    QString fileName;
+    fileName = QFileDialog::getOpenFileName(this,
+                                            tr("Select IPython executable"),
+                                            fileName);
+    QFileInfo fs(fileName);
+    if (fs.exists()) {
+        ui->edIPythonExe->setText(fileName);
+    }
+}    
 
 //==[ HOST ]===================================================================
 
@@ -936,13 +953,7 @@ void ConfigTool::transferCfgToGUI()
         // Nothing
     }
     
-    // 1.2 VOSpace
-    ui->edVOSpaceURL->setText(C(cfg.vospace.url()));
-    ui->edVOSpaceUser->setText(C(cfg.vospace.user()));
-    ui->edVOSpacePwd->setText(C(cfg.vospace.pwd()));
-    ui->edVOSpaceFolder->setText(C(cfg.vospace.folder()));
-
-    // 1.3 Environment
+    // 1.2 Environment
     ui->edUser->setText(qgetenv("USER"));
     ui->edHost->setText(QHostInfo::localHostName());
 
@@ -991,10 +1002,26 @@ void ConfigTool::transferCfgToGUI()
     (void)(mvRules);
 
     // 6. USER DEFINED TOOLS
-
     // Already set
 
-    // 7. FLAGS
+    // 7. CONNECTIVITY
+
+    // VOSpace
+    ui->edVOSpaceURL->setText(C(cfg.connectivity.vospace.url()));
+    ui->edVOSpaceUser->setText(C(cfg.connectivity.vospace.user()));
+    ui->edVOSpacePwd->setText(C(cfg.connectivity.vospace.pwd()));
+    ui->edVOSpaceFolder->setText(C(cfg.connectivity.vospace.folder()));
+
+    // Jupyter (Lab)
+    ui->edJupyterLabHost->setText(C(cfg.connectivity.jupyter.host()));
+    ui->edJupyterLabHostUser->setText(C(cfg.connectivity.jupyter.user()));
+    ui->edJupyterLabHostPwd->setText(C(cfg.connectivity.jupyter.pwd()));
+    ui->edJupyterLabURL->setText(C(cfg.connectivity.jupyter.url()));
+
+    // IPython
+    ui->edIPythonExe->setText(C(cfg.connectivity.ipython()));
+    
+    // 8. FLAGS
     transferFlagsFromCfgToGUI();
 
 }
@@ -1024,15 +1051,8 @@ bool ConfigTool::transferGUIToCfg()
     default:
         break;
     }
-        
-    
-    // 1.2 VOSpace
-    cfg.vospace["url"]    = ui->edVOSpaceURL->text().toStdString();
-    cfg.vospace["user"]   = ui->edVOSpaceUser->text().toStdString();
-    cfg.vospace["pwd"]    = ui->edVOSpacePwd->text().toStdString();
-    cfg.vospace["folder"] = ui->edVOSpaceFolder->text().toStdString();
-    
-    // 1.3 Environment
+            
+    // 1.2 Environment
 
     // 2. MACHINES
 
@@ -1132,7 +1152,24 @@ bool ConfigTool::transferGUIToCfg()
     
     // 6. USER DEFINED TOOLS
 
-    // 7. FLAGS
+    // 7. CONNECTIVITY
+
+    // VOSpace
+    cfg.connectivity.vospace["url"]    = ui->edVOSpaceURL->text().toStdString();
+    cfg.connectivity.vospace["user"]   = ui->edVOSpaceUser->text().toStdString();
+    cfg.connectivity.vospace["pwd"]    = ui->edVOSpacePwd->text().toStdString();
+    cfg.connectivity.vospace["folder"] = ui->edVOSpaceFolder->text().toStdString();
+
+    // Jupyter (Lab)
+    cfg.connectivity.jupyter["host"]   = ui->edJupyterLabHost->text().toStdString();
+    cfg.connectivity.jupyter["user"]   = ui->edJupyterLabHostUser->text().toStdString();
+    cfg.connectivity.jupyter["pwd"]    = ui->edJupyterLabHostPwd->text().toStdString();
+    cfg.connectivity.jupyter["url"]    = ui->edJupyterLabURL->text().toStdString();
+
+    // IPython
+    cfg.connectivity["ipython"] = ui->edIPythonExe->text().toStdString();
+
+    // 8. FLAGS
     transferFlagsFromGUIToCfg();
 
     //=== CONSOLIDATE ===

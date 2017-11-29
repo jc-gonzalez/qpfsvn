@@ -28,6 +28,7 @@ set (qpfGuiLib_src
   dlgalert.cpp
   dlgdataing.cpp
   dlgshowtaskinfo.cpp
+  dlgreproc.cpp
   conthostedit.cpp
   swarmedit.cpp
   ruleedit.cpp
@@ -69,6 +70,7 @@ set (qpfGuiLib_hdr
   dlgalert.h
   dlgdataing.h
   dlgshowtaskinfo.h
+  dlgreproc.h
   conthostedit.h
   swarmedit.h
   ruleedit.h
@@ -106,6 +108,7 @@ set (qpfGuiLib_ui
   mainwindow.ui
   dlgdataing.ui
   dlgshowtaskinfo.ui
+  dlgreproc.ui
   configtool.ui
   browserwidget.ui
   dbbrowser.ui

@@ -149,6 +149,7 @@ typedef Json::Value  json;
 #define JRECORD(e) JRecord e () { return JRecord(value[ #e ]); }
 
 #define SET_GRP(c,e) e = c ( v[ #e ] );
+#define SET_GRP2(c,e,f) e.f = c ( v[ #e ][ #f ] );
 #define GRP(c,e) c e;
 
 #define DUMPJSTR(e)  std::cerr << #e << ": " << value[ #e ].asString() << std::endl;

@@ -145,6 +145,8 @@ private slots:
     void updateWindowMenu();
 
     void reprocessProduct();
+    void analyzeProduct();
+    void exportProduct();
 
     void processPendingEvents();
 
@@ -307,6 +309,13 @@ private:
 
     QAction *acDefault;
     QAction *acReprocess;
+
+    QAction *acAnalyzeIPython;
+    QAction *acAnalyzeJupyter;
+    QAction *acExportLocal;
+    QAction *acExportRemote;
+    QAction *acExportVOSpace;
+    QAction *acExportVOSpaceOther;
 
     QAction *acNavig;
     QAction *acClose;

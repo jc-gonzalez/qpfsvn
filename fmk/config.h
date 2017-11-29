@@ -167,6 +167,45 @@ public:
 };
 
 //==========================================================================
+// Class: CfgGrpJupyter
+//==========================================================================
+class CfgGrpJupyter : public JRecord {
+public:
+    CfgGrpJupyter() {}
+    CfgGrpJupyter(json v) : JRecord(v) {}
+    virtual void dump() {
+        DUMPJSTR(host);
+        DUMPJSTR(user);
+        DUMPJSTR(pwd);
+        DUMPJSTR(url);
+    }
+    JSTR(host);
+    JSTR(user);
+    JSTR(pwd);
+    JSTR(url);
+};
+
+//==========================================================================
+// Class: CfgGrpConnectivity
+//==========================================================================
+class CfgGrpConnectivity : public JRecord {
+public:
+    CfgGrpConnectivity() {}
+    CfgGrpConnectivity(json v) : JRecord(v) {
+        SET_GRP(CfgGrpVOSpace, vospace);
+        SET_GRP(CfgGrpJupyter, jupyter);
+    }
+    virtual void dump() {
+        vospace.dump();
+        jupyter.dump();
+        DUMPJSTR(ipython);
+    }
+    GRP(CfgGrpVOSpace, vospace);
+    GRP(CfgGrpJupyter, jupyter);
+    JSTR(ipython);
+};
+
+//==========================================================================
 // Class: CfgGrpProducts
 //==========================================================================
 class CfgGrpProducts : public JRecord {
@@ -283,15 +322,11 @@ public:
 class Config : public JRecord {
 public:
     static Config & _();
-/*
-    Config(std::string fName = std::string());
-    Config(const char * fName = 0);
-    Config(json v);
-*/
+
     GRP(CfgGrpGeneral,          general);
     GRP(CfgGrpNetwork,          network);
     GRP(CfgGrpDB,               db);
-    GRP(CfgGrpVOSpace,          vospace);
+    GRP(CfgGrpConnectivity,     connectivity);
     GRP(CfgGrpProducts,         products);
     GRP(CfgGrpOrchestration,    orchestration);
     GRP(CfgGrpUserDefToolsList, userDefTools);
@@ -317,7 +352,7 @@ public:
         general.dump();
         network.dump();
         db.dump();
-        vospace.dump();
+        connectivity.dump();
         products.dump();
         orchestration.dump();
         userDefTools.dump();

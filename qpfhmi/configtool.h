@@ -133,6 +133,7 @@ public:
         PageProdProc,
         PageOrchestration,
         PageExtTools,
+        PageConnectivity,
         PageFlags,
     };
 
@@ -156,7 +157,8 @@ public slots:
     void setWorkingPaths(QString newPath);
     void selectUserDefAreaPath();
     void defineUserWA(int btn);
-
+    void selectIPythonExec();
+    
 private slots:
     void addHost();
     void removeHost();

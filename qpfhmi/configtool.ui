@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>963</width>
-    <height>798</height>
+    <width>964</width>
+    <height>685</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,7 +23,7 @@
       <widget class="QLabel" name="label">
        <property name="minimumSize">
         <size>
-         <width>48</width>
+         <width>169</width>
          <height>48</height>
         </size>
        </property>
@@ -32,6 +32,9 @@
          <width>48</width>
          <height>48</height>
         </size>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
        </property>
        <property name="text">
         <string/>
@@ -220,6 +223,32 @@ Processors</string>
          <property name="icon">
           <iconset resource="configtool.qrc">
            <normaloff>:/img/img/exttools.png</normaloff>:/img/img/exttools.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>48</width>
+           <height>48</height>
+          </size>
+         </property>
+         <property name="autoExclusive">
+          <bool>true</bool>
+         </property>
+         <attribute name="buttonGroup">
+          <string notr="true">btngrpCfgSections</string>
+         </attribute>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="tbtnConnectivity">
+         <property name="styleSheet">
+          <string notr="true">QPushButton { text-align: left; padding: 5px; }</string>
+         </property>
+         <property name="text">
+          <string>Connectivity</string>
+         </property>
+         <property name="icon">
+          <iconset resource="configtool.qrc">
+           <normaloff>:/img/img/connect.png</normaloff>:/img/img/connect.png</iconset>
          </property>
          <property name="iconSize">
           <size>
@@ -665,93 +694,6 @@ Processors</string>
           </widget>
          </item>
          <item>
-          <widget class="QGroupBox" name="groupBox_11">
-           <property name="title">
-            <string>VOSpace Credentials</string>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_16">
-            <item>
-             <layout class="QFormLayout" name="formLayout">
-              <item row="1" column="0">
-               <widget class="QLabel" name="label_5">
-                <property name="text">
-                 <string>Username</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="0">
-               <widget class="QLabel" name="label_6">
-                <property name="text">
-                 <string>Password</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="0">
-               <widget class="QLabel" name="label_7">
-                <property name="text">
-                 <string>User Area Folder</string>
-                </property>
-               </widget>
-              </item>
-              <item row="3" column="1">
-               <widget class="QLineEdit" name="edVOSpaceFolder"/>
-              </item>
-              <item row="1" column="1">
-               <layout class="QHBoxLayout" name="horizontalLayout_20" stretch="1,2">
-                <item>
-                 <widget class="QLineEdit" name="edVOSpaceUser"/>
-                </item>
-                <item>
-                 <spacer name="horizontalSpacer_23">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-               </layout>
-              </item>
-              <item row="2" column="1">
-               <layout class="QHBoxLayout" name="horizontalLayout_21" stretch="1,2">
-                <item>
-                 <widget class="QLineEdit" name="edVOSpacePwd"/>
-                </item>
-                <item>
-                 <spacer name="horizontalSpacer_24">
-                  <property name="orientation">
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0">
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-               </layout>
-              </item>
-              <item row="0" column="0">
-               <widget class="QLabel" name="label_8">
-                <property name="text">
-                 <string>URL</string>
-                </property>
-               </widget>
-              </item>
-              <item row="0" column="1">
-               <widget class="QLineEdit" name="edVOSpaceURL"/>
-              </item>
-             </layout>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
           <widget class="QGroupBox" name="groupBox_10">
            <property name="title">
             <string>Environment</string>
@@ -964,6 +906,19 @@ Processors</string>
             </item>
            </layout>
           </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_6">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>40</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </widget>
@@ -1913,6 +1868,231 @@ Processors</string>
          </item>
         </layout>
        </widget>
+       <widget class="QWidget" name="page_2">
+        <layout class="QVBoxLayout" name="verticalLayout_27">
+         <item>
+          <widget class="QGroupBox" name="groupBox_11">
+           <property name="title">
+            <string>VOSpace Credentials</string>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_16">
+            <item>
+             <layout class="QGridLayout" name="gridLayout_3" columnstretch="1,4">
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_8">
+                <property name="text">
+                 <string>URL</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="edVOSpaceURL"/>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_5">
+                <property name="text">
+                 <string>Username</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_20" stretch="1,2">
+                <item>
+                 <widget class="QLineEdit" name="edVOSpaceUser"/>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_23">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_6">
+                <property name="text">
+                 <string>Password</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_21" stretch="1,2">
+                <item>
+                 <widget class="QLineEdit" name="edVOSpacePwd"/>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_24">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_7">
+                <property name="text">
+                 <string>User Area Folder</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QLineEdit" name="edVOSpaceFolder"/>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox_12">
+           <property name="title">
+            <string>Jupyter Lab</string>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_22">
+            <item>
+             <layout class="QGridLayout" name="gridLayout" columnstretch="1,4">
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_14">
+                <property name="text">
+                 <string>Host</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <widget class="QLineEdit" name="edJupyterLabHost"/>
+              </item>
+              <item row="1" column="0">
+               <widget class="QLabel" name="label_9">
+                <property name="text">
+                 <string>Username</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_25" stretch="1,2">
+                <item>
+                 <widget class="QLineEdit" name="edJupyterLabHostUser"/>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_25">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item row="2" column="0">
+               <widget class="QLabel" name="label_10">
+                <property name="text">
+                 <string>Password</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_26" stretch="1,2">
+                <item>
+                 <widget class="QLineEdit" name="edJupyterLabHostPwd"/>
+                </item>
+                <item>
+                 <spacer name="horizontalSpacer_26">
+                  <property name="orientation">
+                   <enum>Qt::Horizontal</enum>
+                  </property>
+                  <property name="sizeHint" stdset="0">
+                   <size>
+                    <width>40</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                 </spacer>
+                </item>
+               </layout>
+              </item>
+              <item row="3" column="0">
+               <widget class="QLabel" name="label_12">
+                <property name="text">
+                 <string>URL                   </string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="QLineEdit" name="edJupyterLabURL"/>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <widget class="QGroupBox" name="groupBox_13">
+           <property name="title">
+            <string>IPython</string>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout_23">
+            <item>
+             <layout class="QGridLayout" name="gridLayout_4" columnstretch="1,4">
+              <item row="0" column="0">
+               <widget class="QLabel" name="label_13">
+                <property name="text">
+                 <string>IPython executable</string>
+                </property>
+               </widget>
+              </item>
+              <item row="0" column="1">
+               <layout class="QHBoxLayout" name="horizontalLayout_24" stretch="1,0">
+                <item>
+                 <widget class="QLineEdit" name="edIPythonExe"/>
+                </item>
+                <item>
+                 <widget class="QToolButton" name="tbtnIPythonExe">
+                  <property name="text">
+                   <string>...</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
+             </layout>
+            </item>
+           </layout>
+          </widget>
+         </item>
+         <item>
+          <spacer name="verticalSpacer_4">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>20</width>
+             <height>165</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </widget>
        <widget class="QWidget" name="pageFlags">
         <layout class="QVBoxLayout" name="verticalLayout_21">
          <item>
@@ -2247,7 +2427,6 @@ number indicating the percentage of progress of the task.files the </string>
  </tabstops>
  <resources>
   <include location="configtool.qrc"/>
-  <include location="configtool.qrc"/>
  </resources>
  <connections>
   <connection>
@@ -2257,8 +2436,8 @@ number indicating the percentage of progress of the task.files the </string>
    <slot>saveAs()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>780</x>
-     <y>787</y>
+     <x>781</x>
+     <y>674</y>
     </hint>
     <hint type="destinationlabel">
      <x>523</x>
@@ -2273,8 +2452,8 @@ number indicating the percentage of progress of the task.files the </string>
    <slot>save()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>866</x>
-     <y>787</y>
+     <x>867</x>
+     <y>674</y>
     </hint>
     <hint type="destinationlabel">
      <x>677</x>
@@ -2289,8 +2468,8 @@ number indicating the percentage of progress of the task.files the </string>
    <slot>addNewTool()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>214</x>
-     <y>95</y>
+     <x>224</x>
+     <y>734</y>
     </hint>
     <hint type="destinationlabel">
      <x>850</x>
@@ -2305,8 +2484,8 @@ number indicating the percentage of progress of the task.files the </string>
    <slot>editTool()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>252</x>
-     <y>95</y>
+     <x>293</x>
+     <y>734</y>
     </hint>
     <hint type="destinationlabel">
      <x>913</x>
@@ -2321,8 +2500,8 @@ number indicating the percentage of progress of the task.files the </string>
    <slot>removeTool()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>233</x>
-     <y>95</y>
+     <x>252</x>
+     <y>734</y>
     </hint>
     <hint type="destinationlabel">
      <x>913</x>
@@ -2337,8 +2516,8 @@ number indicating the percentage of progress of the task.files the </string>
    <slot>apply()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>952</x>
-     <y>787</y>
+     <x>953</x>
+     <y>674</y>
     </hint>
     <hint type="destinationlabel">
      <x>913</x>
@@ -2353,8 +2532,8 @@ number indicating the percentage of progress of the task.files the </string>
    <slot>addHost()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>215</x>
-     <y>129</y>
+     <x>216</x>
+     <y>399</y>
     </hint>
     <hint type="destinationlabel">
      <x>664</x>
@@ -2369,8 +2548,8 @@ number indicating the percentage of progress of the task.files the </string>
    <slot>removeHost()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>233</x>
-     <y>129</y>
+     <x>234</x>
+     <y>399</y>
     </hint>
     <hint type="destinationlabel">
      <x>776</x>
@@ -2385,8 +2564,8 @@ number indicating the percentage of progress of the task.files the </string>
    <slot>addRule()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>223</x>
-     <y>95</y>
+     <x>224</x>
+     <y>734</y>
     </hint>
     <hint type="destinationlabel">
      <x>431</x>
@@ -2401,8 +2580,8 @@ number indicating the percentage of progress of the task.files the </string>
    <slot>removeRule()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>251</x>
-     <y>95</y>
+     <x>252</x>
+     <y>734</y>
     </hint>
     <hint type="destinationlabel">
      <x>330</x>
@@ -2417,8 +2596,8 @@ number indicating the percentage of progress of the task.files the </string>
    <slot>addProduct()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>201</x>
-     <y>95</y>
+     <x>224</x>
+     <y>734</y>
     </hint>
     <hint type="destinationlabel">
      <x>141</x>
@@ -2433,8 +2612,8 @@ number indicating the percentage of progress of the task.files the </string>
    <slot>removeProduct()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>207</x>
-     <y>95</y>
+     <x>252</x>
+     <y>734</y>
     </hint>
     <hint type="destinationlabel">
      <x>238</x>
@@ -2449,8 +2628,8 @@ number indicating the percentage of progress of the task.files the </string>
    <slot>addProcessor()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>245</x>
-     <y>95</y>
+     <x>607</x>
+     <y>734</y>
     </hint>
     <hint type="destinationlabel">
      <x>913</x>
@@ -2465,8 +2644,8 @@ number indicating the percentage of progress of the task.files the </string>
    <slot>removeProcessor()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>251</x>
-     <y>95</y>
+     <x>635</x>
+     <y>734</y>
     </hint>
     <hint type="destinationlabel">
      <x>913</x>
@@ -2481,8 +2660,8 @@ number indicating the percentage of progress of the task.files the </string>
    <slot>closeDoNothing()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>589</x>
-     <y>787</y>
+     <x>590</x>
+     <y>674</y>
     </hint>
     <hint type="destinationlabel">
      <x>292</x>
@@ -2513,8 +2692,8 @@ number indicating the percentage of progress of the task.files the </string>
    <slot>addSwarm()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>215</x>
-     <y>129</y>
+     <x>216</x>
+     <y>700</y>
     </hint>
     <hint type="destinationlabel">
      <x>494</x>
@@ -2529,8 +2708,8 @@ number indicating the percentage of progress of the task.files the </string>
    <slot>removeSwarm()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>233</x>
-     <y>129</y>
+     <x>234</x>
+     <y>700</y>
     </hint>
     <hint type="destinationlabel">
      <x>494</x>
@@ -2565,8 +2744,24 @@ number indicating the percentage of progress of the task.files the </string>
      <y>391</y>
     </hint>
     <hint type="destinationlabel">
-     <x>964</x>
+     <x>963</x>
      <y>371</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>tbtnIPythonExe</sender>
+   <signal>clicked()</signal>
+   <receiver>ConfigTool</receiver>
+   <slot>selectIPythonExec()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>915</x>
+     <y>346</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>961</x>
+     <y>319</y>
     </hint>
    </hints>
   </connection>
@@ -2618,9 +2813,10 @@ number indicating the percentage of progress of the task.files the </string>
   <slot>editRule(QModelIndex)</slot>
   <slot>selectUserDefAreaPath()</slot>
   <slot>defineUserWA(int)</slot>
+  <slot>selectIPythonExec()</slot>
  </slots>
  <buttongroups>
-  <buttongroup name="btngrpCfgSections"/>
   <buttongroup name="btngrpUserWA"/>
+  <buttongroup name="btngrpCfgSections"/>
  </buttongroups>
 </ui>

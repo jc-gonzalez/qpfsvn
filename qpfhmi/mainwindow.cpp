@@ -94,6 +94,7 @@
 #include "qjsonmodel.h"
 #include "xmlsyntaxhighlight.h"
 #include "dlgalert.h"
+#include "dlgreproc.h"
 
 #include "reqrep.h"
 #include "pubsub.h"
@@ -1513,6 +1514,24 @@ void MainWindow::initLocalArchiveView()
     acReprocess = new QAction("Reprocess data product", ui->treevwArchive);
     connect(acReprocess, SIGNAL(triggered()), this, SLOT(reprocessProduct()));
 
+    acAnalyzeIPython = new QAction("Analyze within IPython", ui->treevwArchive);
+    connect(acAnalyzeIPython, SIGNAL(triggered()), this, SLOT(analyzeProduct()));
+
+    acAnalyzeJupyter = new QAction("Analyze within Jupyter Lab", ui->treevwArchive);
+    connect(acAnalyzeJupyter, SIGNAL(triggered()), this, SLOT(analyzeProduct()));
+
+    acExportLocal = new QAction("Export to a local folder", ui->treevwArchive);
+    connect(acExportLocal, SIGNAL(triggered()), this, SLOT(exportProduct()));
+
+    acExportRemote = new QAction("Export to a remote folder", ui->treevwArchive);
+    connect(acExportRemote, SIGNAL(triggered()), this, SLOT(exportProduct()));
+
+    acExportVOSpace = new QAction("Export to configured VOSpace folder", ui->treevwArchive);
+    connect(acExportVOSpace, SIGNAL(triggered()), this, SLOT(exportProduct()));
+
+    acExportVOSpaceOther = new QAction("Export to another VOSpace folder", ui->treevwArchive);
+    connect(acExportVOSpaceOther, SIGNAL(triggered()), this, SLOT(exportProduct()));
+
     // Filter initialisation
     FieldSet products;
     Field fld("product_id"          , STRING); products[fld.name] = fld;
@@ -1592,6 +1611,10 @@ void MainWindow::resizeLocalArch()
 //----------------------------------------------------------------------
 void MainWindow::updateLocalArchModel()
 {
+    // Update context menus depending on config flags
+    acReprocess->setEnabled(cfg.flags.allowReprocessing());
+    
+    // Update view
     productsModel->refresh();
     if (expandProductsModel) {
         ui->treevwArchive->expandAll();
@@ -1773,6 +1796,27 @@ void MainWindow::reprocessProduct()
     QString fileName = archUrl.path();
     std::cerr << "Request of reprocessing: " << fileName.toStdString() << std::endl;
 
+    QStringList inProds;
+    inProds << fileName;
+
+    std::string userWAType = cfg.general.userAreaType();
+    DlgReproc::OutputsLocation out = ((userWAType == "auto") ?
+                                      DlgReproc::DefUserArea :
+                                      ((userWAType == "local") ?
+                                       DlgReproc::CfgLocalDir :
+                                       DlgReproc::CfgVOSpace));
+    int flags = (cfg.flags.intermediateProducts() ?
+                 DlgReproc::GenIntermProd : DlgReproc::NullFlags);
+
+    DlgReproc dlg;
+    dlg.setFields(inProds, out, flags);
+    if (!dlg.exec()) { return; }
+
+    QString outLocation;
+    dlg.getFields(inProds, out, outLocation, flags);
+
+    std::cerr << out << " : " << flags << '\n';
+    
     FileNameSpec fns;
     ProductMetadata md;
     fns.parseFileName(fileName.toStdString(), md);
@@ -1781,6 +1825,20 @@ void MainWindow::reprocessProduct()
     URLHandler urlh;
     urlh.setProduct(md);
     md = urlh.fromFolder2Inbox();
+}
+
+//----------------------------------------------------------------------
+// SLOT: analyzeProduct
+//----------------------------------------------------------------------
+void MainWindow::analyzeProduct()
+{
+}
+
+//----------------------------------------------------------------------
+// SLOT: exportProduct
+//----------------------------------------------------------------------
+void MainWindow::exportProduct()
+{
 }
 
 //----------------------------------------------------------------------
@@ -1826,10 +1884,19 @@ void MainWindow::showArchiveTableContextMenu(const QPoint & p)
             acReprocess->setProperty("clickedItem", p);
         }
 
+        QMenu * cmAnalyze = menu.addMenu("Analyze ...");
+        cmAnalyze->addAction(acAnalyzeIPython);
+        cmAnalyze->addAction(acAnalyzeJupyter);
+
+        QMenu * cmExport = menu.addMenu("Export ...");
+        cmExport->addAction(acExportLocal);
+        cmExport->addAction(acExportRemote);
+        cmExport->addAction(acExportVOSpace);
+        cmExport->addAction(acExportVOSpaceOther);
+
         isViewsUpdateActive = false;
         menu.exec(ui->treevwArchive->mapToGlobal(p));
         isViewsUpdateActive = true;
-        //QMenu::exec(actions, ui->treevwArchive->mapToGlobal(p));
     }
 }
 

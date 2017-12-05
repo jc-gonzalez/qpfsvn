@@ -48,6 +48,8 @@ class VOSpaceHandler : public QObject {
 
     Q_OBJECT
 
+    static const QString Tx_XML_File;
+    
 public:
     explicit VOSpaceHandler(QObject *parent = 0);
     ~VOSpaceHandler();
@@ -55,7 +57,12 @@ public:
 signals:
     void activate();
 
-
+private:
+    void uploadToFile(QString folder, QString file, QString content);
+    void uploadFile(QString folder, QString file, QString localFile);
+    void downloadFromFile(QString folder, QString file, QString & content);
+    void downloadFile(QString folder, QString file, QString localFile);
+    
 private:
     int a;
 };

@@ -40,6 +40,12 @@
 
 #include "voshdl.h"
 
+#include "config.h"
+using Configuration::cfg;
+
+#define C(x) (x).c_str()
+#define QS(x) QString::fromStdString(x)
+
 namespace QPF {
 
 VOSpaceHandler::VOSpaceHandler(QObject *parent)
@@ -49,5 +55,38 @@ VOSpaceHandler::VOSpaceHandler(QObject *parent)
 VOSpaceHandler::~VOSpaceHandler()
 {
 }
+
+void VOSpaceHandler::uploadToFile(QString folder, QString file, QString content)
+{
+    QString transfer_url = QString::fromStdString(cfg.connectivity.vospace.url() +
+                                                  "/servlet/transfers/async?PHASE=RUN");
+    QString end_point("/service/data/");
+        
+    QString metadataTransfer("transfer_push_to_a.xml"); // Contains the path where to store the output file
+    QString & toupload = file; // Name of the file to be uploaded in VOSpace
+
+    QString user = QString::fromStdString(cfg.connectivity.vospace.user());
+    QString txData = Tx_XML_File.arg(user).arg(folder).arg("pushToVoSpace");
+}
+
+void VOSpaceHandler::uploadFile(QString folder, QString file, QString localFile)
+{
+}
+
+void VOSpaceHandler::downloadFromFile(QString folder, QString file, QString & content)
+{
+}
+
+void VOSpaceHandler::downloadFile(QString folder, QString file, QString localFile)
+{
+}
+
+const QString VOSpaceHandler::Tx_XML_File =
+    "<vos:transfer xmlns:vos=\"http://www.ivoa.net/xml/VOSpace/v2.0\">"
+    "    <vos:target>vos://esavo!vospace/%1/%2</vos:target>"
+    "    <vos:direction>%3</vos:direction>"
+    "    <vos:view uri=\"vos://esavo!vospace/core#fits\"/>"
+    "    <vos:protocol uri=\"vos://esavo!vospace/core#httpput\"/>"
+    "</vos:transfer>";
 
 }

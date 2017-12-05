@@ -48,7 +48,6 @@
 #include "swarmedit.h"
 #include "ruleedit.h"
 
-#include "config.h"
 #include "tskorc.h"
 
 #include <QHostInfo>
@@ -58,6 +57,7 @@
 #include <QMessageBox>
 #include <QtCore/qnamespace.h>
 
+#include "config.h"
 using Configuration::cfg;
 
 #define C(x) (x).c_str()

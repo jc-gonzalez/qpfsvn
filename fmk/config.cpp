@@ -117,7 +117,7 @@ void Config::init(std::string fName)
         DBPort = url.substr(0, url.find("/")); url.erase(0, url.find("/") + 1); // take port
         DBName = url; // take database name
         DbgMsg(DBUser + ":" + DBPwd + "@" + DBHost + ":" + DBPort + "/" + DBName);
-
+        
         DbgMsg("Configuration is retrieved from db: " + fName);
         readConfigFromDB();
         isActualFile = false;
@@ -198,7 +198,6 @@ void Config::setLastAccess(std::string last)
 //----------------------------------------------------------------------
 void Config::setConfigFile(std::string fName)
 {
-
     char actualpath [PATH_MAX+1];
     char * ptr;
     ptr = realpath(fName.c_str(), actualpath);
@@ -219,6 +218,7 @@ void Config::readConfigFromFile()
     buffer << cfgFile.rdbuf();
     TraceMsg("CONFIG FROM FILE:\n" + buffer.str());
     fromStr(buffer.str());
+    fillData();
 }
 
 //----------------------------------------------------------------------
@@ -253,6 +253,7 @@ void Config::readConfigFromDB()
         unsigned int lastConfig = config.size() - 1;
         dateCreated = config.at(lastConfig).at(0);
         std::string configData(config.at(lastConfig).at(1));
+        TRC("Retrieving from DB config:\n" + config.at(lastConfig).at(1));
         cfg.fromStr(configData);
         cfgFileName = "<internalDB> " + Config::DBName + "::configuration";
     } catch (RuntimeException & e) {

@@ -44,7 +44,7 @@
             "pwd": "eu314clid",
             "url": "http://eucproc03.n1vs.lan:8001"
         },
-        "ipython": "/usr/bin/ypython"
+        "ipython": "/usr/bin/ipython"
     },
     "products": {
         "productTypes": [

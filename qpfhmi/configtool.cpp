@@ -202,16 +202,6 @@ ConfigTool::ConfigTool(QWidget *parent) :
     monitMsgFlags.append(FlagSt({ "FMKMON",   ui->chkFmkMon })); 
     monitMsgFlags.append(FlagSt({ "HOSTMON",  ui->chkHostMon }));
                                        
-    // Hide non-yet-implemented widgets
-    ui->btngrpCfgSections->setId(ui->tbtnGeneral       , PageGeneral);
-    ui->btngrpCfgSections->setId(ui->tbtnMachines      , PageMachines);
-    ui->btngrpCfgSections->setId(ui->tbtnDB            , PageDatabase);
-    ui->btngrpCfgSections->setId(ui->tbtnProdProc      , PageProdProc);
-    ui->btngrpCfgSections->setId(ui->tbtnOrchestration , PageOrchestration);
-    ui->btngrpCfgSections->setId(ui->tbtnExtTools      , PageExtTools);
-    ui->btngrpCfgSections->setId(ui->tbtnConnectivity  , PageConnectivity);
-    ui->btngrpCfgSections->setId(ui->tbtnFlags         , PageFlags);
-
     ui->btngrpUserWA->setId(ui->rbtnUserWAAuto    , Auto);
     ui->btngrpUserWA->setId(ui->rbtnUserWALocal   , LocalFolder);
     ui->btngrpUserWA->setId(ui->rbtnUserWAVOSpace , VOSpaceFolder);

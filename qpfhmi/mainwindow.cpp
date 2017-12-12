@@ -131,8 +131,8 @@ const std::string MainWindow::INITIALISED_StateName("INITIALISED");
 const std::string MainWindow::RUNNING_StateName("RUNNING");
 const std::string MainWindow::OPERATIONAL_StateName("OPERATIONAL");
 
-    void fwdCommandFromHMIPxy(void* context, std::string cmd, std::string arg) {
-        static_cast<MainWindow*>(context)->commandFromHMIPxy(cmd, arg);
+void fwdCommandFromHMIPxy(void* context, std::string cmd, std::string arg) {
+    static_cast<MainWindow*>(context)->commandFromHMIPxy(cmd, arg);
 }
 
 
@@ -1178,28 +1178,36 @@ void MainWindow::setLogWatch()
 //----------------------------------------------------------------------
 void MainWindow::addPathToLogWatch(QString & logDir)
 {
+    // Create list of log file names and window names (file basenames)
     QStringList logExtFilter("*.log");
-
     QStringList logFiles;
     logFiles << QDir(logDir).entryList(logExtFilter);
-
-    // Create MDI window with the log file viewer
+    QStringList wndNames;
+    QStringList logFileNames;
     foreach (QString logBaseName, logFiles) {
         QString logFileName(logDir + "/" + logBaseName);
-        QString bseName(QFileInfo(logFileName).baseName());
-      
-        // check that the window for this log does not exist
-        QList<QMdiSubWindow *> sws = ui->mdiArea->subWindowList();
-        bool doesExist = false;
-        foreach (QMdiSubWindow * subw, sws) {
-            TextView * tv = qobject_cast<TextView *>(subw->widget());
+        logFileNames << logFileName;
+        wndNames     << QFileInfo(logFileName).baseName();
+    }
+
+    // Clean up, removing those that match existing subwindows
+    foreach (QMdiSubWindow * subw, ui->mdiArea->subWindowList()) {
+        TextView * tv = qobject_cast<TextView *>(subw->widget());
+        for (int i = logFileNames.size() - 1; i >= 0; --i) {
+            const QString & bseName = wndNames.at(i);
             if (tv->logName() == bseName) {
-                doesExist = true;
-                break;
+                logFileNames.removeAt(i);
+                wndNames.removeAt(i);
+                continue;
             }
         }
-        if (doesExist) { continue; }
-
+    }
+    
+    // Create MDI window with the log file viewer
+    for (int i = 0; i < logFileNames.size(); ++i) {
+        const QString & logFileName = logFileNames.at(i);
+        const QString & bseName     = wndNames.at(i);
+      
         activeNodes << bseName;
 
         TextView * pltxted = new TextView;
@@ -1210,10 +1218,13 @@ void MainWindow::addPathToLogWatch(QString & logDir)
         nodeLogs.append(newLog);
         QMdiSubWindow * subw = ui->mdiArea->addSubWindow(pltxted);
         subw->setWindowFlags(Qt::CustomizeWindowHint |
-                             Qt::WindowTitleHint |
-                             Qt::WindowMinMaxButtonsHint);
+                            Qt::WindowTitleHint |
+                            Qt::WindowMinMaxButtonsHint);
+        subw->show();
         connect(newLog, SIGNAL(logUpdated()), this, SLOT(processPendingEvents()));
     }
+
+    updateWindowMenu();
 }
 
 //----------------------------------------------------------------------
@@ -3209,6 +3220,7 @@ void MainWindow::commandFromHMIPxy(std::string command, std::string arg)
         newPathToWatch = QString::fromStdString(Log::getLogBaseDir());
         newPathToWatch.replace(QString::fromStdString(cfg.sessionId),
                                QString::fromStdString(arg));
+        TRC("Now checking =====> " + newPathToWatch.toStdString());
     }
 }
 

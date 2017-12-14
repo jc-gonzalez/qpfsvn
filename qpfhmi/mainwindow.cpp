@@ -764,10 +764,10 @@ void MainWindow::createMenus()
     toolsMenu->addAction(acConfigTool);
     toolsMenu->addAction(acBrowseDB);
     toolsMenu->addAction(acExtTools);
-    toolsMenu->addSeparator();
-
-    sessionInfoMenu = toolsMenu->addMenu(tr("&Session Information"));
-    sessionInfoMenu->addAction(acVerbosity);
+    // toolsMenu->addSeparator();
+    // sessionInfoMenu = toolsMenu->addMenu(tr("&Session Information"));
+    // sessionInfoMenu->addAction(acVerbosity);
+    toolsMenu->addAction(acVerbosity);
 
     //toolsMenu->addSeparator();
     //toolsMenu->addAction(acExecTestRun);
@@ -931,7 +931,7 @@ void MainWindow::setActiveSubWindow(QWidget *window)
 //----------------------------------------------------------------------
 void MainWindow::showConfigTool()
 {
-    static ConfigTool cfgTool;
+    static ConfigTool cfgTool(this);
 
     cfgTool.prepare(userDefTools, userDefProdTypes);
     if (cfgTool.exec()) {

@@ -45,6 +45,7 @@ set (qpfGuiLib_src
   logframe.cpp
   logwatcher.cpp
   mainwindow.cpp
+  multitextview.cpp
   procfmkmonit.cpp
   procalertmodel.cpp
   proctskstatmodel.cpp
@@ -93,6 +94,7 @@ set (qpfGuiLib_hdr
   logframe.h
   logwatcher.h
   mainwindow.h
+  multitextview.h
   procfmkmonit.h
   procalertmodel.h
   proctskstatmodel.h
@@ -124,6 +126,7 @@ set (qpfGuiLib_ui
   ruleedit.ui
   exttooledit.ui
   exttoolsdef.ui
+  multitextview.ui
   frm_filterset.ui
   frm_filter.ui
   frmagentstatus.ui

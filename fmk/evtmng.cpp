@@ -197,6 +197,13 @@ void EvtMng::processHMICmdMsg(ScalabilityProtocolRole* c, MessageString & m)
         }
         body["states"] = states;
 
+        json logs;
+        for (auto & kv : logFolders) {
+            TraceMsg(kv.first + " => " + kv.second);
+            logs[kv.first] = kv.second;
+        }
+        body["logs"] = logs;
+
     } else if (cmd == CmdSession) { // Session id. request
 
         msg.buildHdr(ChnlHMICmd, MsgHMICmd, CHNLS_IF_VERSION,

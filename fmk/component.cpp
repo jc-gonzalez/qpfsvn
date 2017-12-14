@@ -472,14 +472,19 @@ void Component::processEvtMngMsg(ScalabilityProtocolRole * c, MessageString & m)
         msg.buildHdr(ChnlEvtMng, MsgEvtMng, CHNLS_IF_VERSION,
                      compName, msg.header.source(),
                      "", "", "");
-        body["cmd"]   = CmdStates;
-        body["state"] = getStateName(getState());
+        body["cmd"]     = CmdStates;
+        body["state"]   = getStateName(getState());
+        body["host"]    = compAddress;
+        body["logs"]    = Config::PATHLog;
+            
         msg.buildBody(body);
         this->send(ChnlEvtMng, msg.str());
 
     } else if (cmd == CmdStates) { // This should be EvtMng
 
         cfg.nodeStates[msg.header.source()] = msg.body["state"].asString();
+        logFolders[msg.body["host"].asString()] = msg.body["logs"].asString();
+       
         TraceMsg(compName + " received from " + msg.header.source() + " from " + compName);
 
     } else {

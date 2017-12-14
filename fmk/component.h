@@ -336,6 +336,8 @@ protected:
     Synchronizer * synchro;
     int iteration;
     int stepSize;
+
+    std::map<std::string, std::string> logFolders;
 };
 
 #endif

@@ -172,6 +172,8 @@ void Config::fillData()
     SET_GRP(CfgGrpUserDefToolsList, userDefTools);
     SET_GRP(CfgGrpFlags,            flags);
 
+    Log::setMinLogLevel(general.logLevel());
+
     DBHost = db.host();
     DBPort = db.port();
     DBName = db.name();
@@ -266,7 +268,7 @@ void Config::readConfigFromDB()
                  "Unexpected error accessing "
                  "database for retrieval of system configuration");
         return;
-    }
+    }    
     
     // Modificar fecha de último accesso
     std::string now = timeTag();
@@ -413,6 +415,14 @@ void Config::processConfig()
         {Tag_MsgHostMon,   "HOSTMON"}};
 
     fillData();
+
+    if (std::string(CONFIG_VERSION) != cfg.general.cfgVersion()) {
+        FatalMsg("Configuration version (" +
+                 cfg.general.cfgVersion() +
+                 ") not compatible with the one supported (" +
+                 std::string(CONFIG_VERSION) +
+                 ") by this release.\n");
+    }
     
     PATHBase    = general.workArea();
 

@@ -119,24 +119,43 @@ void HMIProxy::processHMICmdMsg(ScalabilityProtocolRole* c, MessageString & m)
     Message<MsgBodyCMD> msg(m);
     std::string cmd = msg.body["cmd"].asString();
     if (cmd == CmdStates) {
+        
         cfg.nodeStates.clear();
+
         json & mp = msg.body["states"];
         Json::Value::iterator it = mp.begin();
         while (it != mp.end()) {
             std::string node(it.key().asString());
             std::string stat((*it).asString());
             TraceMsg(compName + " received the information that " +
-                node + " has state " + stat);
+                     node + " has state " + stat);
             cfg.nodeStates[node] = stat;
             ++it;
         }
+        
         cfg.nodeStates["QPFHMI"] = getStateName(getState());
+
+        mp = msg.body["logs"];
+        it = mp.begin();
+        while (it != mp.end()) {
+            std::string hostAddr(it.key().asString());
+            std::string logFldr((*it).asString());
+            TraceMsg(compName + " received the information that host " +
+                     hostAddr + " stores its logs in folder " + logFldr);
+            logFolders[hostAddr] = logFldr;
+            ++it;
+        }
+
+        cfg.nodeStates["QPFHMI"] = getStateName(getState());
+
     } else if (cmd == CmdSession) {
+        
         std::string sessId = msg.body["sessionId"].asString();
         if (sessId != cfg.sessionId) {
             InfoMsg("Trying to monitor folder for master session id " + sessId);
             doInParent(parent, "linkSessionLogs", sessId);
         }
+        
     } else if (cmd == CmdProcHdl) {
         // Do nothing, answer is dummy (for the time being)
     }

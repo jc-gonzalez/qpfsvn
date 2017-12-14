@@ -1014,6 +1014,12 @@ void ConfigTool::transferCfgToGUI()
     // 8. FLAGS
     transferFlagsFromCfgToGUI();
 
+    QStringList levels;
+    for (int lvl = (int)(Log::TRACE); lvl <= (int)(Log::FATAL); lvl++) {
+        levels << QString::fromStdString(Log::LogLevelName[lvl]);
+    }    
+    ui->cboxMinLogLevel->addItems(levels);
+    ui->cboxMinLogLevel->setCurrentIndex((int)(Log::getMinLogLevel()));
 }
 
 //----------------------------------------------------------------------
@@ -1161,6 +1167,8 @@ bool ConfigTool::transferGUIToCfg()
 
     // 8. FLAGS
     transferFlagsFromGUIToCfg();
+    cfg.general["logLevel"] = Log::LogLevelName[ui->cboxMinLogLevel->currentIndex()];
+
 
     //=== CONSOLIDATE ===
     cfg.consolidate();

@@ -61,6 +61,8 @@
 
 #define DEFAULT_INITIAL_PORT   50000
 
+#define CONFIG_VERSION  "1.0"
+
 //==========================================================================
 // Class: CfgGrpGeneral
 //==========================================================================
@@ -71,17 +73,21 @@ public:
     virtual void dump() {
         DUMPJSTR(appName);
         DUMPJSTR(appVersion);
+        DUMPJSTR(cfgVersion);
         DUMPJSTR(lastAccess);
         DUMPJSTR(workArea);
         DUMPJSTR(userAreaType);
         DUMPJSTR(userArea);
+        DUMPJSTR(logLevel);
     }
     JSTR(appName);
     JSTR(appVersion);
+    JSTR(cfgVersion);
     JSTR(lastAccess);
     JSTR(workArea);
     JSTR(userAreaType);
     JSTR(userArea);
+    JSTR(logLevel);
 };
 
 //==========================================================================

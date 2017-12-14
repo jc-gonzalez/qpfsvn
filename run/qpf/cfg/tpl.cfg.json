@@ -2,10 +2,12 @@
     "general": {
         "appName": "QPF",
         "appVersion": "2.0",
+        "cfgVersion": "1.0",
         "lastAccess": "20171117T121212",
         "workArea": "/home/eucops/qpf",
         "userAreaType": "auto",
-        "userArea": ""
+        "userArea": "",
+        "logLevel": "INFO"
     },
     "network" : {
         "masterNode" : "@THIS_HOST_IP@",

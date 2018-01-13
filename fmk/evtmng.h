@@ -48,6 +48,7 @@
 //------------------------------------------------------------
 // Topic: System headers
 //------------------------------------------------------------
+#include <mutex>
 
 //------------------------------------------------------------
 // Topic: External packages
@@ -61,14 +62,9 @@
 #include "component.h"
 #include "dwatcher.h"
 
-////////////////////////////////////////////////////////////////////////////
-// Namespace: QPF
-// -----------------------
-//
-// Library namespace
-////////////////////////////////////////////////////////////////////////////
-//namespace QPF {
-
+//==========================================================================
+// Class: EventManager
+//==========================================================================
 class EvtMng : public Component {
 
 public:
@@ -97,18 +93,58 @@ public:
     //----------------------------------------------------------------------
     virtual void runEachIteration();
 
+public:
+    //----------------------------------------------------------------------
+    // Method: runEachIteration
+    //----------------------------------------------------------------------
+    bool getInData(ProductList & inData, std::string & space);
+
+    //----------------------------------------------------------------------
+    // Method: getReprocData
+    // Store in argument variables the REPROCDATA products
+    //----------------------------------------------------------------------
+    bool getReprocData(ProductList & reprocData);
+    
+    //----------------------------------------------------------------------
+    // Method: isHMIActive
+    //----------------------------------------------------------------------
+    bool isHMIActive();
+    
+    //----------------------------------------------------------------------
+    // Method: isQuitRequested
+    //----------------------------------------------------------------------
+    bool isQuitRequested();
+    
+    //----------------------------------------------------------------------
+    // Method: isQuitRequested
+    //----------------------------------------------------------------------
+    void quit();
+
+    //----------------------------------------------------------------------
+    // Method: sendProcFmkInfoUpdate
+    // Send an update on the ProcessingFrameworkInfo structure
+    //----------------------------------------------------------------------
+    void sendProcFmkInfoUpdate(json & fmkInfoValue);
+
 protected:
     //----------------------------------------------------------------------
     // Method: processHMICmdMsg
     //----------------------------------------------------------------------
     virtual void processHMICmdMsg(ScalabilityProtocolRole* c, MessageString & m);
 
-
 private:
     DirWatcher * dw;
+
+    ProductList inboxProducts;
+    ProductList reprocProducts;
+
+    std::mutex mtxInData;
+    std::mutex mtxReproc;
+    std::mutex mtxHostInfo;
 
     std::map<std::string, json> elements;
 
     bool requestQuit;
+    bool hmiActive;
 };
 #endif

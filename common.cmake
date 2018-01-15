@@ -49,7 +49,7 @@ else()
   set (UUIDINCDIR ${UUID_ROOT_DIR}/include)
   set (UUIDLIBDIR ${UUID_ROOT_DIR}/lib)
   
-  set (CURL_ROOT_DIR ${COTSDIR}/uuid)
+  set (CURL_ROOT_DIR ${COTSDIR}/curl)
   set (CURLINCDIR ${CURL_ROOT_DIR}/include)
   set (CURLLIBDIR ${CURL_ROOT_DIR}/lib)
   

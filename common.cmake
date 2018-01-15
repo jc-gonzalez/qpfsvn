@@ -92,6 +92,7 @@ link_directories (
   ${UUIDLIBDIR}
   ${PCRE2LIBDIR}
   ${PSQLLIBDIR}
+  ${CURLLIBDIR}
   ${NNCOMM_ROOT_DIR}
   ${FILEHDL_ROOT_DIR}
   ${FMK_ROOT_DIR}

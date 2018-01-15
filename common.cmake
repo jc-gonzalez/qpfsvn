@@ -22,6 +22,9 @@ if ("${COTSDIR}" STREQUAL "")
   set (UUIDINCDIR /usr/include)
   set (UUIDLIBDIR /usr/lib64)
   
+  set (CURLINCDIR /usr/include)
+  set (CURLLIBDIR /usr/lib64)
+  
   set (PCRE2INCDIR /usr/include)
   set (PCRE2LIBDIR /usr/lib64)
   
@@ -45,6 +48,10 @@ else()
   set (UUID_ROOT_DIR ${COTSDIR}/uuid)
   set (UUIDINCDIR ${UUID_ROOT_DIR}/include)
   set (UUIDLIBDIR ${UUID_ROOT_DIR}/lib)
+  
+  set (CURL_ROOT_DIR ${COTSDIR}/uuid)
+  set (CURLINCDIR ${CURL_ROOT_DIR}/include)
+  set (CURLLIBDIR ${CURL_ROOT_DIR}/lib)
   
   set (PCRE2_ROOT_DIR ${COTSDIR}/pcre2)
   set (PCRE2INCDIR ${PCRE2_ROOT_DIR}/include)

@@ -466,6 +466,7 @@ void ActionHandler::createLocalArchiveViewActions()
 
     acAnalyzeJupyter = new QAction("Analyze within Jupyter Lab", mw->ui->treevwArchive);
     acAnalyzeJupyter->setObjectName("AnalyzeWithJupyter");
+    acAnalyzeJupyter->setEnabled(false);
     connect(acAnalyzeJupyter, SIGNAL(triggered()), mw, SLOT(analyzeProduct()));
 
     acExport = new QAction("Export the selected product(s) ...", mw->ui->treevwArchive);

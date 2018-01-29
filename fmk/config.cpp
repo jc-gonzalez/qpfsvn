@@ -254,10 +254,11 @@ void Config::readConfigFromDB()
         dbHdl->getTable("configuration", config);
         unsigned int lastConfig = config.size() - 1;
         dateCreated = config.at(lastConfig).at(0);
-        std::string configData(config.at(lastConfig).at(1));
+        cfgFileName = config.at(lastConfig).at(1);
+        std::string configData(config.at(lastConfig).at(2));
         TRC("Retrieving from DB config:\n" + config.at(lastConfig).at(1));
         cfg.fromStr(configData);
-        cfgFileName = "<internalDB> " + Config::DBName + "::configuration";
+        //cfgFileName = "<internalDB> " + Config::DBName + "::configuration";
     } catch (RuntimeException & e) {
         DBG("ERROR Trying to retrieve configuration table");
         Log::log("SYSTEM", Log::ERROR, e.what());
@@ -342,8 +343,8 @@ void Config::saveConfigToDB()
     Json::FastWriter writer;
     std::string cfgString = writer.write(dbcfg);
 
-    cmd = "INSERT INTO configuration (created, last_accessed, cfg) VALUES ";
-    cmd += "('" + now + "', '" + now + "', '" + cfgString + "')";
+    cmd = "INSERT INTO configuration (created, filename, last_accessed, cfg) VALUES ";
+    cmd += "('" + now + "', '" + cfgFileName + "', '" + now + "', '" + cfgString + "')";
 
     try {
          dbHdl->runCmd(cmd);

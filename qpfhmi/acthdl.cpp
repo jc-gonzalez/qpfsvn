@@ -509,6 +509,7 @@ void ActionHandler::showArchiveTableContextMenu(const QPoint & p)
                 actions.append(ac);
             }
         }
+        acArchiveOpenExt->clear();
         acArchiveOpenExt->addAction(acDefault);
         acArchiveOpenExt->addSeparator();
         acArchiveOpenExt->addActions(actions);
@@ -517,10 +518,10 @@ void ActionHandler::showArchiveTableContextMenu(const QPoint & p)
         menu.addAction(acArchiveShow);
         menu.addSeparator();
         menu.addMenu(acArchiveOpenExt);
-
+        
         if ((m.parent().isValid()) && ((productType.left(4) == "LE1_") ||
-                                       (productType.left(4) == "SIM_") ||
-                                       (productType.left(4) == "SOC_"))) {
+                                      (productType.left(4) == "SIM_") ||
+                                      (productType.left(4) == "SOC_"))) {
             acReprocess->setEnabled(cfg.flags.allowReprocessing());
             menu.addSeparator();
             menu.addAction(acReprocess);

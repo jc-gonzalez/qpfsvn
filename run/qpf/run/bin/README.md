@@ -1,30 +1,66 @@
+# `WA/run/bin` folder
 
-EXECUTION SCRIPTS FOR QLA FRAMEWORK
-===================================
+This folder contains the `RunProcessor.py` script that is used by the **QPF**
+to launch a given processor to be executed inside a `Docker` container. In
+addition, it includes the `qpfproc` subdirectory, which includes the
+*QPF Processor* Python package, with the `Processor` class.  The implementation
+of this class will drive the execution of the processors launched by the QLA
+Processing Framework
 
-The scripts in this folder are executed sequentially upon the execution of a
-task. The sequence is started by the QLA Framework.  The scripts have the
-functionality described below, and the order of execution is explained:
+## `RunProcessor.py`
 
- * runTask.sh <proc.elem.> <cfg.file>
+### Usage
+The usage of this script is:
 
-   This script is devoted to the instantiation of a Docker container. The path
-   of the provided cfg. file name is used to build the local path name and the
-   associated (container related) image path name.  The cfg.file as such could
-   be non-exiting, since it is not used in the current version.  This script
-   calls the runDocker.sh script, with the name of the processing element to
-   be executed, and the local and image paths to be used.
+    $ python <path>/RunProcessor.py --taskpath <taskPath> --cfg <jsonCfgFile>
 
- * runDocker.sh <proc.elem> <local-path> <image-path>
+where:
 
-   This script is used to launch the appropriate Docker container, in order to
-   execute the desired processing element.  The script also provides in
-   <local-path>/docker.id the image id of the launched docker container.
+* `<path>` : Directory where the RunProcessor.py script is located.
 
- * QLA_VIS <cfg.file>
+* `<tashPath>` : Directory where the task is to be executed (where the
+  actual processor should be run.
+* `<jsonCfgFile>` : Configuration file for the execution of the processor.
 
-   This script is a wrapper for the Python QLA code to process input VIS_IMG
-   files in FITS format.  The script runs *inside* the launched Docker
-   container.  It uses the path in the cfg.file as the working directory, and
-   then calls the Python script in this container.
+Alternatively, you can activate the execution permissions of this script, and
+call it directly.  This can be done with
 
+    $ chmod ug+x <path>/RunProcessor.py
+
+Note that these script and the package under `qpfproc` expect that you have
+defined the env. variable `QPFWA` as the *QPF Working Area* path (usually
+`/home/eucops/qpf`). Otherwise they try to presume its value from the location
+of the scripts themselves.
+
+### Examples
+
+    $ python ../WA/run/bin/RunProcessor.py --taskpath $(pwd) --cfg ./task.cfg.json
+
+or, if the `RunProcessor.py` script has the execution permission set:
+
+    $ ../WA/run/bin/RunProcessor.py --taskpath $(pwd) --cfg ./task.cfg.json
+
+This will trigger the following set of actions:
+
+* For container-based processors
+
+  1. Read the processor configuration file provided.
+  2. Ensure the processor specified exists.
+  3. Ensure the docker image is available.
+  4. Ensure the `in`/`out`/`log` folders exist in the task path specified.  
+     Otherwise, create them.
+  5. Expand the names of the input/output/log files specified in the task config.
+     file.
+  6. Launch the creation of a container with the specified `Docker` image and the
+     main script file, as specified in the task config file.
+
+
+* For Swarm-based processors
+
+  1. Read the processor configuration file provided.
+  2. Ensure the processor specified exists.
+  3. Ensure the specified docker swarm is running.
+  4. Expand the names of the input/output/log files specified in the task config.
+     file.
+  5. Create input task info so that the swarm services receive it upon request.
+  5. Retrieve output data upon notification.

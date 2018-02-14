@@ -341,20 +341,27 @@ ProductMetadata & URLHandler::fromGateway2LocalArch()
     std::string newUrl(productUrl);
 
     std::string section("/out");
-
+    /*
     str::replaceAll(newFile,
                     cfg.storage.gateway + section,
                     cfg.storage.archive + section);
     str::replaceAll(newUrl,
                     cfg.storage.gateway + section,
                     cfg.storage.archive + section);
+    */
+    str::replaceAll(newFile,
+                    cfg.storage.gateway + section,
+                    cfg.storage.inbox);
+    str::replaceAll(newUrl,
+                    cfg.storage.gateway + section,
+                    cfg.storage.inbox);
 
     // Set (hard) link
     (void)relocate(file, newFile, MOVE);
 
     // Change url in processing task
     product["url"]      = newUrl;
-    product["urlSpace"] = LocalArchSpace;
+    product["urlSpace"] = InboxSpace; //LocalArchSpace;
 
     return product;
 }

@@ -2545,9 +2545,10 @@ void MainWindow::jumpToAlertSource(const QModelIndex & idx)
             wdg->expand(k);
         }
     }
-    lExpand(k);
-    wdg->setCurrentIndex(k);
-    
+    if (k != QModelIndex()) {
+        lExpand(k);
+        wdg->setCurrentIndex(k);
+    }
     ui->tabMainWgd->setCurrentIndex(tabIdx);
 }
 

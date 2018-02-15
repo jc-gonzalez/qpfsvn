@@ -654,7 +654,7 @@ void MainWindow::setActiveSubWindow(QWidget *window)
 //----------------------------------------------------------------------
 void MainWindow::showConfigTool()
 {
-    static ConfigTool cfgTool(this);
+    static ConfigTool cfgTool(0);
 
     cfgTool.prepare(userDefTools, userDefProdTypes);
     if (cfgTool.exec()) {

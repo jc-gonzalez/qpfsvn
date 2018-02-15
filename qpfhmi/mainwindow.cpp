@@ -2506,21 +2506,24 @@ void MainWindow::jumpToAlertSource(const QModelIndex & idx)
 {
     Alert alert = procAlertModel->getAlertAt(idx);
     QString origin = QString::fromStdString(alert.getOrigin());
+    std::cerr << origin.toStdString() << '\n';
     QStringList seq = origin.split('.');
     QString a = seq.takeFirst();
     QString b = seq.takeFirst();
     QString c = seq.takeFirst();
-    seq.prepend(a + "." + b + "." + c);
+    QString d = seq.takeFirst();
     QString last = seq.takeLast();
-    seq << "diagnostics" << last;
 
     QString file = QString::fromStdString(alert.getFile());
     QFileInfo fs(file);
     QString tabName = fs.fileName();
 
+    seq.prepend(tabName);
+    seq << "diagnostics" << last;
+    
     QWidget * existingWdg = ui->tabMainWgd->findChild<QWidget*>(tabName);
     if (existingWdg == 0) {
-        openLocalArchiveFullPath(QString::fromStdString(cfg.storage.archive + "/out/") + file);
+        openLocalArchiveFullPath(QString::fromStdString(cfg.storage.archive + "/") + file);
         existingWdg = ui->tabMainWgd->findChild<QWidget*>(tabName);
     }
     

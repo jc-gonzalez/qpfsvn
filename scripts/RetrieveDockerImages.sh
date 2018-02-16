@@ -1,12 +1,12 @@
 #!/bin/bash
 ##############################################################################
-# File       : BuildQPF.sh - QPF Compilation and Installation script
+# File       : RetrieveDockerImages.sh - Retrieve Docker Images from Nexus
 # Domain     : QPF.scripts
 # Version    : 2.0
-# Date       : 2017/09/08
+# Date       : 2018/02/16
 # Copyright (C) 2015-2017 J C Gonzalez
 #_____________________________________________________________________________
-# Purpose    : Compile and Install QPF binaries in target platform
+# Purpose    : Retrieve Docker Images from Nexus Repository
 # Created by : J C Gonzalez
 # Status     : Prototype
 # History    : See <Changelog>

@@ -2,9 +2,9 @@
 ##############################################################################
 # File       : CreateDockerImgs.sh - Generates docker images from Dockerfiles
 # Domain     : QPF.run.dockerfiles
-# Version    : 1.2
+# Version    : 2.0
 # Date       : 2016/12/18
-# Copyright (C) 2015-2017  J C Gonzalez
+# Copyright (C) 2015-2018  J C Gonzalez
 #_____________________________________________________________________________
 # Purpose    : Generates docker images from Dockerfiles
 # Created by : J C Gonzalez

@@ -164,6 +164,7 @@ if [ "${PGSQL}" = "yes" ]; then
 	# Already installed, take path for installed package
 	PSQL_PTH=$(echo /usr/pgsql*)
 	say "PostgreSQL is already installed in ${PSQL_PTH}."
+	sudo yum install -y libpq\*
     else
 	# We need to install PostgreSQL and then setup the database
 

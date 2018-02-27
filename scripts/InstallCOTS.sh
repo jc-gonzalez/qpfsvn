@@ -204,11 +204,14 @@ if [ "${PGSQL}" = "yes" ]; then
     # Then, for the creation of the local folder, initialization and server start, 
     # use the scripts =scripts/pgsql_start_server.sh= and =scripts/pgsql_initdb.sh=
 
-    say ". Initializing database"
-    source ${SCRIPT_PATH}/maint/pgsql_initdb.sh
+    sudo -u postgres createuser -s eucops
 
-    say ". Starting server"
-    source ${SCRIPT_PATH}/maint/pgsql_start_server.sh
+    if [ "${isInstalled}" = "yes" ]; then 
+	say ". Initializing database"
+	source ${SCRIPT_PATH}/maint/pgsql_initdb.sh
+	say ". Starting server"
+	source ${SCRIPT_PATH}/maint/pgsql_start_server.sh
+    fi
 fi
 
 #### Installing COTS: II - Install Qt
@@ -290,8 +293,14 @@ fi
 
 if [ "${DOCKER}" = "yes" ]; then 
     step "Installing Docker"
-    say ". Installing packages"
-    sudo yum -y install docker
+    # Check if PostgreSQL is already installed in the system
+    isInstalled=$(sudo yum list installed docker\* >/dev/null 2>&1 && echo yes || echo no)
+    if [ "${isInstalled}" = "no" ]; then
+	say ". Installing packages"
+	sudo yum -y install docker
+    else
+	say ". Docker is already installed in this host"
+    fi
     say ". Creating docker group"
     sudo groupadd docker
     say ". Adding user to docker group"

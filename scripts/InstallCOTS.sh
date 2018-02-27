@@ -294,20 +294,16 @@ fi
 
 if [ "${DOCKER}" = "yes" ]; then 
     step "Installing Docker"
-    # Check if PostgreSQL is already installed in the system
-    isInstalled=$(sudo yum list installed docker\* >/dev/null 2>&1 && echo yes || echo no)
-    if [ "${isInstalled}" = "no" ]; then
-	say ". Installing packages"
-	sudo yum -y install docker
-    else
-	say ". Docker is already installed in this host"
-    fi
-    say ". Creating docker group"
-    sudo groupadd docker
+    say ". Installing packages"
+    sudo yum check-update
+    curl -fsSL https://get.docker.com/ | sh
     say ". Adding user to docker group"
-    sudo usermod -aG docker $(whoami)
+    sudo usermod -aG docker eucops
     say ". Starting Docker service"
-    sudo service docker start
+    sudo systemctl start docker
+    sleep 2
+    sudo systemctl status docker
+    sudo systemctl enable docker
 fi
 
 #### Finishing
@@ -337,6 +333,9 @@ say "For your convenience, these commands have been saved into the file:"
 say "  \$HOME/env_qpf.sh"
 say "so that you can just update your environment by typing:"
 say "  source \$HOME/env_qpf.sh"
+say ""
+say "NOTE: It is strongly encouraged that you logout and login again, in order"
+say "      to allow some changes take effect."
 say "-------------------------------------------------------------------------------"
 say ""
 say "Done."

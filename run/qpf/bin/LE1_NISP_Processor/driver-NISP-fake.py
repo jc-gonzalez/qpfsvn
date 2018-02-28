@@ -4,10 +4,11 @@
 '''
 
 from time import sleep
+from shutil import copyfile
 
 import random
 import argparse
-
+import glob
 
 __author__ = 'jcgonzalez'
 
@@ -71,6 +72,10 @@ def main():
         fh.close()
     else:
         print "Processing finished."
+
+    infiles = glob.glob(args.input_dir + '/*.fits')
+    ifile = infiles[0]
+    copyfile(ifile, args.output)
 
 
 if __name__ == "__main__":

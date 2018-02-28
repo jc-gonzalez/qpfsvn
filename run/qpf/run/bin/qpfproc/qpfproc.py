@@ -221,9 +221,10 @@ class Processor(object):
                 'proc_dir': [self.proc_dir, self.proc_dir_img]}
         self.mapping = ""
         for mkey, mval in maps.iteritems():
-            self.mapping += " -v {}:{}".format(mval[0], mval[1])
+            self.mapping += " -v {0}:{1}".format(mval[0], mval[1])
 
-        self.dck_opts = "{} -w={} --privileged=true".format(dck_opts, self.task_dir_img)
+        uid = os.getuid()
+        self.dck_opts = "{0} --user {1}:{1} -w={2} --privileged=true".format(dck_opts, uid, self.task_dir_img)
         self.dck_image = self.cfg["image"] #Processor.QPFDckImageDefault
 
     def run(self, arguments=None, additional="", container=None):

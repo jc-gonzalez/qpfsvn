@@ -6,6 +6,6 @@
   "image": "le1-emu-debian:latest",
   "processor": "LE1_VIS_Processor",
   "script": "driver.py",
-  "args": "--inputFile {input} --outputDir {output_dir}",
+  "args": "--inputFile {input} --outputFile {output}",
   "container": true
 }

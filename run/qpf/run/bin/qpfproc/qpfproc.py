@@ -177,7 +177,7 @@ class Processor(object):
         # 2. Processor subfolder name (folder under QPF_WA/bin/"
         self.processor = self.cfg["processor"]
         # 3. Processor entire subfolder name
-        self.proc_dir = Processor.QPFProcsPath + "/" + self.processor
+        self.proc_dir = Processor.QPFProcsPath # + "/" + self.processor
         # 4. Main script to invoke processor (something like driver.py)
         self.script = self.cfg["script"]
         self.args = self.cfg["args"]
@@ -215,7 +215,7 @@ class Processor(object):
 
         # Prepare Docker folder mapping, just in case...
         self.task_dir_img = Processor.QPFDckImageRunPath + "/" + self.task_id
-        self.proc_dir_img = Processor.QPFDckImageProcPath + "/" + self.processor
+        self.proc_dir_img = Processor.QPFDckImageProcPath #+ "/" + self.processor
 
         maps = {'task_dir': [self.task_dir, self.task_dir_img],
                 'proc_dir': [self.proc_dir, self.proc_dir_img]}

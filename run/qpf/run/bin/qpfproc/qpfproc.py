@@ -243,8 +243,10 @@ class Processor(object):
         #os.symlink(self.proc_dir + "/" + self.script,
         #           self.task_dir + "/" + self.script)
 
-        cmd_line = "python {0}/{1} {2} {3}".format(self.proc_dir_img, self.script,
-                                                   script_args, additional)
+        cmd_line = "python {0}/{1}/{2} {3} {4}".format(self.proc_dir_img, 
+                                                       self.processor,
+                                                       self.script,
+                                                       script_args, additional)
         if container is None:
             use_containers = self.cfg['container']
         else:

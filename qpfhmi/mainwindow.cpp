@@ -333,8 +333,15 @@ void MainWindow::manualSetupUI()
     procAlertModel = new ProcAlertModel;
     ui->tblvwAlerts->setModel(procAlertModel);
 
+    std::vector<std::string> pTypes;
+    int siz = 0;
+    for (auto & s : cfg.products.productTypes()) {
+	pTypes.push_back(s);
+	if (s.length() > siz) { siz = s.length(); } 
+    }
+
     // 4. Local Archive Products Model
-    productsModel = new ProductsModel;
+    productsModel = new ProductsModel(pTypes, siz);
     ui->treevwArchive->setModel(productsModel);
     ui->treevwArchive->setItemDelegate(new DBTreeBoldHeaderDelegate(this));
     ui->treevwArchive->setSortingEnabled(true);

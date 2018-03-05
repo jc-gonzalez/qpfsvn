@@ -29,8 +29,10 @@ psql -f /tmp/clean-up-qpfdb.sql qpfdb
 echo "Cleaning up data folders . . ."
 
 pths=""
+pths="$pths qpf/data/archive"
 pths="$pths qpf/data/archive/in"
 pths="$pths qpf/data/archive/out"
+pths="$pths qpf/data/gateway"
 pths="$pths qpf/data/gateway/in"
 pths="$pths qpf/data/gateway/out"
 pths="$pths qpf/data/inbox"
@@ -38,7 +40,7 @@ pths="$pths qpf/data/inbox"
 size=0
 for p in $pths ; do
     sz=$(du -ks $HOME/${p} | cut -f 1)
-    rm -rf $HOME/${p}/*
+    rm -rf $HOME/${p}/EUC*
     size=$(($size + $sz))
 done
 

@@ -224,7 +224,8 @@ class Processor(object):
             self.mapping += " -v {0}:{1}".format(mval[0], mval[1])
 
         uid = os.getuid()
-        self.dck_opts = "{0} --user {1}:{1} -w={2} --privileged=true".format(dck_opts, uid, self.task_dir_img)
+        self.dck_opts = "{0} -e UID={1} -e UNAME=eucops -e WDIR={2} -w={2} --privileged=true"
+                        .format(dck_opts, uid, self.task_dir_img)
         self.dck_image = self.cfg["image"] #Processor.QPFDckImageDefault
 
     def run(self, arguments=None, additional="", container=None):

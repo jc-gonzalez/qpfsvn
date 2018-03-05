@@ -101,11 +101,12 @@ for domain in $(echo ${DOMAINS} | tr ',' ' '); do
     #- Switch to domain
     cd ${domain}
     
-    for dckFile in Dockerfile__* ; do
+    for imgName in $(cat docker-images.lst); do
 
+        dckFile="Dockerfile__${imgName}"
+    
         echo "###______ PROCESSING FILE ${dckFile} ______________________________"
-        #- Set image name
-        imgName=$(echo $dckFile | sed -e 's/Dockerfile__//g')
+
         imgId=$(echo ${imgName} | cut -d: -f1)
         imgTag=$(echo ${imgName} | cut -d: -f2)
         

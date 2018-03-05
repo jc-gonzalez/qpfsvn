@@ -10,7 +10,7 @@ USER_NAME=${UNAME:-eucops}
 echo "Starting with unique ID $USER_ID and username $USER_NAME"
 useradd --shell /bin/bash -u $USER_ID -o -c "" -m $USER_NAME
 echo "$USER_NAME ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-echo "autologin-user=$USER_NAME" >> /etc/lightdm/lightdm.conf
+#echo "autologin-user=$USER_NAME" >> /etc/lightdm/lightdm.conf
 
 export HOME=/home/$USER_NAME
 export USER=$USER_NAME
@@ -25,6 +25,7 @@ if [ -f /etc/bashrc ]; then
 fi
 EOF
 
-cd $HOME
+WORKDIR=${WDIR:-$HOME}
+cd ${WORKDIR}
 
 exec /usr/bin/gosu $USER_NAME "$@"

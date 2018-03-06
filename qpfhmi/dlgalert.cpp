@@ -44,11 +44,10 @@
 namespace QPF {
 
 DlgAlert::DlgAlert(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::DlgAlert)
+  QDialog(parent),
+  ui(new Ui::DlgAlert)
 {
     ui->setupUi(this);
-    setAttribute(Qt::WA_DeleteOnClose);
 }
   
 DlgAlert::~DlgAlert()

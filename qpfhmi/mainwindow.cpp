@@ -2481,10 +2481,13 @@ void MainWindow::showAlertInfo(QTableView * tblvw, DBTableModel * model)
 {
     QModelIndex idx = tblvw->currentIndex();
     Alert alert = model->getAlertAt(idx);
-    DlgAlert dlg;
-    dlg.setAlert(alert);
-    dlg.exec();
-    disconnect(actHdl->getAcShowAlert());
+
+    DlgAlert * dlg = new DlgAlert;
+    dlg->setAttribute(Qt::WA_DeleteOnClose);
+    dlg->setAlert(alert);
+    dlg->show();
+    dlg->raise();
+    dlg->activateWindow();
 }
 
 //----------------------------------------------------------------------

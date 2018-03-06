@@ -109,7 +109,7 @@ def main():
             numSteps += moreSteps
             deltaProgress = (endProgress - progress) / (numSteps - step)
 
-    resFile = os.path.basename(args.result_file)
+    resFile = input_file[0] # os.path.basename(args.result_file)
     report = {
         resFile: {
             "CCD_1-6": {

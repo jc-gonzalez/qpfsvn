@@ -48,8 +48,9 @@ DlgAlert::DlgAlert(QWidget *parent) :
     ui(new Ui::DlgAlert)
 {
     ui->setupUi(this);
+    setAttribute(Qt::WA_DeleteOnClose);
 }
-
+  
 DlgAlert::~DlgAlert()
 {
     delete ui;

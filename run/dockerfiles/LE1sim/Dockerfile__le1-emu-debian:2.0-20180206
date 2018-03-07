@@ -1,5 +1,5 @@
 #==============================================================================
-# VERSION:        1.2
+# VERSION:        2.0
 # DESCRIPTION:    Create container with its dependencies for the execution of
 #                 the fake LE1 processor
 # AUTHOR:         J. C. Gonzalez <JCGonzalez@sciops.esa.int>

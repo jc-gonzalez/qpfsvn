@@ -49,7 +49,7 @@ DOCKER="no"
 #- Other
 DATE=$(date +"%Y%m%d%H%M%S")
 LOG_FILE=./cots_${DATE}.log
-VERSION=1.0
+VERSION=2.0
 LDLIBS=$(echo $LD_LIBRARY_PATH | tr ':' ' ')
 
 ###### Handy functions

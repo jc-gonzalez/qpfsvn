@@ -4,7 +4,7 @@
  *
  * Domain:  InFix.InfixEval
  *
- * Version:  1.2
+ * Version:  2.0
  *
  * Date:    2016/01/11
  *
@@ -200,7 +200,7 @@ struct Precedence {
     int topOfStack;
 } PREC_TABLE [] = {
     { 0, -1 }, { 0, 0 },       // EOL, VALUE
-    { 101, 102 },                  // SYMBOL
+    { 101, 2.0 },                  // SYMBOL
     { 100, 0 }, { 0, 99 },     // OPAREN, CPAREN
     { 60, 50 },                  // EXP
     { 30, 40 }, { 30, 40 },        // MULT, DIV

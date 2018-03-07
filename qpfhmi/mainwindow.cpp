@@ -2528,9 +2528,12 @@ void MainWindow::jumpToAlertSource(const QModelIndex & idx)
     QFileInfo fs(file);
     QString tabName = fs.fileName();
 
-    seq.prepend(tabName);
+    seq.prepend(a + "." + b + "." + c + "." + d);
     seq << "diagnostics" << last;
     
+    //foreach (QString s, seq) { std::cerr << '/' << s.toStdString(); }
+    //std::cerr << '\n';
+
     QWidget * existingWdg = ui->tabMainWgd->findChild<QWidget*>(tabName);
     if (existingWdg == 0) {
         openLocalArchiveFullPath(QString::fromStdString(cfg.storage.archive + "/") + file);

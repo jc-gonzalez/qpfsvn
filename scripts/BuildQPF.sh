@@ -244,7 +244,7 @@ install_contrib () {
 ############################################################
 
 ## Parse command line
-while getopts :hcinrbB:C:D:pw:H:P:I:v OPT; do
+while getopts :hcinrbB:C:D:pwW:H:P:I:v OPT; do
     case $OPT in
         h|+h) usage ;;
         c|+c) COMPILE="yes" ;;

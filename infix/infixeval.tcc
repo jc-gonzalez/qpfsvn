@@ -200,7 +200,7 @@ struct Precedence {
     int topOfStack;
 } PREC_TABLE [] = {
     { 0, -1 }, { 0, 0 },       // EOL, VALUE
-    { 101, 2.0 },                  // SYMBOL
+    { 101, 102 },                  // SYMBOL
     { 100, 0 }, { 0, 99 },     // OPAREN, CPAREN
     { 60, 50 },                  // EXP
     { 30, 40 }, { 30, 40 },        // MULT, DIV

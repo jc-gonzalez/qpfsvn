@@ -3,9 +3,6 @@
     QDT_fake driver.py
 '''
 
-#from common.controller.controller import Controller
-#from common.controller.multi_processor_controller import MultiProcessorController
-
 from time import time,sleep
 from astropy.io import fits
 
@@ -42,18 +39,16 @@ def get_args():
     return parser.parse_args()
 
 
-# def start_controller(args):
-#     controller = Controller(args) if args.processors < 2 else MultiProcessorController(args)
-#     controller.run()
-
-
 def main():
     start_time = time()
 
     args = get_args()
 
     format_string = '%(asctime)s:%(levelname)s:%(name)s:%(message)s'
-    logging.basicConfig(level=logging.DEBUG, format=format_string, filename=args.log_file)
+    logging_level = logging.INFO
+    if args.debugging:
+        logging_level = logging.DEBUG
+    logging.basicConfig(level=logging_level, format=format_string, filename=args.log_file)
     logger = logging.getLogger(__name__)
 
     fres = open(args.result_file, 'w')
@@ -62,7 +57,7 @@ def main():
     logger.debug(json.dumps(args.__dict__))
 
     input_files = glob.glob(args.input_dir + "/*.fits")
-    logger.debug("Input files: %s", ''.join(input_files))
+    logger.info("Input files: %s", ''.join(input_files))
 
     for fits_file in input_files:
         hdulist = fits.open(fits_file)
@@ -101,8 +96,9 @@ def main():
         step += 1
         progress += deltaProgress
 
-        logger.info("Processing step {0} of {1}.".format(step, numSteps))
-        logger.info("Processing executed: {0:.2f}%".format(progress))
+        if args.verbose:
+            logger.info("Processing step {0} of {1}.".format(step, numSteps))
+            logger.info("Processing executed: {0:.2f}%".format(progress))
 
         # At some point, number of steps could change
         if random.randint(0, 1000) < 50:
@@ -405,7 +401,8 @@ def main():
     elapsed_time = time() - start_time
 
     logger.info("Processing finished.")
-    logger.info("Execution time: {0:.2f} s".format(elapsed_time))
+    if args.verbose:
+        logger.info("Execution time: {0:.2f} s".format(elapsed_time))
 
 
 if __name__ == "__main__":

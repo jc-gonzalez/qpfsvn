@@ -6,6 +6,6 @@
   "image": "qdt-vis_nisp-debian:latest",
   "processor": "QLA_NISP_Processor",
   "script": "driver.py",
-  "args": "--input {input_dir} --result {output} --log {log}",
+  "args": "--input_dir {input_dir} --result_file {output} --log_file {log} --verbose",
   "container": true
 }

@@ -30,8 +30,6 @@ echo "Cleaning up data folders . . ."
 
 pths=""
 pths="$pths qpf/data/archive"
-pths="$pths qpf/data/archive/in"
-pths="$pths qpf/data/archive/out"
 pths="$pths qpf/data/gateway"
 pths="$pths qpf/data/gateway/in"
 pths="$pths qpf/data/gateway/out"
@@ -46,7 +44,7 @@ done
 
 ## Remove old run folders
 echo "Removing old sessions . . ."
-sess=$(ls -d $HOME/qpf/run/201* 2>/dev/null)
+sess=$(ls -d $HOME/qpf/run/20* 2>/dev/null)
 for p in $sess ; do
     sz=$(du -ks ${p} | cut -f 1)
     rm -rf ${p}

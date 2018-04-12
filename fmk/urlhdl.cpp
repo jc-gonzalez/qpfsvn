@@ -47,7 +47,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <sys/sendfile.h>
 #include <cerrno>
 #include <cstring>
 
@@ -58,6 +57,9 @@
 #include "voshdl.h"
 
 #include "dbg.h"
+
+#include "filetools.h"
+using namespace FileTools;
 
 #define showBacktrace()
 
@@ -371,14 +373,9 @@ ProductMetadata & URLHandler::fromGateway2FinalDestination()
     UserAreaId tgtType = UserAreaId(product.procTargetType());
     std::string tgtFolder(cfg.storage.archive);
     
-    if ((tgtType == UA_USER) || (tgtType == UA_LOCAL)) {
+    tgtFolder = product.procTarget();    
 
-        tgtFolder = product.procTarget();
-
-    } else if (tgtType == UA_VOSPACE) {
-
-        tgtFolder = product.procTarget();    
-
+    if (tgtType == UA_VOSPACE) {
         sendToVOSpace(cfg.connectivity.vospace.user(),
                       cfg.connectivity.vospace.pwd(),
                       cfg.connectivity.vospace.url(),
@@ -387,28 +384,19 @@ ProductMetadata & URLHandler::fromGateway2FinalDestination()
                        tgtFolder),
                       file);
         (void)unlink(file.c_str());
+        product["urlSpace"] = ReprocessingVOSpace;
         return product;
-
-    } else {
-        
-        std::cerr << "Proc.target " + UserAreaName[tgtType] +
-            " should not be used here\n";
-        return product;
-
     }
 
     // Ensure local folder exists
-    if ((tgtType == UA_USER) || (tgtType == UA_LOCAL)) {
-        if ((mkdir(tgtFolder.c_str(), Config::PATHMode) != 0) &&
-            (errno != EEXIST)) {
-            std::cerr << "mkdir " + tgtFolder + ": " +
-                std::strerror(errno) << '\n';
-            return product;
-        }
+    if ((mkdir(tgtFolder.c_str(), Config::PATHMode) != 0) &&
+        (errno != EEXIST)) {
+        TRC("mkdir " + tgtFolder + ": " + std::strerror(errno));
+        return product;
     }
     
-    std::cerr << "Must move " + newFile + " from " +
-        cfg.storage.gateway + "/out to " + tgtFolder + '\n';
+    TRC("Must move " + newFile + " from " + cfg.storage.gateway +
+        "/out to " + tgtFolder);
     
     str::replaceAll(newFile,
                     cfg.storage.gateway + "/out",
@@ -421,7 +409,7 @@ ProductMetadata & URLHandler::fromGateway2FinalDestination()
 
     // Change url in processing task
     product["url"]      = newUrl;
-    product["urlSpace"] = (tgtType == UA_USER ? ReprocessingUserArea :
+    product["urlSpace"] = (tgtType == UA_NOMINAL ? InboxSpace :
                            (tgtType == UA_LOCAL ? ReprocessingLocalFolder :
                             ReprocessingVOSpace));
     
@@ -447,14 +435,9 @@ ProductMetadata & URLHandler::fromLocalArch2ExportLocation()
     UserAreaId tgtType = UserAreaId(product.procTargetType());
     std::string tgtFolder; 
     
-    if ((tgtType == UA_USER) || (tgtType == UA_LOCAL)) {
+    tgtFolder = product.procTarget();
 
-        tgtFolder = product.procTarget();
-
-    } else if (tgtType == UA_VOSPACE) {
-
-        tgtFolder = product.procTarget();    
-
+    if (tgtType == UA_VOSPACE) {
         sendToVOSpace(cfg.connectivity.vospace.user(),
                       cfg.connectivity.vospace.pwd(),
                       cfg.connectivity.vospace.url(),
@@ -462,22 +445,14 @@ ProductMetadata & URLHandler::fromLocalArch2ExportLocation()
                        cfg.connectivity.vospace.folder() :
                        tgtFolder),
                       file);
+        product["urlSpace"] = ReprocessingVOSpace;
         return product;
-
-    } else {
-        
-        std::cerr << "Proc.target " + UserAreaName[tgtType] +
-            " should not be used here\n";
-        return product;
-
     }
 
     // Ensure local folder exists
-    if ((tgtType == UA_USER) || (tgtType == UA_LOCAL)) {
-        if ((mkdir(tgtFolder.c_str(), Config::PATHMode) != 0) &&
-            (errno != EEXIST)) {
-            return product;
-        }
+    if ((mkdir(tgtFolder.c_str(), Config::PATHMode) != 0) &&
+        (errno != EEXIST)) {
+        return product;
     }
     
     str::replaceAll(newFile,
@@ -491,7 +466,7 @@ ProductMetadata & URLHandler::fromLocalArch2ExportLocation()
 
     // Change url in processing task
     product["url"]      = newUrl;
-    product["urlSpace"] = (tgtType == UA_USER ? ReprocessingUserArea :
+    product["urlSpace"] = (tgtType == UA_NOMINAL ? InboxSpace :
                            (tgtType == UA_LOCAL ? ReprocessingLocalFolder :
                             ReprocessingVOSpace));
     
@@ -508,7 +483,7 @@ void URLHandler::sendToVOSpace(std::string user, std::string pwd,
     VOSpaceHandler vos(vosURL);
     vos.setAuth(user, pwd);
     if (!vos.uploadFile(folder, oFile)) {
-        std::cerr << "ERROR! Cannot upload " << oFile << "\n";
+        TRC("ERROR! Cannot upload " << oFile);
     }
 }
 
@@ -536,9 +511,9 @@ int URLHandler::relocate(std::string & sFrom, std::string & sTo,
                        (tsp2.tv_nsec - tsp1.tv_nsec) / 1000000);
         }
         if (elapsed > msTimeOut) {
-            std::cerr << ("ERROR: Timeout of " + std::to_string(msTimeOut) +
-                          "ms before successful stat:\n\t" +
-                          sFrom + std::string(" => ") + sTo + "\n");
+            TRC("ERROR: Timeout of " + std::to_string(msTimeOut) +
+                          "ms before successful stat:\t" +
+                          sFrom + std::string(" => ") + sTo);
             return -1;
         }
     }
@@ -570,7 +545,7 @@ int URLHandler::relocate(std::string & sFrom, std::string & sTo,
         break;
     case COPY_TO_REMOTE:
     case COPY_TO_MASTER:
-        retVal = rcopyfile(sFrom, sTo, method == COPY_TO_REMOTE);
+        retVal = rcopyfile(sFrom, sTo, master_address, method == COPY_TO_REMOTE);
         TRC(((method == COPY_TO_REMOTE) ? "COPY_TO_REMOTE: " : "COPY_TO_MASTER: ")
             << "Transferring file from " << sFrom << " to " << sTo);
         break;
@@ -585,60 +560,6 @@ int URLHandler::relocate(std::string & sFrom, std::string & sTo,
         //showBacktrace();
     }
     return retVal;
-}
-
-//----------------------------------------------------------------------
-// Method: copyfile
-//----------------------------------------------------------------------
-int URLHandler::copyfile(std::string & sFrom, std::string & sTo)
-{
-    int source = open(sFrom.c_str(), O_RDONLY, 0);
-    int dest = open(sTo.c_str(), O_WRONLY | O_CREAT, 0644);
-
-    // struct required, rationale: function stat() exists also
-    struct stat stat_source;
-    fstat(source, &stat_source);
-
-    sendfile(dest, source, 0, stat_source.st_size);
-
-    close(source);
-    close(dest);
-
-    return 0;
-}
-
-//----------------------------------------------------------------------
-// Method: rcopyfile
-//----------------------------------------------------------------------
-int URLHandler::rcopyfile(std::string & sFrom, std::string & sTo,
-                          bool toRemote)
-{
-    static std::string scp("/usr/bin/scp");
-    std::string cmd;
-    if (toRemote) {
-        cmd = scp + " " + master_address + ":" + sFrom + " " + sTo;
-    } else {
-        cmd = scp + " " + sFrom + " " + master_address + ":" + sTo;
-    }
-    TRC("CMD: " << cmd);
-    int res = system(cmd.c_str());
-    (void)(res);
-
-    return 0;
-}
-
-//----------------------------------------------------------------------
-// Method: runlink
-//----------------------------------------------------------------------
-int URLHandler::runlink(std::string & f)
-{
-    std::string cmd;
-    cmd = "ssh " + master_address + " rm " + f;
-    TRC("CMD: " << cmd);
-    int res = system(cmd.c_str());
-    (void)(res);
-
-    return 0;
 }
 
 //----------------------------------------------------------------------

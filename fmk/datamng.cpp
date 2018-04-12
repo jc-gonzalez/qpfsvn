@@ -177,18 +177,18 @@ void DataMng::saveTaskToDB(TaskInfo & taskInfo, bool initialStore)
         TraceMsg("Will try to sanitize product versions:");
         sanitizeProductVersions(taskInfo.outputs);
 
-	// Try to process the QDT report and get the issues found
-	for (auto & m : taskInfo.outputs.products) {
-	    if ((m.procTargetType() == UA_NOMINAL) && 
-		(m.procFunc() == "QLA") && 
-		(m.fileType() == "JSON")) {
-		QDTReportHandler qdtRep(m.url().substr(7));
-		if (!qdtRep.read()) continue;
-		std::vector<Alert*> issues;
-		qdtRep.getIssues(issues);
-		for (auto & v : issues) { RaiseDiagAlert(*v); }
-	    }
-	}
+        // Try to process the QDT report and get the issues found
+        for (auto & m : taskInfo.outputs.products) {
+            if ((m.procTargetType() == UA_NOMINAL) && 
+                (m.procFunc() == "QLA") && 
+                (m.fileType() == "JSON")) {
+                QDTReportHandler qdtRep(m.url().substr(7));
+                if (!qdtRep.read()) continue;
+                std::vector<Alert*> issues;
+                qdtRep.getIssues(issues);
+                for (auto & v : issues) { RaiseDiagAlert(*v); }
+            }
+        }
         
         // Move products to local archive
         for (auto & m : taskInfo.outputs.products) {
@@ -199,12 +199,12 @@ void DataMng::saveTaskToDB(TaskInfo & taskInfo, bool initialStore)
                 m = urlh.fromGateway2FinalDestination();
             }
         }
-
-	InfoMsg("Saving outputs...");
-	saveProductsToDB(taskInfo.outputs);
-	
+        
+        InfoMsg("Saving outputs...");
+        saveProductsToDB(taskInfo.outputs);
+        
         InfoMsg("Sending message to register outputs at Orchestrator catalogue");
-
+        
         //Config & cfg = Config::_();
         if (cfg.flags.sendOutputsToMainArchive()) {
             InfoMsg("Archiving/Registering data at DSS/EAS");
@@ -306,6 +306,100 @@ void DataMng::saveProductsToDB(ProductList & productList)
 }
 
 //----------------------------------------------------------------------
+// Method: storeTaskStatusSpectra
+// Store task agent spectra in DB
+//----------------------------------------------------------------------
+void DataMng::storeTaskStatusSpectra(json & fmkInfoValue)
+{
+    TskStatTable tssSet;
+    
+    for (Json::ValueIterator itr = fmkInfoValue["hostsInfo"].begin();
+         itr != fmkInfoValue["hostsInfo"].end(); ++itr) {
+        std::string key = itr.key().asString();
+        json hInfo = *itr;
+        for (Json::ValueIterator ittr = hInfo["agentsInfo"].begin();
+             ittr != hInfo["agentsInfo"].end(); ++ittr) {
+            std::string agNme = ittr.key().asString();
+            json ag = (*ittr)["counts"];
+            TskStatSpectra tss(ag["running"].asInt(),
+                               ag["scheduled"].asInt(),
+                               ag["paused"].asInt(),
+                               ag["stopped"].asInt(),
+                               ag["failed"].asInt(),
+                               ag["finished"].asInt());
+            tssSet.push_back(std::make_pair(agNme, tss));
+        }
+    }
+    
+    for (Json::ValueIterator itr = fmkInfoValue["swarmInfo"].begin();
+         itr != fmkInfoValue["swarmInfo"].end(); ++itr) {
+        std::string key = itr.key().asString();
+        json sw = (*itr)["counts"];
+        TskStatSpectra tss(sw["running"].asInt(),
+                           sw["scheduled"].asInt(),
+                           sw["paused"].asInt(),
+                           sw["stopped"].asInt(),
+                           sw["failed"].asInt(),
+                           sw["finished"].asInt());
+        tssSet.push_back(std::make_pair(sw["name"].asString(), tss));
+    }
+    
+    std::unique_ptr<DBHandler> dbHdl(new DBHdlPostgreSQL);
+
+    try {
+        // Check that connection with the DB is possible
+        dbHdl->openConnection();
+        // Store task status spectra in DB
+        for (auto & p : tssSet) {                   
+            dbHdl->saveTaskStatusSpectra(p.first, p.second);
+        }
+    } catch (RuntimeException & e) {
+        ErrMsg(e.what());
+        return;
+    }
+
+    // Close connection
+    dbHdl->closeConnection();
+}
+
+//----------------------------------------------------------------------
+// Method: retrieveTaskStatusSpectra
+// Retrieve task agent spectra from DB
+//----------------------------------------------------------------------
+void DataMng::retrieveTaskStatusSpectra(TskStatTable & tssSet)
+{
+    std::unique_ptr<DBHandler> dbHdl(new DBHdlPostgreSQL);
+
+    std::vector< std::vector<std::string> > table;
+    try {
+        // Check that connection with the DB is possible
+        dbHdl->openConnection();
+        if (! dbHdl->getTable("task_status_spectra", table)) {
+            RaiseSysAlert(Alert(Alert::System,
+                                Alert::Warning,
+                                Alert::Resource,
+                                std::string(__FILE__ ":" Stringify(__LINE__)),
+                                "Cannot read status spectra table from DB",
+                                0));            
+        }
+    } catch (RuntimeException & e) {
+        ErrMsg(e.what());
+        return;
+    }
+
+    // Close connection
+    dbHdl->closeConnection();
+
+    // Place table results into task status spectra table
+    tssSet.clear();
+    for (auto & row : table) {
+        TskStatSpectra tss(std::stoi(row[1]), std::stoi(row[2]), std::stoi(row[3]),
+                           std::stoi(row[4]), std::stoi(row[5]), std::stoi(row[6]));
+        tssSet.push_back(std::make_pair(row[0], tss));
+    }
+}
+
+//----------------------------------------------------------------------
 // Method: archiveDSSnEAS
 // Sends the information to the area where the corresponding daemon is
 // looking for data to be sent to DSS/EAS
@@ -344,7 +438,7 @@ void DataMng::archiveDSSnEAS(ProductList & productList)
             exit(EXIT_FAILURE);
         case 0: {
             // We are the child
-            std::cerr << md.url << std::endl;
+            TRC(md.url);
             std::string fileName(md.url.substr(7, md.url.length()-7));
             std::string subBox;
             if      (isLE1Product(prodType)) { subBox = "data/"; }

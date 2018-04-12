@@ -107,6 +107,18 @@ public:
     //----------------------------------------------------------------------
     void saveTaskToDB(TaskInfo & taskInfo, bool initialStore = false);
 
+    //----------------------------------------------------------------------
+    // Method: storeTaskStatusSpectra
+    // Store task agent spectra in DB
+    //----------------------------------------------------------------------
+    void storeTaskStatusSpectra(json & fmkInfoValue);
+    
+    //----------------------------------------------------------------------
+    // Method: retrieveTaskStatusSpectra
+    // Retrieve task agent spectra from DB
+    //----------------------------------------------------------------------
+    void retrieveTaskStatusSpectra(TskStatTable & tssSet);
+    
 protected:
 
     //----------------------------------------------------------------------

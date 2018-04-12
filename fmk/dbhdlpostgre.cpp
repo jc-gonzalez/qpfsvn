@@ -347,6 +347,43 @@ bool DBHdlPostgreSQL::retrieveTask(TaskInfo & task)
 }
 
 //----------------------------------------------------------------------
+// Method: storeTask
+// Stores a task information to the database
+//----------------------------------------------------------------------
+bool DBHdlPostgreSQL::saveTaskStatusSpectra(std::string & agName, TskStatSpectra & tss)
+{
+    bool result = true;
+
+    std::stringstream ss;
+    ss.str("");
+    ss << "INSERT INTO task_status_spectra "
+       << "(agent_id, running, waiting, paused, stopped, failed, finished, total) "
+       << "VALUES ("
+       << str::quoted(agName) << ", "
+       << tss.running << ", "
+       << tss.scheduled << ", "
+       << tss.paused << ", "
+       << tss.stopped << ", "
+       << tss.failed << ", "
+       << tss.finished << ", "
+       << tss.total << ") "
+       << " ON CONFLICT(agent_id) DO UPDATE SET "
+       << "running = " << tss.running << ", "
+       << "waiting = " << tss.scheduled << ", "
+       << "paused = " << tss.paused << ", "
+       << "stopped = " << tss.stopped << ", "
+       << "failed = " << tss.failed << ", "
+       << "finished = " << tss.finished << ", "
+       << "total = " << tss.total << ";";
+    
+    try { result = runCmd(ss.str()); } catch(...) { throw; }
+
+    PQclear(res);
+
+    return result;
+}
+
+//----------------------------------------------------------------------
 // Method: storeState
 // Stores a new state to the database, for a given node and session
 //----------------------------------------------------------------------

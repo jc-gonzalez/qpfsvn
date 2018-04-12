@@ -267,7 +267,8 @@ void MainWindow::manualSetupUI()
     setWindowTitle(tr("QLA Processing Framework"));
     setUnifiedTitleAndToolBarOnMac(true);
     ui->lblUptime->setText(QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz"));
-
+    ui->lblVerbosity->setText(QString::fromStdString(cfg.general.logLevel()));
+    
     //== Tab panels handling ==========================================
 
     QTabBar * tb = ui->tabMainWgd->tabBar();
@@ -275,7 +276,7 @@ void MainWindow::manualSetupUI()
     tb->setTabIcon(1, QIcon(":/img/messages.png"));
     tb->setTabIcon(2, QIcon(":/img/monit.png"));
     tb->setTabIcon(3, QIcon(":/img/storage2.png"));
-    tb->setTabIcon(4, QIcon(":/img/alerts.png"));
+    tb->setTabIcon(4, QIcon(":/img/alerts.png"));  
 
     connect(ui->tabMainWgd, SIGNAL(currentChanged(int)),
             this, SLOT(selectRowInNav(int)));
@@ -366,6 +367,7 @@ void MainWindow::readConfig(QString dbUrl)
     cfg.startingPort = startingPort;
     cfg.generateProcFmkInfoStructure();
 
+    /*
     TRC(cfg.str());
     TRC(cfg.general.appName());
     TRC(cfg.network.masterNode());
@@ -375,7 +377,8 @@ void MainWindow::readConfig(QString dbUrl)
     TRC("Config::PATHBase:    " << Config::PATHBase);
     TRC("Config::PATHSession: " << Config::PATHSession);
     TRC("Config::PATHLog:     " << Config::PATHLog);
-
+    */
+    
     std::vector<std::string> runPaths {
         Config::PATHSession,
             Config::PATHLog,
@@ -410,10 +413,6 @@ void MainWindow::readConfig(QString dbUrl)
     for (auto & kv : cfg.network.processingNodes()) {
         int numOfTskAgents = kv.second;
         for (unsigned int i = 0; i < numOfTskAgents; ++i, ++j) {
-            /*QString taName = QString("TskAgent_%1_%2")
-                .arg(h,2,10,QLatin1Char('0'))
-                .arg(i+1,2,10,QLatin1Char('0'));
-                std::string staName = taName.toStdString(); */
             std::string & staName = cfg.agentNames.at(j);
             TaskAgentInfo * taInfo = new TaskAgentInfo;
             (*taInfo)["name"]   = staName;
@@ -427,9 +426,6 @@ void MainWindow::readConfig(QString dbUrl)
     for (auto & kv : cfg.network.swarms()) {
         CfgGrpSwarm & swrm = kv.second;
         if (swrm.serviceNodes().size() > 0) {
-            /*QString n = QString("Swarm_%1")
-                .arg(QString::fromStdString(swrm.name()));
-                std::string staName = n.toStdString();*/
             std::string & staName = cfg.agentNames.at(j);
             TaskAgentInfo * taInfo = new TaskAgentInfo;
             (*taInfo)["name"]   = staName;
@@ -1566,9 +1562,9 @@ void MainWindow::reprocessProduct()
     
     std::string userWAType = QString::fromStdString(cfg.general.userAreaType()).toUpper().toStdString();
     DlgReproc::OutputsLocation out =
-        ((userWAType == UserAreaName[UA_USER]) ?
-         DlgReproc::DefUserArea : ((userWAType == UserAreaName[UA_LOCAL]) ?
-                                   DlgReproc::CfgLocalDir : DlgReproc::CfgVOSpace));
+        ((userWAType == UserAreaName[UA_NOMINAL]) ?
+         DlgReproc::LocalArch : ((userWAType == UserAreaName[UA_LOCAL]) ?
+                                 DlgReproc::LocalDir : DlgReproc::VOSpaceFolder));
     int flags = (cfg.flags.intermediateProducts() ?
                  DlgReproc::GenIntermProd : DlgReproc::NullFlags);
 
@@ -1588,11 +1584,9 @@ void MainWindow::reprocessProduct()
     foreach (QString fileName, inProds) {
         fns.parseFileName(fileName.toStdString(), md);
         md["urlSpace"]       = ReprocessingSpace;
-        md["procTargetType"] = (((out == DlgReproc::CfgLocalDir) ||
-                                 (out == DlgReproc::LocalDir)) ?
-                                UA_LOCAL : (((out == DlgReproc::CfgVOSpace) ||
-                                             (out == DlgReproc::VOSpaceFolder)) ?
-                                            UA_VOSPACE : UA_USER)); 
+        md["procTargetType"] = ((out == DlgReproc::LocalDir) ?
+                                UA_LOCAL : ((out == DlgReproc::VOSpaceFolder) ?
+                                               UA_VOSPACE : UA_NOMINAL)); 
         md["procTarget"]     = outLocation.toStdString();
         reprocProducts.products.push_back(md);
     }
@@ -1692,9 +1686,9 @@ void MainWindow::exportProduct()
     
     std::string userWAType = QString::fromStdString(cfg.general.userAreaType()).toUpper().toStdString();
     DlgReproc::OutputsLocation out =
-        ((userWAType == UserAreaName[UA_USER]) ?
-         DlgReproc::DefUserArea : ((userWAType == UserAreaName[UA_LOCAL]) ?
-                                   DlgReproc::CfgLocalDir : DlgReproc::CfgVOSpace));
+        ((userWAType == UserAreaName[UA_NOMINAL]) ?
+         DlgReproc::LocalArch : ((userWAType == UserAreaName[UA_LOCAL]) ?
+                                 DlgReproc::LocalDir : DlgReproc::VOSpaceFolder));
     int flags = (cfg.flags.intermediateProducts() ?
                  DlgReproc::GenIntermProd : DlgReproc::NullFlags);
 
@@ -1716,11 +1710,10 @@ void MainWindow::exportProduct()
     foreach (QString fileName, inProds) {
         fns.parseFileName(fileName.toStdString(), md);
         md["urlSpace"]       = LocalArchSpace;
-        md["procTargetType"] = (((out == DlgReproc::CfgLocalDir) ||
-                                 (out == DlgReproc::LocalDir)) ?
-                                UA_LOCAL : (((out == DlgReproc::CfgVOSpace) ||
-                                             (out == DlgReproc::VOSpaceFolder)) ?
-                                            UA_VOSPACE : UA_USER)); 
+        md["procTargetType"] = ((out == DlgReproc::LocalArch) ?
+                                UA_NOMINAL :
+                                ((out == DlgReproc::VOSpaceFolder) ?
+                                 UA_VOSPACE : UA_LOCAL)); 
         md["procTarget"]     = outLocation.toStdString();
         exportProducts.products.push_back(md);
     }

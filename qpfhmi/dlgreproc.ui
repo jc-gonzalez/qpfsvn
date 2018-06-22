@@ -377,6 +377,70 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>rbtnLocalDir</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>chkIPython</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>121</x>
+     <y>269</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>62</x>
+     <y>352</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rbtnLocalDir</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>chkJupLab</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>124</x>
+     <y>261</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>139</x>
+     <y>365</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rbtnVOSpace</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>chkBrowserVOSpace</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>108</x>
+     <y>290</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>46</x>
+     <y>399</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>rbtnLocalDir</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>chkGenIntermProd</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>113</x>
+     <y>265</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>112</x>
+     <y>324</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>showHelp()</slot>
@@ -385,7 +449,7 @@
   <slot>selectLocalFolderToIPythonWorkDir(bool)</slot>
  </slots>
  <buttongroups>
-  <buttongroup name="btngrpOutputsLocation"/>
   <buttongroup name="btngrpAnalyzeSession"/>
+  <buttongroup name="btngrpOutputsLocation"/>
  </buttongroups>
 </ui>

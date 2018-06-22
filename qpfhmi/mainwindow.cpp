@@ -508,6 +508,30 @@ void MainWindow::readParamInInternalConfig(QString key, QString & value)
 }
 
 //----------------------------------------------------------------------
+// Method: readParamInInternalConfig
+// Read parameter from internal configuration
+//----------------------------------------------------------------------
+void MainWindow::readParamInInternalConfig(QString key, QString & value)
+{
+    QFile file(QString("%1/.qpf/config").arg(getenv("HOME")));
+    if (file.open(QIODevice::ReadOnly)) {
+        QTextStream in(&file);      
+        while(! in.atEnd()) {
+            QString line = in.readLine();    
+            QStringList fields = line.split("=");
+            if (fields.at(0) == key) {
+                value = fields.at(1);
+                return;
+            }
+        }        
+    } else {
+        statusBar()->showMessage(tr("ERROR: Cannot open internal config file!"),
+                                MessageDelay);
+        value = "";
+    }
+}
+
+//----------------------------------------------------------------------
 // Method: closeEvent
 // Handles close events
 //----------------------------------------------------------------------

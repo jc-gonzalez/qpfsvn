@@ -65,7 +65,7 @@ using Configuration::cfg;
 //----------------------------------------------------------------------
 // Constructor: DBHdlPostgreSQL
 //----------------------------------------------------------------------
-DBHdlPostgreSQL::DBHdlPostgreSQL() : conn(0)
+DBHdlPostgreSQL::DBHdlPostgreSQL() : conn(0), res(0)
 {
 }
 
@@ -266,7 +266,7 @@ bool DBHdlPostgreSQL::storeTask(TaskInfo & task)
     ss.str("");
     ss << "INSERT INTO tasks_info "
        << "(task_id, task_status_id, task_progress, task_exitcode, "
-       << "task_path, task_size, registration_time, start_time, task_data) "
+       << "task_path, task_size, registration_time, start_time, task_info, task_data) "
        << "VALUES ("
        << str::quoted(task.taskName()) << ", "
        << task.taskStatus() << ", "
@@ -276,6 +276,7 @@ bool DBHdlPostgreSQL::storeTask(TaskInfo & task)
        << 0 << ", "
        << str::quoted(registrationTime) << ", "
        << str::quoted(task.taskStart()) << ", "
+       << str::quoted(task.str()) << ", "
        << str::quoted(taskData) << ");";
         
     try { result = runCmd(ss.str()); } catch(...) { throw; }
@@ -345,6 +346,7 @@ bool DBHdlPostgreSQL::updateTask(TaskInfo & task)
 	    }
 	    updates.push_back(eqKeyValue("task_path", task.taskPath())); 
 	    updates.push_back(eqKeyValue("task_data", task["taskData"]));
+	    updates.push_back(eqKeyValue("task_info", task.str())); 
 	    //}
         result &= updateTable("tasks_info",
                               eqKeyValue("task_id", id),
@@ -662,9 +664,10 @@ int DBHdlPostgreSQL::getNumRowsInTable(std::string tName)
 // Method: runCmd
 // Runs a SQL command
 //----------------------------------------------------------------------
-bool DBHdlPostgreSQL::runCmd(std::string cmd)
+bool DBHdlPostgreSQL::runCmd(std::string cmd, bool clear)
 {
     // Run the command
+    if (clear) { PQclear(res); }
     res = PQexec(conn, cmd.c_str());
     if ((PQresultStatus(res) != PGRES_COMMAND_OK) &&
             (PQresultStatus(res) != PGRES_TUPLES_OK)) {
@@ -786,6 +789,91 @@ bool DBHdlPostgreSQL::checkSignature(std::string & sgnt, std::string & ptype,
     }
 
     PQclear(res);
+    return result;
+}
+
+//----------------------------------------------------------------------
+// Method: retrieveRestartableTasks
+// Retrieve tasks with status SCHEDULED and RUNNING
+//----------------------------------------------------------------------
+bool DBHdlPostgreSQL::retrieveRestartableTasks(std::map<int,TaskInfo> & tasks)
+{
+    bool result = true;
+
+    std::string cmd("SELECT id, task_info from tasks_info "
+                    "WHERE task_status_id = " + std::to_string(TASK_SCHEDULED) +
+                    "   OR task_status_id = " + std::to_string(TASK_RUNNING) +
+                    "ORDER BY id;");
+
+    try {
+        result = runCmd(cmd);
+        result = PQntuples(res) > 0;
+        if (!result) {
+                PQclear(res);
+                return false;
+        }
+    } catch(...) {
+        throw;
+    }
+
+    int nRows = PQntuples(res);
+    for (int i = 0; i < nRows; ++i) {
+        int id = atoi(PQgetvalue(res, i, 0));
+        std::string content(PQgetvalue(res, i, 1));
+        TRC(std::to_string(id));
+        TRC("TaskInfo content is: " + content);
+        JValue tiv(std::string(PQgetvalue(res, i, 1)));
+        TaskInfo * ti = new TaskInfo(tiv.val());
+        tasks[id] = *ti;
+        TRC("#########>>>>>> FOUND task with id = " + std::to_string(id));// +
+        //                    " and status " + std::to_string(ti->taskStatus()));
+    }
+
+    // Register count of tasks with the statuses that are
+    // to be restarted
+    // SCHEDULED tasks have not been assigned to any TaskAgent yet
+    std::map<TaskStatus, std::string> statuses {{TASK_RUNNING, "running"}};
+    for (auto & kv: statuses) {
+        const TaskStatus & s = kv.first;
+        std::string & ss = kv.second;
+        for (auto & ag: cfg.agentNames) {
+            try {
+                result = runCmd("SELECT COUNT(*) from tasks_info " 
+                                " WHERE task_status_id = " + std::to_string(s) +
+                                " AND task_data#>>'{Info,Agent}' = '" + ag + "';",
+                                true);
+                int numAb = atoi(PQgetvalue(res, 0, 0));
+                TRC("Number of aborted tasks found for agent " + ag +
+                    " and status " + TaskStatusName[s] + ": " +
+                    std::to_string(numAb));
+                /*
+                if (numAb > 0) {
+                    std::string cmd("UPDATE task_status_spectra "
+                                    "SET " + ss + " = " + ss + " - " + std::to_string(numAb) +
+                                    ", total = total - " + std::to_string(numAb) +
+                                    " WHERE agent_id = '" + ag + "';");
+                    TRC("Correcting: " + cmd);
+                    result = runCmd(cmd, true);
+                    }*/
+            } catch(...) {
+                throw;
+            }            
+        }
+    }
+    
+    // Clear status for these tasks
+    cmd = ("UPDATE tasks_info "
+           "SET   task_status_id = " + std::to_string(TASK_ABORTED) +
+           "WHERE id IN "
+           "(SELECT id from tasks_info "
+           " WHERE task_status_id = " + std::to_string(TASK_SCHEDULED) +
+           "    OR task_status_id = " + std::to_string(TASK_RUNNING) +
+           " ORDER BY id);");
+    
+    try { result = runCmd(cmd, true); } catch(...) { throw; }    
+
+    PQclear(res);
+
     return result;
 }
 

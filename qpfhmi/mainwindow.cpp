@@ -113,6 +113,8 @@
 
 #include "launcher.h"
 
+#include "launcher.h"
+
 using Configuration::cfg;
 
 Synchronizer synchro;
@@ -143,6 +145,11 @@ const std::string MainWindow::OFF_StateName("OFF");
 const std::string MainWindow::INITIALISED_StateName("INITIALISED");
 const std::string MainWindow::RUNNING_StateName("RUNNING");
 const std::string MainWindow::OPERATIONAL_StateName("OPERATIONAL");
+
+// Template for pushTo/pullFromVoSpace request file
+const QString MainWindow::VOSpaceURL =
+    "https://vospace.esac.esa.int/vospace/";
+
 
 // Template for pushTo/pullFromVoSpace request file
 const QString MainWindow::VOSpaceURL =

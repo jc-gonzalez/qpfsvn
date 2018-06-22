@@ -2332,6 +2332,10 @@ void MainWindow::doAgentStop()
         hmiNode->sendProcHdlCmd(PROC_AGENT, agentId, PROC_HDL_STOP);
         agentProcStatus[qagentId] = TASK_PAUSED;
     }
+    TRC("HOST PROCESSING (Suspend): " +
+        agName.toStdString() + " @ " + qhostId.toStdString() + ": " +
+        TaskStatusName[hostStatus] + " => " +
+        TaskStatusName[hostProcStatus[qhostId]]);
 }
 
 //----------------------------------------------------------------------

@@ -113,8 +113,6 @@
 
 #include "launcher.h"
 
-#include "launcher.h"
-
 using Configuration::cfg;
 
 Synchronizer synchro;
@@ -145,11 +143,6 @@ const std::string MainWindow::OFF_StateName("OFF");
 const std::string MainWindow::INITIALISED_StateName("INITIALISED");
 const std::string MainWindow::RUNNING_StateName("RUNNING");
 const std::string MainWindow::OPERATIONAL_StateName("OPERATIONAL");
-
-// Template for pushTo/pullFromVoSpace request file
-const QString MainWindow::VOSpaceURL =
-    "https://vospace.esac.esa.int/vospace/";
-
 
 // Template for pushTo/pullFromVoSpace request file
 const QString MainWindow::VOSpaceURL =
@@ -488,30 +481,6 @@ void MainWindow::readConfig(QString dbUrl)
     putToSettings("lastAccess", QVariant(lastAccess));
 
     getUserToolsFromSettings();
-}
-
-//----------------------------------------------------------------------
-// Method: readParamInInternalConfig
-// Read parameter from internal configuration
-//----------------------------------------------------------------------
-void MainWindow::readParamInInternalConfig(QString key, QString & value)
-{
-    QFile file(QString("%1/.qpf/config").arg(getenv("HOME")));
-    if (file.open(QIODevice::ReadOnly)) {
-        QTextStream in(&file);      
-        while(! in.atEnd()) {
-            QString line = in.readLine();    
-            QStringList fields = line.split("=");
-            if (fields.at(0) == key) {
-                value = fields.at(1);
-                return;
-            }
-        }        
-    } else {
-        statusBar()->showMessage(tr("ERROR: Cannot open internal config file!"),
-                                MessageDelay);
-        value = "";
-    }
 }
 
 //----------------------------------------------------------------------
@@ -2341,10 +2310,6 @@ void MainWindow::doAgentStop()
         hmiNode->sendProcHdlCmd(PROC_AGENT, agentId, PROC_HDL_STOP);
         agentProcStatus[qagentId] = TASK_PAUSED;
     }
-    TRC("HOST PROCESSING (Suspend): " +
-        agName.toStdString() + " @ " + qhostId.toStdString() + ": " +
-        TaskStatusName[hostStatus] + " => " +
-        TaskStatusName[hostProcStatus[qhostId]]);
 }
 
 //----------------------------------------------------------------------

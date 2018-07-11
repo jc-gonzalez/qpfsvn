@@ -362,7 +362,7 @@ if [ "${INSTALL}" == "yes" ]; then
         ln -sf ${WORK_AREA}/qpf/bin/qpfgui ${WORK_AREA}/qpf/bin/qpfhmi
     fi
 
-    install_scpt RunQPF.sh
+    #install_scpt RunQPF.sh
     install_scpt qpfapp
 
     if [ ! -d "'${HOME}/.qpf'" ]; then
@@ -451,14 +451,14 @@ say "  - include the directory ${WORK_AREA}/qpf/bin in the PATH variable, and"
 say "  - include the directory ${WORK_AREA}/qpf/lib in the LD_LIBRARY_PATH variable."
 say "To do that, just execute the following commands:"
 say "  export PATH=${WORK_AREA}/qpf/bin:${WORK_AREA}/qpf/scripts:${WORK_AREA}/qpf/scripts/lib:\$PATH"
-say "  export LD_LIBRARY_PATH=${WORK_AREA}/qpf/lib:\$LD_LIBRARY_PATH"
+say "  export LD_LIBRARY_PATH=${WORK_AREA}/qpf/lib:${WORK_AREA}/qpf/lib64:\$LD_LIBRARY_PATH"
 
 (cat ~/env_qpf.sh 2>/dev/null ; echo ""; echo "# BuildQPF section") | \
 awk '(NR==1),/BuildQPF section/' > /tmp/$$.sh
 cat /tmp/$$.sh > ~/env_qpf.sh
 cat <<EOF>> ~/env_qpf.sh
 export PATH=${WORK_AREA}/qpf/bin:${WORK_AREA}/qpf/scripts:${WORK_AREA}/qpf/scripts/lib:\$PATH
-export LD_LIBRARY_PATH=${WORK_AREA}/qpf/lib:\$LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=${WORK_AREA}/qpf/lib:${WORK_AREA}/qpf/lib64:\$LD_LIBRARY_PATH
 EOF
   
 say ""

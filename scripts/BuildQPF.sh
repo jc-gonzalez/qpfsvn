@@ -114,9 +114,10 @@ greetings () {
 }
 
 usage () {
-    local opts="[ -h ] [ -c ] [ -i ] [ -n ] [ -r ] [ -b ] [ -w ] [ -D def ] [ -D def ] [ -p ]"
-    opts="$opts [ -W <path> ] [ -H <host> ] [ -P <port> ] [ -I <ip> ] [ -v ]"
-    say "Usage: ${SCRIPT_NAME} $opts"
+    local opts1="[ -h ] [ -c ] [ -i ] [ -n ] [ -r ] [ -b ] [ -w ] [ -B def ] [ -D def ] [ -p ]"
+    local opts2="[ -I <ip> ] [ -H <host> ] [ -P <port> ] [ -W <path> ] [ -v ]"
+    say "Usage: ${SCRIPT_NAME} $opts1"
+    say "                   $opts2"
     say "where:"
     say "  -h         Show this usage message"
     say "  -c         Compile the source code"
@@ -128,10 +129,10 @@ usage () {
     say "  -B DEF     Define build macros"
     say "  -D DEF     Define compile macros"
     say "  -p         Processing-only node: do not compile QPF HMI"
-    say "  -W <path>  Folder to locate QPF working area (default:HOME)"
+    say "  -I <ip>    IP address to use in the sample config. file"
     say "  -H <host>  Host where system database is located (default:${PSQL_HOST})"
     say "  -P <port>  Port to access the database (default:${PSQL_PORT})"
-    say "  -I <ip>    IP address to use in the sample config. file"
+    say "  -W <path>  Folder to locate QPF working area (default:HOME)"
     say "  -v         Make output verbose"
     say ""
     exit 1

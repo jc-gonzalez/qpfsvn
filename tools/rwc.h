@@ -103,8 +103,7 @@ public:
     // Function to POST a string
     //------------------------------------------------------------
     void postContent(std::string url, std::string & content,
-                     std::string & result,
-                     std::string contentType = std::string("application/xml"));
+                     std::string & result);
 
     //------------------------------------------------------------
     // Method: setAuth

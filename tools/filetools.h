@@ -70,7 +70,7 @@ namespace FileTools {
     // Method: rcopyfile
     //----------------------------------------------------------------------
     int rcopyfile(std::string & sFrom, std::string & sTo,
-                  std::string & remoteHost, bool fromRemote);
+                  std::string & remoteHost, bool toRemote);
     
     //----------------------------------------------------------------------
     // Method: runlink

@@ -51,7 +51,6 @@ using namespace FileTools;
 
 //------------------------------------------------------------
 // Constructor
-// Generate a temporary file with unique file name in /tmp
 //------------------------------------------------------------
 RWC::RWC()
 {
@@ -96,15 +95,10 @@ RWC::RWC()
 }
     
 //------------------------------------------------------------
-// Method: setAuth
-// Set authorisation parameters
+// Destructor
 //------------------------------------------------------------
-void RWC::setAuth(std::string & u, std::string & p, long aut)
+RWC::~RWC()
 {
-    authType = aut;
-    user = u;
-    pwd = p;
-    isAuthSet = true;
 }
 
 //------------------------------------------------------------
@@ -252,7 +246,7 @@ void RWC::post(std::string url, std::string localFile,
 // Function to POST a string
 //------------------------------------------------------------
 void RWC::postContent(std::string url, std::string & content,
-                      std::string & result)
+                      std::string & result, std::string contentType)
 {
     std::string localFile = generateTmpFile();
     std::ofstream oFhdl(localFile);
@@ -263,5 +257,17 @@ void RWC::postContent(std::string url, std::string & content,
     post(url, localFile, result);
 
     unlink(localFile.c_str());
+}
+
+//------------------------------------------------------------
+// Method: setAuth
+// Set authorisation parameters
+//------------------------------------------------------------
+void RWC::setAuth(std::string & u, std::string & p, long aut)
+{
+    authType = aut;
+    user = u;
+    pwd = p;
+    isAuthSet = true;
 }
 

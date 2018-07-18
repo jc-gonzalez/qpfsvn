@@ -1,25 +1,24 @@
-#ifndef TEST_VOSPACEHANDLER_H
-#define TEST_VOSPACEHANDLER_H
+#ifndef TEST_PROCESS_H
+#define TEST_PROCESS_H
 
-#include "voshdl.h"
-
+#include "filetools.h"
 #include "gtest/gtest.h"
 
-//using namespace VOSpaceHandler;
+//using namespace process;
 
-namespace TestVOSpaceHandler {
+namespace TestFiletools {
 
-class TestVOSpaceHandler : public ::testing::Test {
+class TestFiletools : public ::testing::Test {
 
 protected:
     // You can remove any or all of the following functions if its body
     // is empty.
 
     // You can do set-up work for each test here.
-    TestVOSpaceHandler() {}
+    TestFiletools() {}
 
     // You can do clean-up work that doesn't throw exceptions here.
-    virtual ~TestVOSpaceHandler() {}
+    virtual ~TestFiletools() {}
 
     // If the constructor and destructor are not enough for setting up
     // and cleaning up each test, you can define the following methods:
@@ -33,20 +32,20 @@ protected:
     virtual void TearDown() {}
 
     // Objects declared here can be used by all tests in the test case for Foo.
-    // VOSpaceHandler::obj ev;
+    // Filetools::obj ev;
 };
 
-class TestVOSpaceHandlerExit : public TestVOSpaceHandler {
+class TestFiletoolsExit : public TestFiletools {
 
 protected:
     // You can remove any or all of the following functions if its body
     // is empty.
 
     // You can do set-up work for each test here.
-    TestVOSpaceHandlerExit() {}
+    TestFiletoolsExit() {}
 
     // You can do clean-up work that doesn't throw exceptions here.
-    virtual ~TestVOSpaceHandlerExit() {}
+    virtual ~TestFiletoolsExit() {}
 
     // If the constructor and destructor are not enough for setting up
     // and cleaning up each test, you can define the following methods:
@@ -64,4 +63,4 @@ protected:
 
 }
 
-#endif // TEST_VOSPACEHANDLER_H
+#endif // TEST_FILETOOLS_H

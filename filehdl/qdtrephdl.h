@@ -82,14 +82,14 @@ public:
     //----------------------------------------------------------------------
     QDTReportHandler(const char * fname = 0)
         : JsonFileHandler(fname)
-    {}
+    { getHeaderAndBody(); }
 
     //----------------------------------------------------------------------
     // Constructor
     //----------------------------------------------------------------------
     QDTReportHandler(std::string fname = std::string())
         : JsonFileHandler(fname)
-    {}
+    { getHeaderAndBody(); }
 
     //----------------------------------------------------------------------
     // (Virtual) Destructor
@@ -111,6 +111,15 @@ public:
                          std::string & location,
                          std::vector<Alert*> & issues);
 
+private:
+    //----------------------------------------------------------------------
+    // Method: getIssues
+    // Retrieves from the data the list of issues found
+    //----------------------------------------------------------------------
+    void getHeaderAndBody();
+
+protected:
+    Json::Value header;
 };
 
 // }

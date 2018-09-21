@@ -55,6 +55,18 @@
 // Method: getIssues
 // Retrieves from the data the list of issues found
 //----------------------------------------------------------------------
+void QDTReportHandler::getHeaderAndBody()
+{
+    header = data["Header"];
+
+    Json::Value body = data["Results"];
+    data = std::move(body);
+}
+
+//----------------------------------------------------------------------
+// Method: getIssues
+// Retrieves from the data the list of issues found
+//----------------------------------------------------------------------
 bool QDTReportHandler::getIssues(std::vector<Alert*> & issues)
 {
     // Loop on all the products in the report (normally, only 1)

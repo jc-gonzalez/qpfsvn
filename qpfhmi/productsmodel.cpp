@@ -54,7 +54,7 @@ ProductsModel::ProductsModel(std::vector<std::string> & pTypes,
 
     defineQuery(QString::fromStdString(
                 "SELECT  "
-                "    left(p.signature, 7) AS ObsId_Exp,  "
+                "    left(p.signature, 7) AS ObsId_Exp, "
                 "    concat(left(p.signature, 7), '.', "
                 "                cast(position(cast(p.instrument_id as char) "
 		        "                              in ' VNS') as char), '.', "
@@ -73,7 +73,7 @@ ProductsModel::ProductsModel(std::vector<std::string> & pTypes,
                 "    p.end_time as End,  "
                 "    p.registration_time as RegTime,  "
                 "    p.url as URL, "
-                "    p.id as internal_id "
+                "    p.id as internal_id  "
                 "FROM products_info p  "
                 "@WHERE@ "
                 "ORDER BY idx;"
@@ -84,7 +84,7 @@ ProductsModel::ProductsModel(std::vector<std::string> & pTypes,
                    "Size", "Status", "Creator", "Obs.Mode",
                    "Start", "End", "Reg.Time", "URL", "IntID"});
 
-   // skipColumns(1);
+    //skipColumns(2);
 
     refresh();
 }

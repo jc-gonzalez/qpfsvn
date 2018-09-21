@@ -1450,8 +1450,8 @@ void MainWindow::updateLocalArchModel()
         resizeLocalArch();
     }
      
+    ui->treevwArchive->hideColumn(1);
     //ui->treevwArchive->hideColumn(0);
-    //ui->treevwArchive->hideColumn(1);
 }
 
 //----------------------------------------------------------------------
@@ -1496,7 +1496,7 @@ void MainWindow::setMultiselectProducts(bool b)
 //----------------------------------------------------------------------
 void MainWindow::openWithDefault()
 {
-    static const int NumOfURLCol = 10;
+    static const int NumOfURLCol = 12;
 
     QModelIndex m = ui->treevwArchive->currentIndex();
     QString url = m.model()->index(m.row(), NumOfURLCol, m.parent()).data().toString();
@@ -1508,7 +1508,7 @@ void MainWindow::openWithDefault()
 //----------------------------------------------------------------------
 void MainWindow::openLocation()
 {
-    static const int NumOfURLCol = 10;
+    static const int NumOfURLCol = 12;
 
     QModelIndex m = ui->treevwArchive->currentIndex();
     QString url = m.model()->index(m.row(), NumOfURLCol, m.parent()).data().toString();
@@ -1522,7 +1522,7 @@ void MainWindow::openLocation()
 //----------------------------------------------------------------------
 void MainWindow::openWith()
 {
-    static const int NumOfURLCol = 10;
+    static const int NumOfURLCol = 12;
 
     QAction * ac = qobject_cast<QAction*>(sender());
     QString key = ac->text();
@@ -1623,7 +1623,7 @@ void MainWindow::openWith()
 //----------------------------------------------------------------------
 void MainWindow::reprocessProduct()
 {
-    static const int NumOfURLCol = 10;
+    static const int NumOfURLCol = 12;
 
     QPoint p = actHdl->getAcReprocess()->property("clickedItem").toPoint();
     //QModelIndex m = ui->treevwArchive->indexAt(p);
@@ -1685,7 +1685,7 @@ void MainWindow::reprocessProduct()
 //----------------------------------------------------------------------
 void MainWindow::analyzeProduct()
 {
-    static const int NumOfURLCol = 10;
+    static const int NumOfURLCol = 12;
 
     // Create product list
 
@@ -1740,7 +1740,7 @@ void MainWindow::analyzeProduct()
 //----------------------------------------------------------------------
 void MainWindow::exportProduct()
 {
-    static const int NumOfURLCol = 10;
+    static const int NumOfURLCol = 12;
 
     QPoint p = actHdl->getAcReprocess()->property("clickedItem").toPoint();
     //QModelIndex m = ui->treevwArchive->indexAt(p);
@@ -1842,7 +1842,7 @@ void MainWindow::showJSONdata(QString title, QString & dataString)
 void MainWindow::openLocalArchiveElement(QModelIndex idx)
 {
     static const int NumOfNameCol = 0;
-    static const int NumOfURLCol = 10;
+    static const int NumOfURLCol = 12;
 
     int row = idx.row();
     TMsg(QString("(%1,%2)").arg(row).arg(idx.column()).toStdString());

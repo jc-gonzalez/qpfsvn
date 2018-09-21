@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ $# -lt 1 ]; then
+    echo "Usage: $0 [ qdt | qdtfake | le1 | le1fake ]"
+    exit 1
+fi
+
 act=$1
 
 BINPATH=${HOME}/qpf/bin

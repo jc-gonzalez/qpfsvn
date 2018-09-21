@@ -4,7 +4,7 @@
  *
  * Domain:  QPF.version
  *
- * Version: 2.0
+ * Last update:  2.1
  *
  * Date:    2018/01/20
  *
@@ -50,10 +50,10 @@
 #define APP_NAME         "QPF"
 
 //! Application release number
-#define APP_RELEASE      "2.1beta"
+#define APP_RELEASE      "2.1RC1"
 
 //! Application release date
-#define APP_DATE         "MAY 2018"
+#define APP_DATE         "SEP 2018"
 
 //! Application developer company
 #define APP_COMPANY      "Euclid SOC Team"

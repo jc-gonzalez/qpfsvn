@@ -4,7 +4,7 @@
  *
  * Domain:  InFix.InfixEval
  *
- * Version:  2.0
+ * Last update:  2.0
  *
  * Date:    2016/01/11
  *

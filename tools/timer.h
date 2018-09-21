@@ -4,7 +4,7 @@
  *
  * Domain:  QPF.tools.Timer
  *
- * Version:  2.0
+ * Last update:  2.0
  *
  * Date:    2015/07/01
  *

@@ -4,7 +4,7 @@
  *
  * Domain:  QPF.qpfgui.hmitypes
  *
- * Version:  2.0
+ * Last update:  2.0
  *
  * Date:    2016-11-03
  *

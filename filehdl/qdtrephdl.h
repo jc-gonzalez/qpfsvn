@@ -82,14 +82,14 @@ public:
     //----------------------------------------------------------------------
     QDTReportHandler(const char * fname = 0)
         : JsonFileHandler(fname)
-    { getHeaderAndBody(); }
+    {}
 
     //----------------------------------------------------------------------
     // Constructor
     //----------------------------------------------------------------------
     QDTReportHandler(std::string fname = std::string())
         : JsonFileHandler(fname)
-    { getHeaderAndBody(); }
+    {}
 
     //----------------------------------------------------------------------
     // (Virtual) Destructor

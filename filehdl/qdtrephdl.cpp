@@ -51,16 +51,20 @@
 ////////////////////////////////////////////////////////////////////////////
 // namespace QPF {
 
+#define ShowTrace(a) std::cerr << a ;
+
 //----------------------------------------------------------------------
 // Method: getIssues
 // Retrieves from the data the list of issues found
 //----------------------------------------------------------------------
 void QDTReportHandler::getHeaderAndBody()
 {
+    ShowTrace("Reading header...\n");
     header = data["Header"];
 
-    Json::Value body = data["Results"];
-    data = std::move(body);
+    ShowTrace("Reading results...\n");
+    Json::Value body = data;
+    data = body["Results"];
 }
 
 //----------------------------------------------------------------------
@@ -69,13 +73,18 @@ void QDTReportHandler::getHeaderAndBody()
 //----------------------------------------------------------------------
 bool QDTReportHandler::getIssues(std::vector<Alert*> & issues)
 {
+    // Get header and body (results) from QDT report, to parse only
+    // the body
+    getHeaderAndBody();
+
+    ShowTrace("Parsing issues...START\n");
     // Loop on all the products in the report (normally, only 1)
     Json::Value::iterator prodIt = data.begin();
     while (prodIt != data.end()) {
 
         Json::Value const & p = (*prodIt);
         std::string product = prodIt.key().asString();
-        //std::cerr << product << '\n';
+        ShowTrace(product << '\n');
 
         // Loop on all the CCDs
         Json::Value::iterator ccdIt = p.begin();
@@ -83,7 +92,7 @@ bool QDTReportHandler::getIssues(std::vector<Alert*> & issues)
 
             Json::Value const & c = (*ccdIt);
             std::string ccdSet = ccdIt.key().asString();
-            //std::cerr << '\t' << ccdSet << '\n';
+            ShowTrace('\t' << ccdSet << '\n');
 
             if (ccdSet.compare(0, 3, "CCD") == 0) {
                 // Loop on all the quadrant
@@ -94,14 +103,14 @@ bool QDTReportHandler::getIssues(std::vector<Alert*> & issues)
 
                     Json::Value const & q = (*quadIt);
                     std::string quadrant = quadIt.key().asString();
-                    //std::cerr << "\t\t" << quadrant << '\n';
+                    ShowTrace("\t\t" << quadrant << '\n');
 
                     // Loop on all the diagnostics for the quadrant
                     Json::Value::iterator diagIt = q["diagnostics"].begin();
                     while (diagIt != q["diagnostics"].end()) {
 
                         std::string diagnostic = diagIt.key().asString();
-                        //std::cerr << "\t\t\t" << diagnostic << '\n';
+                        ShowTrace("\t\t\t" << diagnostic << '\n');
 
                         std::string location = (product + "." + ccdSet + "." +
                                                 quadrant + "." + diagnostic);
@@ -120,7 +129,7 @@ bool QDTReportHandler::getIssues(std::vector<Alert*> & issues)
             while (diagIt != c["diagnostics"].end()) {
 
                 std::string diagnostic = diagIt.key().asString();
-                //std::cerr << "\t\t\t" << diagnostic << '\n';
+                ShowTrace("\t\t\t" << diagnostic << '\n');
 
                 std::string location = (product + "." + ccdSet + "." +
                                         diagnostic);
@@ -136,6 +145,7 @@ bool QDTReportHandler::getIssues(std::vector<Alert*> & issues)
         ++prodIt; // next product
     }
 
+    ShowTrace("Parsing issues...END\n");
     return true;
 }
 
@@ -146,7 +156,7 @@ void QDTReportHandler::checkDiagnostic(Json::Value::iterator it,
     Alert::Messages msgs;
 
     Json::Value const & d = (*it);
-    std::cerr << d["outcome"].asString();
+    ShowTrace(d["outcome"].asString());
     if (d["result"]["outcome"].asString() == "Warning") {
         msgs.push_back("Messsages:");
         Json::Value::iterator mIt;

@@ -122,6 +122,8 @@ namespace QPF {
 static const int MessageDelay = 2000;
 static const char * FixedWidthStyle = "font: 8pt \"Droid Sans Mono\";";
 
+static const int NumOfURLCol = 12;
+
 // Valid Manager states
 const int MainWindow::ERROR        = -1;
 const int MainWindow::OFF          =  0;
@@ -1496,8 +1498,6 @@ void MainWindow::setMultiselectProducts(bool b)
 //----------------------------------------------------------------------
 void MainWindow::openWithDefault()
 {
-    static const int NumOfURLCol = 12;
-
     QModelIndex m = ui->treevwArchive->currentIndex();
     QString url = m.model()->index(m.row(), NumOfURLCol, m.parent()).data().toString();
     QDesktopServices::openUrl(QUrl::fromLocalFile(url));
@@ -1508,8 +1508,6 @@ void MainWindow::openWithDefault()
 //----------------------------------------------------------------------
 void MainWindow::openLocation()
 {
-    static const int NumOfURLCol = 12;
-
     QModelIndex m = ui->treevwArchive->currentIndex();
     QString url = m.model()->index(m.row(), NumOfURLCol, m.parent()).data().toString();
     QFileInfo fs(url.mid(7));
@@ -1522,8 +1520,6 @@ void MainWindow::openLocation()
 //----------------------------------------------------------------------
 void MainWindow::openWith()
 {
-    static const int NumOfURLCol = 12;
-
     QAction * ac = qobject_cast<QAction*>(sender());
     QString key = ac->text();
     const QUserDefTool & udt = userDefTools.value(key);
@@ -1623,8 +1619,6 @@ void MainWindow::openWith()
 //----------------------------------------------------------------------
 void MainWindow::reprocessProduct()
 {
-    static const int NumOfURLCol = 12;
-
     QPoint p = actHdl->getAcReprocess()->property("clickedItem").toPoint();
     //QModelIndex m = ui->treevwArchive->indexAt(p);
 
@@ -1685,8 +1679,6 @@ void MainWindow::reprocessProduct()
 //----------------------------------------------------------------------
 void MainWindow::analyzeProduct()
 {
-    static const int NumOfURLCol = 12;
-
     // Create product list
 
     QAction * caller = qobject_cast<QAction*>(sender());
@@ -1740,8 +1732,6 @@ void MainWindow::analyzeProduct()
 //----------------------------------------------------------------------
 void MainWindow::exportProduct()
 {
-    static const int NumOfURLCol = 12;
-
     QPoint p = actHdl->getAcReprocess()->property("clickedItem").toPoint();
     //QModelIndex m = ui->treevwArchive->indexAt(p);
 
@@ -1841,13 +1831,9 @@ void MainWindow::showJSONdata(QString title, QString & dataString)
 //----------------------------------------------------------------------
 void MainWindow::openLocalArchiveElement(QModelIndex idx)
 {
-    static const int NumOfNameCol = 0;
-    static const int NumOfURLCol = 12;
-
     int row = idx.row();
     TMsg(QString("(%1,%2)").arg(row).arg(idx.column()).toStdString());
     const QAbstractItemModel * model = idx.model();
-    QModelIndex nameIdx = model->index(row, NumOfNameCol, idx.parent());
     QModelIndex urlIdx  = model->index(row, NumOfURLCol, idx.parent());
 
     QString url = urlIdx.data().toString().trimmed();

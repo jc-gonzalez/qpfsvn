@@ -2600,7 +2600,7 @@ void MainWindow::jumpToAlertSource(const QModelIndex & idx)
 {
     Alert alert = procAlertModel->getAlertAt(idx);
     QString origin = QString::fromStdString(alert.getOrigin());
-    std::cerr << origin.toStdString() << '\n';
+    //std::cerr << origin.toStdString() << '\n';
     QStringList seq = origin.split('.');
     QString a = seq.takeFirst();
     QString b = seq.takeFirst();
@@ -2613,6 +2613,7 @@ void MainWindow::jumpToAlertSource(const QModelIndex & idx)
     QString tabName = fs.fileName();
 
     seq.prepend(a + "." + b + "." + c + "." + d);
+    seq.prepend("Results");
     seq << "diagnostics" << last;
     
     //foreach (QString s, seq) { std::cerr << '/' << s.toStdString(); }

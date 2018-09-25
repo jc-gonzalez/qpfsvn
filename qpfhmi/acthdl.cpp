@@ -526,7 +526,7 @@ void ActionHandler::createLocalArchiveViewActions()
 //----------------------------------------------------------------------
 void ActionHandler::showArchiveTableContextMenu(const QPoint & p)
 {
-    static const int NumOfProdTypeCol = 1;
+    static const int NumOfProdTypeCol = 3;
 
     if (mw->isProductsCustomFilterActive) { return; }
 

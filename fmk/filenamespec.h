@@ -82,6 +82,30 @@
 //namespace QPF {
 
 //==========================================================================
+// Class: FileVersion
+//==========================================================================
+class FileVersion {
+
+public:
+    FileVersion();
+    FileVersion(unsigned int ma, unsigned int mi);
+    FileVersion(std::string v);
+
+    unsigned int major();
+    unsigned int minor();
+    void setVersion(unsigned int ma, unsigned int mi);
+    void setVersion(std::string s);
+    void getVersion(unsigned int & ma, unsigned int & mi);
+    std::string getVersion();
+    void incr();
+    void incrMajor();
+    void incrMinor();
+
+private:
+    unsigned int mj, mn;
+};
+
+//==========================================================================
 // Class: FileNameSpec
 //==========================================================================
 class FileNameSpec {

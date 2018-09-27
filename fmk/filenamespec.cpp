@@ -64,6 +64,72 @@
 ////////////////////////////////////////////////////////////////////////////
 //namespace QPF {
 
+FileVersion::FileVersion()
+    : mj(0), mn(0)
+{}
+
+FileVersion::FileVersion(unsigned int ma, unsigned int mi)
+    : mj(ma), mn(mi)
+{}
+
+FileVersion::FileVersion(std::string v)
+{
+    setVersion(v);
+}
+
+unsigned int FileVersion::major()
+{
+    return mj;
+}
+
+unsigned int FileVersion::minor()
+{
+    return mn;
+}
+
+void FileVersion::setVersion(unsigned int ma, unsigned int mi)
+{
+    mj = ma;
+    mn = mi;
+}
+
+void FileVersion::setVersion(std::string s)
+{
+    std::stringstream ss(s);
+    char c;
+    ss >> mj >> c >> mn;
+}
+
+void FileVersion::getVersion(unsigned int & ma, unsigned int & mi)
+{
+    ma = mj;
+    mi = mn;
+}
+
+std::string FileVersion::getVersion()
+{
+    char v[6];
+    sprintf(v, "%02d.%02d", mj, mn);
+    return std::string(v);
+}
+
+void FileVersion::incr()
+{
+    incrMinor();
+}
+
+void FileVersion::incrMajor()
+{
+    mj++;
+}
+
+void FileVersion::incrMinor()
+{
+    mn++;
+    if (mn > 99) { mn = 0, mj++; }
+}
+
+
 //----------------------------------------------------------------------
 // Method: Constructor
 //----------------------------------------------------------------------
@@ -390,20 +456,15 @@ std::string FileNameSpec::buildProductId(ProductMetadata & m)
 
 std::string FileNameSpec::buildVersion(int major, int minor)
 {
-    char v[6];
-    sprintf(v, "%02d.%02d", major, minor);
-    return std::string(v);
+    FileVersion fv(major, minor);
+    return fv.getVersion();
 }
 
 std::string FileNameSpec::incrMinorVersion(std::string & ver)
 {
-    int major, minor;
-    std::stringstream ss(ver);
-    char c;
-    ss >> major >> c >> minor;
-    char v[6];
-    sprintf(v, "%02d.%02d", major, minor + 1);
-    return std::string(v);
+    FileVersion fv(ver);
+    fv.incr();
+    return fv.getVersion();
 }
 
 #ifdef USE_CX11_REGEX

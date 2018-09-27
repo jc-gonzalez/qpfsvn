@@ -290,7 +290,7 @@ void ConfigTool::getExtTools(MapOfUserDefTools & userTools)
 //----------------------------------------------------------------------
 void ConfigTool::save()
 {
-    if (!cfg.isActualFile) {
+    if (cfg.isActualFile) {
         QString fileName(QString::fromStdString(cfg.cfgFileName));
         int ret = QMessageBox::question(this, tr("Save"),
                     tr("Do you want to overwrite the configuration file \"") +

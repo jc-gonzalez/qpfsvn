@@ -350,6 +350,17 @@ void ConfigTool::saveAsFilename(QString & fName)
 void ConfigTool::apply()
 {
     if (transferGUIToCfg()) {
+        if (cfg.isActualFile) {
+            QString fileName(QString::fromStdString(cfg.cfgFileName));
+            int ret = QMessageBox::question(this, tr("Save"),
+                          tr("Do you want to save the changes to the active "
+                             "configuration file?"),
+                      QMessageBox::Yes | QMessageBox::No,
+                      QMessageBox::No);
+            if (ret == QMessageBox::Yes) {
+                saveAsFilename(fileName);
+            }
+        }
         accept();
     }
 }
@@ -583,7 +594,8 @@ void ConfigTool::editSwarm(QModelIndex idx)
     QString id = model->index(row,0).data().toString();
     QString name = model->index(row,1).data().toString();
     QString ip = model->index(row,2).data().toString();
-    QStringList wips = model->index(row,3).data().toString().split(QRegExp("\\W+"), QString::SkipEmptyParts);
+    QStringList wips = model->index(row,3).data().toString()
+                        .split(QRegExp("\\W+"), QString::SkipEmptyParts);
     int scale = model->index(row,4).data().toInt();
     QString image = model->index(row,5).data().toString();
     QString exe = model->index(row,6).data().toString();
@@ -1050,6 +1062,7 @@ void ConfigTool::transferCfgToGUI()
     for (int lvl = (int)(Log::TRACE); lvl <= (int)(Log::FATAL); lvl++) {
         levels << QString::fromStdString(Log::LogLevelName[lvl]);
     }    
+    ui->cboxMinLogLevel->clear();
     ui->cboxMinLogLevel->addItems(levels);
     ui->cboxMinLogLevel->setCurrentIndex((int)(Log::getMinLogLevel()));
 }

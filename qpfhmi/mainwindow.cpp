@@ -854,7 +854,7 @@ void MainWindow::processProductsInPath(QString folder)
         m["urlSpace"] = UserSpace;
         uh.setProduct(m);
         m = uh.fromFolder2Inbox();
-        //sleep(5);
+        sleep(2);
     }
 }
 

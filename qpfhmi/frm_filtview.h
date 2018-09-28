@@ -57,6 +57,9 @@ public:
 
     QTreeView * initialize(QString name, QString qry);
 
+signals:
+    void queryStringChanged(QString);
+
 private:
     Ui::FrmFiltView * ui;
 };

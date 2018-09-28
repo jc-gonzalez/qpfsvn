@@ -44,16 +44,23 @@ namespace QPF {
 
 ProductsFilterModel::ProductsFilterModel(QString qry)
 {
-    QString selectFields("SELECT product_id, id, url, fits_file, product_type, "
-                         "start_time, ccd, q, diag, values, value");
-    qry.replace("SELECT *", selectFields);
-    defineQuery("refresh materialized view products_info_filter; " + qry);
-    
-    defineHeaders({//"Product Id', "ID", "URL", "FITS_File",
-                   "Product Id / Type", "Start", "CCD", "Q",
+    defineHeaders({"Product Id", //"ID", "URL", "FITS_File",
+                   "Type", "Start", "CCD[Q]",
                    "Diagnostic", "Info", "Values"});
+    changeQuery(qry);
+}
 
-    skipColumns(4);
+void ProductsFilterModel::changeQuery(QString qry)
+{
+    QString selectFields("SELECT product_id, "
+                         //"id, url, fits_file, "
+                         "product_type, "
+                         "start_time, ccd, diag, values, value");
+    qry.replace("SELECT *", selectFields);
+    std::cerr << "FILTER >>>>>>>>>>> " + qry.toStdString() + "\n";
+    defineQuery("refresh materialized view products_info_filter; " + qry);
+
+    //skipColumns(4);
 
     refresh();
 }

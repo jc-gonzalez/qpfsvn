@@ -46,6 +46,8 @@ FrmFiltView::FrmFiltView(QWidget *parent) :
     ui(new Ui::FrmFiltView)
 {
     ui->setupUi(this);
+    connect(ui->btnRefresh, &QPushButton::clicked,
+            [this](){emit queryStringChanged(this->ui->pltxtQry->toPlainText());});
 }
 
 FrmFiltView::~FrmFiltView()
@@ -56,7 +58,7 @@ FrmFiltView::~FrmFiltView()
 QTreeView * FrmFiltView::initialize(QString name, QString qry)
 {
     ui->lblName->setText(name);
-    ui->lblQry->setText(qry);
+    ui->pltxtQry->setPlainText(qry);
     return ui->treevwFiltView;
 }
 

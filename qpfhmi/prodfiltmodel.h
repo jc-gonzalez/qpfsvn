@@ -51,6 +51,8 @@ class ProductsFilterModel : public DBTreeModel {
 public:
     explicit ProductsFilterModel(QString qry);
 
+public slots:
+    void changeQuery(QString qry);
 };
 
 }

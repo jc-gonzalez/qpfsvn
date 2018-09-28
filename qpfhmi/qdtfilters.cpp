@@ -49,6 +49,13 @@ const QString ProductSelToken[] = { "@AllProducts",
                                     "@ProductsOfType",
                                     "@ProductsInDateRange" };
 
+const QString StartComparison("{");
+const QString EndComparison("}");
+
+const QString StartElement("`");
+const QString EndElement("´");
+
+
 QString QDTSingleFilter::evaluate()
 {
     QString f;
@@ -57,7 +64,7 @@ QString QDTSingleFilter::evaluate()
     if (!outGrp.isEmpty())  { f += QString(".%1").arg(outGrp); }
     if (!item.isEmpty())    { f += QString(".%1").arg(item); }
 
-    QString flt("[" + f + "] ");
+    QString flt(StartElement + f + EndElement + " ");
     switch (cmp) {
     case LT:
     case LE:
@@ -117,7 +124,8 @@ QString QDTFilter::evaluate()
     QString joint(criteria == ALL_OF_THEM ? "AND" : "OR");
     
     foreach (QDTSingleFilter flt, filts) {
-        evalFilt += "{" + flt.evaluate() + "} " + joint + " ";                   
+        evalFilt += (StartComparison + flt.evaluate() + EndComparison +
+                     " " + joint + " ");
     }
 
     evalFilt.remove(evalFilt.length() - joint.length() - 2, 10);

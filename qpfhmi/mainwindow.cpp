@@ -318,9 +318,9 @@ void MainWindow::manualSetupUI()
     connect(ui->tabMainWgd, SIGNAL(customContextMenuRequested(const QPoint &)),
             actHdl, SLOT(showTabsContextMenu(const QPoint &)));
 
-    ui->tabwdgArchViews->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(ui->tabwdgArchViews, SIGNAL(customContextMenuRequested(const QPoint &)),
-            actHdl, SLOT(showTabsContextMenu(const QPoint &)));
+    //ui->tabwdgArchViews->setContextMenuPolicy(Qt::CustomContextMenu);
+    //connect(ui->tabwdgArchViews, SIGNAL(customContextMenuRequested(const QPoint &)),
+    //        actHdl, SLOT(showTabsContextMenu(const QPoint &)));
 
     ui->tabwdgMonitPages->setContextMenuPolicy(Qt::NoContextMenu);
     //connect(ui->tabwdgMonitPages, SIGNAL(customContextMenuRequested(const QPoint &)),
@@ -2660,13 +2660,13 @@ void MainWindow::reportFiltering()
     // This looks into the products table in the DB, and retrieves the list of
     // diagnostics with possible entries and values
     QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
-	db.setHostName    (Config::DBHost.c_str());
+    db.setHostName    (Config::DBHost.c_str());
     db.setPort        (std::stoi(Config::DBPort.c_str()));
-	db.setDatabaseName(Config::DBName.c_str());
-	db.setUserName    (Config::DBUser.c_str());
-	db.setPassword    (Config::DBPwd.c_str());
+    db.setDatabaseName(Config::DBName.c_str());
+    db.setUserName    (Config::DBUser.c_str());
+    db.setPassword    (Config::DBPwd.c_str());
 
-	if (! db.open()) {
+    if (! db.open()) {
         int ret = QMessageBox::warning(this, tr("Problem with database"),
                                        tr("Cannot access database!"),
                                        QMessageBox::Ok, QMessageBox::Ok);
@@ -2725,6 +2725,9 @@ void MainWindow::reportFiltering()
     ProductsFilterModel * prodFiltModel = new ProductsFilterModel(qryDef);
     newView->setModel(prodFiltModel);
     newView->setSortingEnabled(true);
+
+    connect(filtView, SIGNAL(queryStringChanged(QString)),
+            prodFiltModel, SLOT(changeQuery(QString)));
 
     int tabIdx = ui->tabwdgArchViews->addTab(filtView, viewName);
     ui->tabwdgArchViews->setTabIcon(tabIdx, QIcon(":/img/table.png"));

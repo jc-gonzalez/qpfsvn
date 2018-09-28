@@ -67,7 +67,7 @@ VERBOSE="no"
 #- Other
 DATE=$(date +"%Y%m%d%H%M%S")
 LOG_FILE=${SCRIPT_PATH}/build_${DATE}.log
-VERSION=$(awk -F\" "/APP_RELEASE/{print $2;}" ${QPF_PATH}/version.h)
+VERSION=$(cat "${QPF_PATH}/VERSION")
 LDLIBS=$(echo $LD_LIBRARY_PATH | tr ':' ' ')
 
 wsvn=$(which svn 2>/dev/null)

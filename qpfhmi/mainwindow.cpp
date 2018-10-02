@@ -850,11 +850,13 @@ void MainWindow::processProductsInPath(QString folder)
     FileNameSpec fs;
     ProductMetadata m;
     foreach (const QString & fi, files) {
-        fs.parseFileName(fi.toStdString(), m);
-        m["urlSpace"] = UserSpace;
-        uh.setProduct(m);
-        m = uh.fromFolder2Inbox();
-        sleep(2);
+        if (fs.parseFileName(fi.toStdString(), m)) {
+            m["urlSpace"] = UserSpace;
+            uh.setProduct(m);
+            m.dump();
+            m = uh.fromFolder2Inbox();
+            sleep(2);
+        }
     }
 }
 
@@ -865,11 +867,12 @@ void MainWindow::processProductsInPath(QString folder)
 void MainWindow::getProductsInFolder(QString & path, QStringList & files, bool recursive)
 {
     QDir dir(path);
-    QFileInfoList allEntries = dir.entryInfoList(QDir::Files | QDir::Dirs |
+    QFileInfoList allEntries = dir.entryInfoList(QDir::Files |
             QDir::NoSymLinks | QDir::NoDotAndDotDot,
             QDir::Time | QDir::DirsLast);
     foreach (const QFileInfo & fi, allEntries) {
         QString absPath = fi.absoluteFilePath();
+        std::cerr << "FILE_IN_FOLDER: " << absPath.toStdString() << '\n';
         if (fi.isDir()) {
             if (recursive) {
                 getProductsInFolder(absPath, files, recursive);

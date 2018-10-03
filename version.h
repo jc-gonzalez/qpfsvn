@@ -53,7 +53,7 @@
 #define APP_RELEASE      "2.1RC4"
 
 //! Application release date
-#define APP_DATE         "SEP 2018"
+#define APP_DATE         "OCT 2018"
 
 //! Application developer company
 #define APP_COMPANY      "Euclid SOC Team"

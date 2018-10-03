@@ -50,7 +50,7 @@
 #define APP_NAME         "QPF"
 
 //! Application release number
-#define APP_RELEASE      "2.1RC3"
+#define APP_RELEASE      "2.1RC4"
 
 //! Application release date
 #define APP_DATE         "SEP 2018"

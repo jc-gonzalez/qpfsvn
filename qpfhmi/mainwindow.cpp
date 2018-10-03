@@ -734,6 +734,8 @@ void MainWindow::showConfigTool()
             hmiNode->sendNewConfig();
             TRC("Sending new configuration to all the nodes");
         }
+        // Update HMI
+        ui->lblVerbosity->setText(QString::fromStdString(cfg.general.logLevel()));
     }
 }
 

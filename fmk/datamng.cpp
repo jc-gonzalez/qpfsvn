@@ -692,16 +692,33 @@ bool DataMng::getRestartableTaskInputs(ProductList & inputFiles)
     // Close connection
     dbHdl->closeConnection();
 
+    inputFiles.clear();
     // A set of tasks have been retrieved, re-build these tasks
     for (auto & kv : taskSet) {
         int id = kv.first;
         TaskInfo & task = kv.second;
+        /*
         ProductMetadata m(task["inputs"][0]);
+        std::string url(m.url());
+        std::string oldFile(str::mid(url,7,1000));
+
         m["dirName"]  = cfg.storage.archive;
         m["urlSpace"] = LocalArchSpace;
         m["url"]      = ("file://" + cfg.storage.archive + "/" +
-                         m.baseName() + "." + m.extension());
-        inputFiles.products.push_back(m);
+                         std::string(basename(oldFile)));
+        */
+        std::string url(task["inputs"][0]["url"].asString());
+        std::string theFile(basename(str::mid(url,7,1000).c_str()));
+
+        FileNameSpec fs;
+        ProductMetadata m;
+        if (!fs.parseFileName(theFile, m)) {
+            WarnMsg("Problem while trying to parse filename with regex");
+            continue;
+        }
+        m["url"]      = "file://" + cfg.storage.archive + "/" + theFile;
+        m["urlSpace"] = LocalArchSpace;
+        inputFiles.append(m);
     }
 
     return retVal;

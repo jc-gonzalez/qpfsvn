@@ -216,7 +216,7 @@ bool FileNameSpec::parseFileName(std::string fileName,
 {
     if (! initialized) { setFileNameSpec(reStr, assignationsStr); }
 
-    //DBG("Trying to parse '" << fileName << "' with the regex '" << reStr << "'");
+    TRC("Trying to parse '" << fileName << "' with the regex '" << reStr << "'");
 
     // First, get path name out of the name
     char *dirc, *basec, *bname, *dname;

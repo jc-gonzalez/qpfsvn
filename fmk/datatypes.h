@@ -366,10 +366,31 @@ struct ProductList : public JRecord {
         }
     }
     ProductMetadata at(int i) {
-        return ProductMetadata(value[i]);
+        return products.at(i);
     }
     virtual void dump() {
+        std::cerr << "-----------------------\n## JSON:\n";
+        std::cerr << JValue(value).str() << "\n";
+        std::cerr << "-----------------------\n## Elements:\n";
+        for (auto & v: products) { std::cerr << JValue(v.val()).str() << "\n"; }
+        std::cerr << "## Vector:\n";
         for (auto & v: products) { v.dump(); }
+        std::cerr << "-----------------------\n";
+    }
+    virtual size_t size() { return value.size(); }
+    virtual void clear() {
+        products.clear();
+        value.clear();
+    }
+    virtual void add(int i, ProductMetadata & m) {
+        if (i > products.size()) { products.resize(i + 1); }
+        products[i] = m;
+        value[i] = m.val();
+    }
+    virtual void append(ProductMetadata & m) {
+        int k = products.size();
+        products.push_back(m);
+        value[k] = m.val();
     }
     std::vector<ProductMetadata> products;
 };

@@ -259,9 +259,9 @@ void DataMng::sanitizeProductVersions(ProductList & prodList)
             m.dump();
 
             if (dbHdl->checkSignature(sgnt, ptype, ver)) {
-                TRC("Signature " + sgnt +
+                TRC("Product " + m.baseName() +
                        " with version " + ver + " exists!!");
-                TraceMsg("Signature " + sgnt +
+                TraceMsg("Product " + m.baseName() +
                          " with version " + ver + " exists!!");
 
                 FileVersion fv(ver);
@@ -274,7 +274,7 @@ void DataMng::sanitizeProductVersions(ProductList & prodList)
                 std::string url(m.url());
                 std::string oldFile(str::mid(url,7,1000));
 
-                std::string s("Found in database:" + sgnt + " [" + ver +
+                std::string s("Found in database: " + m.baseName() + " [" + ver +
                               "], changing " + origVer + " with " + newVer);
                 WarnMsg(s);
                 CreateSysAlert(Log::WARNING, Alert::Warning, s);

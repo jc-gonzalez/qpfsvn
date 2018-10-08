@@ -529,8 +529,6 @@ void TskAge::sendTaskReport(std::string contId)
     addInfo["MainInput"] = task.inputs.products.at(0).productId();
     addInfo["Flags"]     = task.taskFlags();
     
-    TRC("INPUTS: " + task.inputs.str());
-        
     // Place all taskdata information into task structure
     taskData["Info"] = addInfo;
     task["taskData"] = taskData;

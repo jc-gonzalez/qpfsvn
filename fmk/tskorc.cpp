@@ -203,7 +203,7 @@ bool TskOrc::checkRulesForProductType(std::string prodType,
             // type (specified by the loop)
             // Otherwise, the rule cannot be fired
             if (rangeProd.first == rangeProd.second) {
-                inputs.products.clear();
+                inputs.clear();
                 continue;
             }
 
@@ -213,7 +213,7 @@ bool TskOrc::checkRulesForProductType(std::string prodType,
             itt--;
             ProductMetadata & m = (*itt).second;
             std::string pt = m.productType();
-            inputs.products.push_back(m);
+            inputs.append(m);
             availableInputs.insert(pt);
 
 #ifdef EVAL_CONDITION
@@ -297,8 +297,9 @@ void TskOrc::createTasks(ProductList & inData, int flags, std::vector<TaskInfo> 
                         orcMaps.ruleDesc[kv.first]);
                 DbgMsg("Product type " + prodType + " fires rule: " +
                         orcMaps.ruleDesc[kv.first]);
-                for (auto & itInp : kv.second.products) {
-                    DbgMsg("Input: " + itInp.productId());
+                for (int i = 0; i < kv.second.size(); ++i) {
+                    TRC("Input: " + kv.second.at(i).productId());
+                    DbgMsg("Input: " + kv.second.at(i).productId());
                 }
 
                 // Generate task and store in output vector
@@ -332,7 +333,7 @@ void TskOrc::createTask(Rule * rule, ProductList & inputs, int flags, TaskInfo &
     task["params"]       = nullJson;
     task["taskFlags"]    = flags;
     
-    std::string productId;
+    std::string productId = inputs.at(0).productId();
     
     URLHandler urlh;
     int i = 0;
@@ -341,7 +342,6 @@ void TskOrc::createTask(Rule * rule, ProductList & inputs, int flags, TaskInfo &
         ProductMetadata & mg = urlh.fromLocalArch2Gateway();
         task.inputs.products.push_back(mg);
         task["inputs"][i] = mg.val();
-        if (i == 0) { productId = m.productId(); }
         ++i;
     }
 
@@ -362,7 +362,7 @@ void TskOrc::createTask(Rule * rule, ProductList & inputs, int flags, TaskInfo &
     addInfo["Inputs"]    = task.inputs.str();
     addInfo["MainInput"] = productId;
     addInfo["Flags"]     = flags;
-
+    TRC("New Task ProductId: " + productId);
     json taskData;
     taskData["Info"] = addInfo;
     

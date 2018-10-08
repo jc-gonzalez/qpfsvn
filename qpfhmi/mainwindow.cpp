@@ -1660,19 +1660,16 @@ void MainWindow::reprocessProduct()
 
     ProductList reprocProducts;
     FileNameSpec fns;
-    ProductMetadata md;
     foreach (QString fileName, inProds) {
+        ProductMetadata md;
         fns.parseFileName(fileName.toStdString(), md);
         md["urlSpace"]       = ReprocessingSpace;
         md["procTargetType"] = ((out == LocalDir) ?
                                 UA_LOCAL : ((out == VOSpaceFolder) ?
                                                UA_VOSPACE : UA_NOMINAL)); 
         md["procTarget"]     = outLocation.toStdString();
-        reprocProducts.products.push_back(md);
+        reprocProducts.append(md);
     }
-
-    TRC(md.urlSpace() + " " + std::to_string(md.procTargetType()) +
-        " " + md.procTarget());
 
     hmiNode->sendReprocCmd(reprocProducts, flags + (int)(out));
 

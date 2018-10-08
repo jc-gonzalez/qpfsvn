@@ -309,7 +309,7 @@ void MainWindow::manualSetupUI()
     connect(ui->tabMainWgd, SIGNAL(tabCloseRequested(int)),
             actHdl, SLOT(closeTab(int)));
     connect(ui->tabwdgArchViews, SIGNAL(tabCloseRequested(int)),
-            actHdl, SLOT(closeTab(int)));
+            actHdl, SLOT(closeArchTab(int)));
 
     //ui->tabwdgArchViews->tabBar()->tabButton(0, QTabBar::RightSide)->hide();
     //ui->tabwdgArchViews->tabBar()->tabButton(0, QTabBar::RightSide)->resize(0, 0);
@@ -318,11 +318,11 @@ void MainWindow::manualSetupUI()
     connect(ui->tabMainWgd, SIGNAL(customContextMenuRequested(const QPoint &)),
             actHdl, SLOT(showTabsContextMenu(const QPoint &)));
 
-    //ui->tabwdgArchViews->setContextMenuPolicy(Qt::CustomContextMenu);
-    //connect(ui->tabwdgArchViews, SIGNAL(customContextMenuRequested(const QPoint &)),
-    //        actHdl, SLOT(showTabsContextMenu(const QPoint &)));
+    ui->tabwdgArchViews->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->tabwdgArchViews, SIGNAL(customContextMenuRequested(const QPoint &)),
+            actHdl, SLOT(showNoTabsContextMenu(const QPoint &)));
 
-    ui->tabwdgMonitPages->setContextMenuPolicy(Qt::NoContextMenu);
+    //ui->tabwdgMonitPages->setContextMenuPolicy(Qt::NoContextMenu);
     //connect(ui->tabwdgMonitPages, SIGNAL(customContextMenuRequested(const QPoint &)),
     //        actHdl, SLOT(showTabsContextMenu(const QPoint &)));
 

@@ -59,6 +59,7 @@ const int ActionHandler::NumOfFixedTabs = 4;
 ActionHandler::ActionHandler(QWidget *parent) 
 {
     mw = qobject_cast<MainWindow*>(parent);
+    tabWidgetSender = nullptr;
 }
 
 //----------------------------------------------------------------------
@@ -403,14 +404,25 @@ void ActionHandler::activateClipboardFor(TextView * child)
 //----------------------------------------------------------------------
 // SLOT: closeTab
 //----------------------------------------------------------------------
+void ActionHandler::closeArchTab(int n)
+{
+    if (n < 1) { return; }
+    QTabWidget* tb = qobject_cast<QTabWidget*>(sender());
+    delete tb->widget(n);
+}
+
+//----------------------------------------------------------------------
+// SLOT: closeTab
+//----------------------------------------------------------------------
 void ActionHandler::closeTab(int n)
 {
-    QTabWidget* tb = qobject_cast<QTabWidget*>(sender());
+    QTabWidget* tb = qobject_cast<QTabWidget*>(tabWidgetSender);
     if ((tabWdgName == TabWidgetNames[TabWdg_Main]) ||
         (tb == mw->ui->tabMainWgd)) {
         mw->removeRowInNav(n);
     }
     delete tb->widget(n);
+    tabWidgetSender = nullptr;
 }
 
 //----------------------------------------------------------------------
@@ -581,6 +593,14 @@ void ActionHandler::showArchiveTableContextMenu(const QPoint & p)
         menu.exec(mw->ui->treevwArchive->mapToGlobal(p));
         mw->isViewsUpdateActive = true;
     }
+}
+
+//----------------------------------------------------------------------
+// SLOT: showNoTabsContextMenu
+// Shows closing menu for all the main tabs in the window
+//----------------------------------------------------------------------
+void ActionHandler::showNoTabsContextMenu(const QPoint & p)
+{
 }
 
 //----------------------------------------------------------------------

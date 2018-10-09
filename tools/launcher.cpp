@@ -41,6 +41,7 @@
 #include "launcher.h"
 
 #include "process.h"
+#include <iostream>
 
 //----------------------------------------------------------------------
 // Method: create
@@ -73,9 +74,24 @@ bool Launcher::exec()
 //------------------------------------------------------------
 IPythonLauncher::IPythonLauncher(std::string ipyApp, std::string ipyPath)
 {
-    std::vector<std::string> vargs {"-e", ipyApp, "-i",
-                                    "-c", "'%cd " + ipyPath + "'"};
-    create("xterm", vargs);
+    std::vector<std::string> vargs {ipyApp, "-i", "-c", "'%cd " + ipyPath + "'"};
+    char * termApp = getenv("COLORTERM");
+    if (termApp == nullptr) { termApp = getenv("TERM"); }
+    if (strncmp(termApp, "xterm", 5) == 0) {
+        vargs.insert(vargs.begin(), "-e");
+    } else {
+        vargs.insert(vargs.begin(), "--");
+    }
+    if (termApp != nullptr) {
+        try {
+            std::cerr << "Launching " << ipyApp.c_str() << " with " << termApp << " . . .\n";
+            create(termApp, vargs);
+        } catch(...) {
+            std::cerr << "Terminal application " << termApp << " not found.\n"
+                      << "Please, set COLORTERM or TERM env. variables to an existing "
+                      << "terminal application.\n";
+        }
+    }
 }
 
 //------------------------------------------------------------

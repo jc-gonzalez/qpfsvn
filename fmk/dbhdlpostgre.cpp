@@ -773,6 +773,7 @@ bool DBHdlPostgreSQL::checkSignature(std::string & sgnt, std::string & ptype,
                     " ORDER BY id "
                     "DESC LIMIT 1;");
 
+    //TRC("CHECKING VERSION: " + cmd);
     // The 10 sec of margin are taken to avoid to count as existing, by
     // the TskOrc, products that where just inserted, by the DataMng,
     // into the local archive, since TskOrc and DataMng are receiving

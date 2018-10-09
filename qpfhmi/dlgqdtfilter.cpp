@@ -207,10 +207,10 @@ QString DlgQdtFilter::convertToSql(QString s)
     }
 
     // Replace filter specifications
-    QRegExp rxFlt("\\{(.+)\\}");
+    QRegExp rxFlt("\\" + StartComparison + "(.+)\\" + EndComparison);
     rxFlt.setMinimal(true);
 
-    QRegExp rxElem("\\[(.+)\\]");
+    QRegExp rxElem("\\" + StartElement + "(.+)\\" + EndElement);
     rxElem.setMinimal(true);
 
     int pos = 0;
@@ -237,10 +237,11 @@ QString DlgQdtFilter::convertToSql(QString s)
             }
 
             // Substitute pseudo-code expression with true condition
-            newFlt.replace("[" + elem + "]", newElem);
+            newFlt.replace(StartElement + elem + EndElement, newElem);
         }
 
-        f.replace("{" + aFlt + "}", "(" + newFlt + "))");
+        f.replace(StartComparison + aFlt + EndComparison,
+                  "(" + newFlt + "))");
     }
 
     return f;

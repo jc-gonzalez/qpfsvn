@@ -122,6 +122,8 @@ namespace QPF {
 static const int MessageDelay = 2000;
 static const char * FixedWidthStyle = "font: 8pt \"Droid Sans Mono\";";
 
+static const int NumOfURLCol = 12;
+
 // Valid Manager states
 const int MainWindow::ERROR        = -1;
 const int MainWindow::OFF          =  0;
@@ -307,7 +309,7 @@ void MainWindow::manualSetupUI()
     connect(ui->tabMainWgd, SIGNAL(tabCloseRequested(int)),
             actHdl, SLOT(closeTab(int)));
     connect(ui->tabwdgArchViews, SIGNAL(tabCloseRequested(int)),
-            actHdl, SLOT(closeTab(int)));
+            actHdl, SLOT(closeArchTab(int)));
 
     //ui->tabwdgArchViews->tabBar()->tabButton(0, QTabBar::RightSide)->hide();
     //ui->tabwdgArchViews->tabBar()->tabButton(0, QTabBar::RightSide)->resize(0, 0);
@@ -318,9 +320,9 @@ void MainWindow::manualSetupUI()
 
     ui->tabwdgArchViews->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->tabwdgArchViews, SIGNAL(customContextMenuRequested(const QPoint &)),
-            actHdl, SLOT(showTabsContextMenu(const QPoint &)));
+            actHdl, SLOT(showNoTabsContextMenu(const QPoint &)));
 
-    ui->tabwdgMonitPages->setContextMenuPolicy(Qt::NoContextMenu);
+    //ui->tabwdgMonitPages->setContextMenuPolicy(Qt::NoContextMenu);
     //connect(ui->tabwdgMonitPages, SIGNAL(customContextMenuRequested(const QPoint &)),
     //        actHdl, SLOT(showTabsContextMenu(const QPoint &)));
 
@@ -732,6 +734,8 @@ void MainWindow::showConfigTool()
             hmiNode->sendNewConfig();
             TRC("Sending new configuration to all the nodes");
         }
+        // Update HMI
+        ui->lblVerbosity->setText(QString::fromStdString(cfg.general.logLevel()));
     }
 }
 
@@ -848,11 +852,13 @@ void MainWindow::processProductsInPath(QString folder)
     FileNameSpec fs;
     ProductMetadata m;
     foreach (const QString & fi, files) {
-        fs.parseFileName(fi.toStdString(), m);
-        m["urlSpace"] = UserSpace;
-        uh.setProduct(m);
-        m = uh.fromFolder2Inbox();
-        //sleep(5);
+        if (fs.parseFileName(fi.toStdString(), m)) {
+            m["urlSpace"] = UserSpace;
+            uh.setProduct(m);
+            m.dump();
+            m = uh.fromFolder2Inbox();
+            sleep(2);
+        }
     }
 }
 
@@ -863,11 +869,12 @@ void MainWindow::processProductsInPath(QString folder)
 void MainWindow::getProductsInFolder(QString & path, QStringList & files, bool recursive)
 {
     QDir dir(path);
-    QFileInfoList allEntries = dir.entryInfoList(QDir::Files | QDir::Dirs |
+    QFileInfoList allEntries = dir.entryInfoList(QDir::Files |
             QDir::NoSymLinks | QDir::NoDotAndDotDot,
             QDir::Time | QDir::DirsLast);
     foreach (const QFileInfo & fi, allEntries) {
         QString absPath = fi.absoluteFilePath();
+        std::cerr << "FILE_IN_FOLDER: " << absPath.toStdString() << '\n';
         if (fi.isDir()) {
             if (recursive) {
                 getProductsInFolder(absPath, files, recursive);
@@ -1496,8 +1503,6 @@ void MainWindow::setMultiselectProducts(bool b)
 //----------------------------------------------------------------------
 void MainWindow::openWithDefault()
 {
-    static const int NumOfURLCol = 12;
-
     QModelIndex m = ui->treevwArchive->currentIndex();
     QString url = m.model()->index(m.row(), NumOfURLCol, m.parent()).data().toString();
     QDesktopServices::openUrl(QUrl::fromLocalFile(url));
@@ -1508,8 +1513,6 @@ void MainWindow::openWithDefault()
 //----------------------------------------------------------------------
 void MainWindow::openLocation()
 {
-    static const int NumOfURLCol = 12;
-
     QModelIndex m = ui->treevwArchive->currentIndex();
     QString url = m.model()->index(m.row(), NumOfURLCol, m.parent()).data().toString();
     QFileInfo fs(url.mid(7));
@@ -1522,8 +1525,6 @@ void MainWindow::openLocation()
 //----------------------------------------------------------------------
 void MainWindow::openWith()
 {
-    static const int NumOfURLCol = 12;
-
     QAction * ac = qobject_cast<QAction*>(sender());
     QString key = ac->text();
     const QUserDefTool & udt = userDefTools.value(key);
@@ -1623,8 +1624,6 @@ void MainWindow::openWith()
 //----------------------------------------------------------------------
 void MainWindow::reprocessProduct()
 {
-    static const int NumOfURLCol = 12;
-
     QPoint p = actHdl->getAcReprocess()->property("clickedItem").toPoint();
     //QModelIndex m = ui->treevwArchive->indexAt(p);
 
@@ -1661,19 +1660,16 @@ void MainWindow::reprocessProduct()
 
     ProductList reprocProducts;
     FileNameSpec fns;
-    ProductMetadata md;
     foreach (QString fileName, inProds) {
+        ProductMetadata md;
         fns.parseFileName(fileName.toStdString(), md);
         md["urlSpace"]       = ReprocessingSpace;
         md["procTargetType"] = ((out == LocalDir) ?
                                 UA_LOCAL : ((out == VOSpaceFolder) ?
                                                UA_VOSPACE : UA_NOMINAL)); 
         md["procTarget"]     = outLocation.toStdString();
-        reprocProducts.products.push_back(md);
+        reprocProducts.append(md);
     }
-
-    TRC(md.urlSpace() + " " + std::to_string(md.procTargetType()) +
-        " " + md.procTarget());
 
     hmiNode->sendReprocCmd(reprocProducts, flags + (int)(out));
 
@@ -1685,8 +1681,6 @@ void MainWindow::reprocessProduct()
 //----------------------------------------------------------------------
 void MainWindow::analyzeProduct()
 {
-    static const int NumOfURLCol = 12;
-
     // Create product list
 
     QAction * caller = qobject_cast<QAction*>(sender());
@@ -1740,8 +1734,6 @@ void MainWindow::analyzeProduct()
 //----------------------------------------------------------------------
 void MainWindow::exportProduct()
 {
-    static const int NumOfURLCol = 12;
-
     QPoint p = actHdl->getAcReprocess()->property("clickedItem").toPoint();
     //QModelIndex m = ui->treevwArchive->indexAt(p);
 
@@ -1841,13 +1833,9 @@ void MainWindow::showJSONdata(QString title, QString & dataString)
 //----------------------------------------------------------------------
 void MainWindow::openLocalArchiveElement(QModelIndex idx)
 {
-    static const int NumOfNameCol = 0;
-    static const int NumOfURLCol = 12;
-
     int row = idx.row();
     TMsg(QString("(%1,%2)").arg(row).arg(idx.column()).toStdString());
     const QAbstractItemModel * model = idx.model();
-    QModelIndex nameIdx = model->index(row, NumOfNameCol, idx.parent());
     QModelIndex urlIdx  = model->index(row, NumOfURLCol, idx.parent());
 
     QString url = urlIdx.data().toString().trimmed();
@@ -2614,7 +2602,7 @@ void MainWindow::jumpToAlertSource(const QModelIndex & idx)
 {
     Alert alert = procAlertModel->getAlertAt(idx);
     QString origin = QString::fromStdString(alert.getOrigin());
-    std::cerr << origin.toStdString() << '\n';
+    //std::cerr << origin.toStdString() << '\n';
     QStringList seq = origin.split('.');
     QString a = seq.takeFirst();
     QString b = seq.takeFirst();
@@ -2627,6 +2615,7 @@ void MainWindow::jumpToAlertSource(const QModelIndex & idx)
     QString tabName = fs.fileName();
 
     seq.prepend(a + "." + b + "." + c + "." + d);
+    seq.prepend("Results");
     seq << "diagnostics" << last;
     
     //foreach (QString s, seq) { std::cerr << '/' << s.toStdString(); }
@@ -2673,13 +2662,13 @@ void MainWindow::reportFiltering()
     // This looks into the products table in the DB, and retrieves the list of
     // diagnostics with possible entries and values
     QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
-	db.setHostName    (Config::DBHost.c_str());
+    db.setHostName    (Config::DBHost.c_str());
     db.setPort        (std::stoi(Config::DBPort.c_str()));
-	db.setDatabaseName(Config::DBName.c_str());
-	db.setUserName    (Config::DBUser.c_str());
-	db.setPassword    (Config::DBPwd.c_str());
+    db.setDatabaseName(Config::DBName.c_str());
+    db.setUserName    (Config::DBUser.c_str());
+    db.setPassword    (Config::DBPwd.c_str());
 
-	if (! db.open()) {
+    if (! db.open()) {
         int ret = QMessageBox::warning(this, tr("Problem with database"),
                                        tr("Cannot access database!"),
                                        QMessageBox::Ok, QMessageBox::Ok);
@@ -2738,6 +2727,9 @@ void MainWindow::reportFiltering()
     ProductsFilterModel * prodFiltModel = new ProductsFilterModel(qryDef);
     newView->setModel(prodFiltModel);
     newView->setSortingEnabled(true);
+
+    connect(filtView, SIGNAL(queryStringChanged(QString)),
+            prodFiltModel, SLOT(changeQuery(QString)));
 
     int tabIdx = ui->tabwdgArchViews->addTab(filtView, viewName);
     ui->tabwdgArchViews->setTabIcon(tabIdx, QIcon(":/img/table.png"));

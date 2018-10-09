@@ -140,7 +140,7 @@ void Master::runEachIteration()
             
             // a. Generate tasks for processing these products
             tskOrc->createTasks(restartInData, 0, tasks);
-            
+
         }
 
         isFirstIteration = false;

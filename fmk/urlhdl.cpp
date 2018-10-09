@@ -560,11 +560,24 @@ int URLHandler::relocate(std::string & sFrom, std::string & sTo,
         break;
     case MOVE:
         retVal = rename(sFrom.c_str(), sTo.c_str());
-        TRC("MOVE: Moving file from " << sFrom << " to " << sTo);
-        if ((retVal != 0) && (errno = EXDEV)) {
-            // Error due to move between different logical devices
-            // Try copy & remove
-            if ((retVal = copyfile(sFrom, sTo)) == 0) {
+        TRC("MOVE: Moving file from " << sFrom << " to " << sTo << "   retVal=" << retVal);
+        if (retVal != 0) {
+            TRC("MOVE: errno=" << errno << "  (EXDEV:" << EXDEV
+                << ",EEXIST:" << EEXIST << ")");
+            if (errno = EXDEV) {
+                // Error due to move between different logical devices
+                // Try copy & remove
+                if ((retVal = copyfile(sFrom, sTo)) == 0) {
+                    (void)unlink(sFrom.c_str());
+                }
+            } else if (errno = EEXIST) {
+                // File with same name is already at target location
+                // Simply remove src.
+                (void)unlink(sFrom.c_str());
+            }
+        } else {
+            struct stat buffer;
+            if (stat(sFrom.c_str(), &buffer) == 0) {
                 (void)unlink(sFrom.c_str());
             }
         }

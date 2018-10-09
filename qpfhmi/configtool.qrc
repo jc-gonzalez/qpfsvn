@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/img">
+    <file>img/propcfg.png</file>
     <file>img/calendar.png</file>
     <file>img/verblevel.png</file>
     <file>img/connect.png</file>

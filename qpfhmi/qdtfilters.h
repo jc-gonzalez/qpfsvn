@@ -76,6 +76,12 @@ enum Comparison { LIST_OF_COMPARISONS };
 extern const QString ComparisonToken[];
 extern const QString ProductSelToken[];
 
+extern const QString StartComparison;
+extern const QString EndComparison;
+
+extern const QString StartElement;
+extern const QString EndElement;
+
 struct QDTSingleFilter {
     QDTSingleFilter() {
         section = "";
@@ -84,7 +90,7 @@ struct QDTSingleFilter {
         item = "";
         cmp = LT;
         cmpString = "";
-    }    
+    }
     QString section;
     QString diag;
     QString outGrp;
@@ -93,7 +99,7 @@ struct QDTSingleFilter {
     QString cmpString;
     QString evaluate();
 };
- 
+
 struct QDTFilter {
     QDTFilter() {
         prodSelType = ALL;
@@ -108,6 +114,6 @@ struct QDTFilter {
     QMap<FrmDiagFlt*,QDTSingleFilter> filts;
     QString sqlQry;
     QString evaluate();
-};                          
-                                               
+};
+
 #endif // QDTFILTERS_H

@@ -96,12 +96,14 @@ public slots:
 private slots:
     void showArchiveTableContextMenu(const QPoint&);
     void showTabsContextMenu(const QPoint&);
+    void showNoTabsContextMenu(const QPoint&);
     void showJsonContextMenu(const QPoint&);
     void showTaskMonitContextMenu(const QPoint&);
     void showAlertsContextMenu(const QPoint&);
     void showSysAlertsContextMenu(const QPoint &);
     void showTxContextMenu(const QPoint&);
         
+    void closeArchTab(int n);
     void closeTab(int n);
     void closeTabAction();
     void closeAllTabAction();

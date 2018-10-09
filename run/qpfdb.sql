@@ -516,20 +516,20 @@ create materialized view products_info_filter as
         products_info.product_type,
         products_info.url as url,
         products.key as fits_file,
-        ccd.key as ccd,
-        q.key as q,
+        ccdq.key as ccd,
         diag.key as diag,
         values.key as values,
         values.value
     from
         products_info
-    cross join json_each(products_info.report) products
-    cross join json_each(products.value) ccd
-    cross join json_each(ccd.value) q
-    cross join json_each(q.value) sec
+    cross join json_each(products_info.report) report_sections
+    cross join json_each(report_sections.value) products
+    cross join json_each(products.value) ccdq
+    cross join json_each(ccdq.value) sec
     cross join json_each(sec.value) diag
     cross join json_each(diag.value) values 
-        where sec.key like 'diagnostics' and 
+        where report_sections.key like 'Results' and
+              sec.key like 'diagnostics' and 
               values.key not like 'name')
 union all
     (select 
@@ -539,20 +539,20 @@ union all
         products_info.product_type,
         products_info.url as url,
         products.key as fits_file,
-        ccd.key as ccd,
-        q.key as q,
+        ccdq.key as ccd,
         diag.key as diag,
         'values'::text as values,
         ('{"value": ' || values.value::char || '}')::json
     from
         products_info
-    cross join json_each(products_info.report) products
-    cross join json_each(products.value) ccd
-    cross join json_each(ccd.value) q
-    cross join json_each(q.value) sec
+    cross join json_each(products_info.report) report_sections
+    cross join json_each(report_sections.value) products
+    cross join json_each(products.value) ccdq
+    cross join json_each(ccdq.value) sec
     cross join json_each(sec.value) diag
     cross join json_each(diag.value) values 
-        where sec.key like 'processing')
+        where report_sections.key like 'Results' and
+              sec.key like 'processing')
 );
 
 -- ----------------------------------------------------------------------
@@ -565,14 +565,16 @@ select distinct
     items.key as item
 from
     products_info
-cross join json_each(products_info.report) products
-cross join json_each(products.value) ccd
-cross join json_each(ccd.value) q
-cross join json_each(q.value) sec
+cross join json_each(products_info.report) report_sections
+cross join json_each(report_sections.value) products
+cross join json_each(products.value) ccdq
+cross join json_each(ccdq.value) sec
 cross join json_each(sec.value) diag
 cross join json_each(diag.value) values
 cross join json_each(values.value) items
-where sec.key like 'diagnostics' and values.key not like 'name'
+where report_sections.key like 'Results' and
+      sec.key like 'diagnostics' and
+      values.key not like 'name'
 order by sec.key, diag.key, values.key, items.key;
 
 -- ----------------------------------------------------------------------
@@ -583,12 +585,13 @@ select distinct
     diag.key as diag
 from
     products_info
-cross join json_each(products_info.report) products
-cross join json_each(products.value) ccd
-cross join json_each(ccd.value) q
-cross join json_each(q.value) sec
+cross join json_each(products_info.report) report_sections
+cross join json_each(report_sections.value) products
+cross join json_each(products.value) ccdq
+cross join json_each(ccdq.value) sec
 cross join json_each(sec.value) diag
-where sec.key not like 'diagnostics'
+where report_sections.key like 'Results' and
+      sec.key not like 'diagnostics'
 order by sec.key, diag.key;
 
 -- ----------------------------------------------------------------------

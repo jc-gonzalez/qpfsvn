@@ -128,7 +128,7 @@ void EvtMng::runEachIteration()
             {
                 std::lock_guard<std::mutex> lock(mtxInData);
                 m["urlSpace"] = InboxSpace;
-                inboxProducts.products.push_back(m);
+                inboxProducts.append(m);
             }
         }
         events.erase(events.begin());
@@ -225,9 +225,10 @@ void EvtMng::processHMICmdMsg(ScalabilityProtocolRole* c, MessageString & m)
 
         ProductList prodList(msg.body["products"]);
         TRC("Received CmdReproc with " +
-            std::to_string(prodList.products.size()) + " products");
+            std::to_string(prodList.size()) + " products");
         std::lock_guard<std::mutex> lock(mtxReproc);
-        reprocProducts.products = std::move(prodList.products);
+        reprocProducts.clear();
+        for (auto & v : prodList.products) { reprocProducts.append(v); }
         reprocFlags = msg.body["flags"].asInt();
         
     } else if (cmd == CmdQuit) { // Quit request
@@ -270,12 +271,14 @@ void EvtMng::sendStopAgentTasks()
 //----------------------------------------------------------------------
 bool EvtMng::getInData(ProductList & inData, std::string & space)
 {
-    bool retVal = inboxProducts.products.size() > 0;
+    bool retVal = inboxProducts.size() > 0;
     if (retVal) {
         std::lock_guard<std::mutex> lock(mtxInData);
-        inData.products = std::move(inboxProducts.products);
-        space = inData.products.at(0).urlSpace();
+        inData.clear();
+        for (auto & v : inboxProducts.products) { inData.append(v); }
+        space = inData.at(0).urlSpace();
     }
+    inboxProducts.clear();
     return (retVal);
 }
 
@@ -285,12 +288,14 @@ bool EvtMng::getInData(ProductList & inData, std::string & space)
 //----------------------------------------------------------------------
 bool EvtMng::getReprocData(ProductList & reprocData, int & flags)
 {
-    bool retVal = reprocProducts.products.size() > 0;
+    bool retVal = reprocProducts.size() > 0;
     if (retVal) {
         std::lock_guard<std::mutex> lock(mtxReproc);
-        reprocData.products = std::move(reprocProducts.products);
+        reprocData.clear();
+        for (auto & v : reprocProducts.products) { reprocData.append(v); }
         flags = reprocFlags;
     }
+    reprocProducts.clear();
     return (retVal);
 }
 

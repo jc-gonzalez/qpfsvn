@@ -71,7 +71,7 @@
       <number>0</number>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <property name="tabSpacing">
       <number>6</number>
@@ -82,7 +82,7 @@
         <x>0</x>
         <y>0</y>
         <width>852</width>
-        <height>594</height>
+        <height>543</height>
        </rect>
       </property>
       <attribute name="label">
@@ -184,8 +184,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>852</width>
-        <height>594</height>
+        <width>838</width>
+        <height>553</height>
        </rect>
       </property>
       <property name="font">
@@ -886,7 +886,7 @@
         <x>0</x>
         <y>0</y>
         <width>852</width>
-        <height>594</height>
+        <height>543</height>
        </rect>
       </property>
       <attribute name="icon">
@@ -964,7 +964,7 @@
           <item>
            <widget class="QGroupBox" name="gpboxHosts">
             <property name="title">
-             <string>Host machines &amp;&amp; Swarms Network</string>
+             <string>Host machines &amp;&amp; Swarms Network *</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_8">
              <item>
@@ -1274,7 +1274,7 @@
         <x>0</x>
         <y>0</y>
         <width>852</width>
-        <height>594</height>
+        <height>543</height>
        </rect>
       </property>
       <attribute name="icon">
@@ -1352,7 +1352,7 @@
           <item>
            <widget class="QGroupBox" name="groupBox_2">
             <property name="title">
-             <string>Database</string>
+             <string>Database *</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_11">
              <item>
@@ -1627,7 +1627,7 @@
         <x>0</x>
         <y>0</y>
         <width>852</width>
-        <height>594</height>
+        <height>543</height>
        </rect>
       </property>
       <attribute name="icon">
@@ -1705,7 +1705,7 @@
           <item>
            <widget class="QGroupBox" name="gpboxPT">
             <property name="title">
-             <string>Product Types</string>
+             <string>Product Types *</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_9">
              <property name="spacing">
@@ -1778,7 +1778,7 @@
           <item>
            <widget class="QGroupBox" name="groupBox_5">
             <property name="title">
-             <string>Processors</string>
+             <string>Processors *</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_22">
              <property name="spacing">
@@ -1859,7 +1859,7 @@
         <x>0</x>
         <y>0</y>
         <width>852</width>
-        <height>594</height>
+        <height>543</height>
        </rect>
       </property>
       <attribute name="icon">
@@ -1937,7 +1937,7 @@
           <item>
            <widget class="QGroupBox" name="gpboxRules">
             <property name="title">
-             <string>Orchestration Rules</string>
+             <string>Orchestration Rules *</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_7">
              <property name="spacing">
@@ -2036,7 +2036,7 @@
         <x>0</x>
         <y>0</y>
         <width>852</width>
-        <height>594</height>
+        <height>543</height>
        </rect>
       </property>
       <attribute name="icon">
@@ -2114,7 +2114,7 @@
           <item>
            <widget class="QGroupBox" name="gpboxNet_2">
             <property name="title">
-             <string>User-defined External Tools</string>
+             <string>User-defined External Tools *</string>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_12">
              <property name="spacing">
@@ -2251,7 +2251,7 @@
         <x>0</x>
         <y>0</y>
         <width>852</width>
-        <height>594</height>
+        <height>543</height>
        </rect>
       </property>
       <attribute name="icon">
@@ -2329,7 +2329,7 @@
           <item>
            <widget class="QGroupBox" name="groupBox_11">
             <property name="title">
-             <string>VOSpace Credentials</string>
+             <string>VOSpace Credentials *</string>
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_16">
              <item>
@@ -2416,7 +2416,7 @@
           <item>
            <widget class="QGroupBox" name="groupBox_12">
             <property name="title">
-             <string>Jupyter Lab</string>
+             <string>Jupyter Lab *</string>
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_22">
              <item>
@@ -2503,7 +2503,7 @@
           <item>
            <widget class="QGroupBox" name="groupBox_13">
             <property name="title">
-             <string>IPython</string>
+             <string>IPython *</string>
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_23">
              <item>
@@ -2579,7 +2579,7 @@
         <x>0</x>
         <y>0</y>
         <width>852</width>
-        <height>594</height>
+        <height>543</height>
        </rect>
       </property>
       <attribute name="icon">
@@ -2669,7 +2669,7 @@
           <item>
            <widget class="QGroupBox" name="groupBox_3">
             <property name="title">
-             <string>Monitoring flags</string>
+             <string>Monitoring flags *</string>
             </property>
             <layout class="QHBoxLayout" name="horizontalLayout_15" stretch="50,50">
              <item>
@@ -2956,6 +2956,41 @@ number indicating the percentage of progress of the task.files the </string>
       </layout>
      </widget>
     </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_12" stretch="1,1000">
+     <property name="topMargin">
+      <number>2</number>
+     </property>
+     <property name="bottomMargin">
+      <number>2</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="label_25">
+       <property name="text">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;*&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="lblDisclaimer">
+       <property name="font">
+        <font>
+         <pointsize>8</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Elements or group of elements marked with this symbol will get modified in the current HMI and Core instance, and propagated to all the Core instances connected to the master Core instance when the 'Apply' button is selected. This option can lead to disconnection of elements and other troubles. Please, consider instead saving the modifications to a configuration file, and restart all the Core instances with the new configuration.</string>
+       </property>
+       <property name="wordWrap">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="10,1,2,1,1,0">

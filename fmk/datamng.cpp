@@ -92,13 +92,13 @@ void DataMng::storeTskRegData(json & tskRepData)
          itr != tskRepData.end(); ++itr) {
 
         TaskInfo task(*itr);
-        
+
         std::string taskName  = task.taskName();
         TaskStatus taskStatus = TaskStatus(task.taskStatus());
-        
+
         TraceMsg("DataMng: Processing TaskReport: " + taskName
                  + " has status " + TaskStatusName[taskStatus]);
-        
+
         saveTaskToDB(task);
     }
 }
@@ -150,7 +150,7 @@ void DataMng::saveTaskToDB(TaskInfo & taskInfo, bool initialStore)
     std::unique_ptr<DBHandler> dbHdl(new DBHdlPostgreSQL);
 
     TRC("TaskStatus = " + TaskStatusName[(TaskStatus)(taskInfo.taskStatus())]);
-    
+
     try {
         // Check that connection with the DB is possible
         dbHdl->openConnection();
@@ -180,8 +180,8 @@ void DataMng::saveTaskToDB(TaskInfo & taskInfo, bool initialStore)
 
         // Try to process the QDT report and get the issues found
         for (auto & m : taskInfo.outputs.products) {
-            if ((m.procTargetType() == UA_NOMINAL) && 
-                (m.procFunc() == "QLA") && 
+            if ((m.procTargetType() == UA_NOMINAL) &&
+                (m.procFunc() == "QLA") &&
                 (m.fileType() == "JSON")) {
                 QDTReportHandler qdtRep(m.url().substr(7));
                 if (!qdtRep.read()) continue;
@@ -190,7 +190,7 @@ void DataMng::saveTaskToDB(TaskInfo & taskInfo, bool initialStore)
                 for (auto & v : issues) { RaiseDiagAlert(*v); }
             }
         }
-        
+
         // Move products to local archive or to final destination
         for (auto & m : taskInfo.outputs.products) {
             urlh.setProduct(m);
@@ -205,7 +205,7 @@ void DataMng::saveTaskToDB(TaskInfo & taskInfo, bool initialStore)
                                         Alert::Resource,
                                         std::string(__FILE__ ":" Stringify(__LINE__)),
                                         "Cannot copy the output product to target " + m.procTarget(),
-                                        0));            
+                                        0));
                 }
             }
         }
@@ -219,12 +219,12 @@ void DataMng::saveTaskToDB(TaskInfo & taskInfo, bool initialStore)
         } else if (flags & OpenJupyterLab) {
             // TODO Analyze product with Jupyter Lab
         }
-            
+
         InfoMsg("Saving outputs...");
         saveProductsToDB(taskInfo.outputs);
-        
+
         InfoMsg("Sending message to register outputs at Orchestrator catalogue");
-        
+
         //Config & cfg = Config::_();
         if (cfg.flags.sendOutputsToMainArchive()) {
             InfoMsg("Archiving/Registering data at DSS/EAS");
@@ -255,39 +255,53 @@ void DataMng::sanitizeProductVersions(ProductList & prodList)
         for (auto & m : prodList.products) {
             std::string sgnt  = m.signature();
             std::string ptype = m.productType();
+            std::string ver;
             m.dump();
-            TraceMsg("Checking signature " + sgnt + 
-                     ", product type " + ptype + " and version " + ver);
+
             if (dbHdl->checkSignature(sgnt, ptype, ver)) {
+                TRC("Product " + m.baseName() +
+                       " with version " + ver + " exists!!");
+                TraceMsg("Product " + m.baseName() +
+                         " with version " + ver + " exists!!");
+
+                FileVersion fv(ver);
+                fv.incr();
+
                 // Version exists: change minor version number
                 std::string origVer = m.productVersion();
-                std::string newVer  = fs.incrMinorVersion(origVer);
+                std::string newVer  = fv.getVersion();
 
                 std::string url(m.url());
                 std::string oldFile(str::mid(url,7,1000));
 
-                std::string s("Found in database:" + sgnt + " [" + ver +
+                std::string s("Found in database: " + m.baseName() + " [" + ver +
                               "], changing " + origVer + " with " + newVer);
                 WarnMsg(s);
                 CreateSysAlert(Log::WARNING, Alert::Warning, s);
 
-                std::vector<std::string> svec {m.url(), m.baseName(), m.productId(), m.baseName(), sgnt };
+                std::vector<std::string> svec {m.url(), m.baseName(),
+                                               m.productId(), sgnt };
                 for (auto & s: svec) { str::replaceAll(s, origVer, newVer); }
 
                 int i = 0;
                 m["url"]            = svec.at(i++);
                 m["baseName"]       = svec.at(i++);
                 m["productId"]      = svec.at(i++);
-                i++;
                 m["signature"]      = svec.at(i++);
 
                 m["productVersion"] = newVer;
 
                 url = m.url();
                 std::string newFile(str::mid(url,7,1000));
+                TRC("Renaming " + oldFile + " => " + newFile);
                 if (rename(oldFile.c_str(), newFile.c_str()) != 0) {
-                    WarnMsg("ERROR: Cannot rename file " + oldFile + " to " + newFile);
+                    s = "ERROR: Cannot rename file " + oldFile + " to " + newFile;
+                    WarnMsg(s);
+                    CreateSysAlert(Log::WARNING, Alert::Warning, s);
                 }
+
+                sgnt  = m.signature();
+                ver   = newVer;
             }
         }
 
@@ -357,7 +371,7 @@ void DataMng::storeTaskStatusSpectra(json & fmkInfoValue)
 {
     TskStatTable tssSet;
     retrieveTaskStatusSpectra(tssSet);
-    
+
     for (Json::ValueIterator itr = fmkInfoValue["hostsInfo"].begin();
          itr != fmkInfoValue["hostsInfo"].end(); ++itr) {
         std::string key = itr.key().asString();
@@ -374,7 +388,7 @@ void DataMng::storeTaskStatusSpectra(json & fmkInfoValue)
             ag["finished"]  = tss.finished;
         }
     }
-    /*    
+    /*
     for (Json::ValueIterator itr = fmkInfoValue["swarmInfo"].begin();
          itr != fmkInfoValue["swarmInfo"].end(); ++itr) {
         std::string key = itr.key().asString();
@@ -399,7 +413,7 @@ void DataMng::storeTaskStatusSpectra(json & fmkInfoValue)
 {
     TskStatTable tssSet;
     retrieveTaskStatusSpectra(tssSet);
-    
+
     for (Json::ValueIterator itr = fmkInfoValue["hostsInfo"].begin();
          itr != fmkInfoValue["hostsInfo"].end(); ++itr) {
         std::string key = itr.key().asString();
@@ -417,7 +431,7 @@ void DataMng::storeTaskStatusSpectra(json & fmkInfoValue)
             tssSet.push_back(std::make_pair(agNme, tss));
         }
     }
-    
+
     for (Json::ValueIterator itr = fmkInfoValue["swarmInfo"].begin();
          itr != fmkInfoValue["swarmInfo"].end(); ++itr) {
         std::string key = itr.key().asString();
@@ -430,14 +444,14 @@ void DataMng::storeTaskStatusSpectra(json & fmkInfoValue)
                            sw["finished"].asInt());
         tssSet.push_back(std::make_pair(sw["name"].asString(), tss));
     }
-    
+
     std::unique_ptr<DBHandler> dbHdl(new DBHdlPostgreSQL);
 
     try {
         // Check that connection with the DB is possible
         dbHdl->openConnection();
         // Store task status spectra in DB
-        for (auto & p : tssSet) {                   
+        for (auto & p : tssSet) {
             dbHdl->saveTaskStatusSpectra(p.first, p.second);
         }
     } catch (RuntimeException & e) {
@@ -462,7 +476,7 @@ void DataMng::retrieveTaskStatusSpectra(TskStatTable & tssSet)
     try {
         // Check that connection with the DB is possible
         dbHdl->openConnection();
-        
+
         //if (! dbHdl->getTable("task_status_spectra", table)) {
         dbHdl->runCmd("refresh materialized view agents_tasks_spectra;");
         if (! dbHdl->getTable("agents_tasks_spectra", table)) {
@@ -471,7 +485,7 @@ void DataMng::retrieveTaskStatusSpectra(TskStatTable & tssSet)
                                 Alert::Resource,
                                 std::string(__FILE__ ":" Stringify(__LINE__)),
                                 "Cannot read status spectra table from DB",
-                                0));            
+                                0));
         }
     } catch (RuntimeException & e) {
         ErrMsg(e.what());
@@ -487,7 +501,7 @@ void DataMng::retrieveTaskStatusSpectra(TskStatTable & tssSet)
     tssSet.clear();
     for (auto & row : table) {
         auto str2Num  = [&] (int i) -> int
-                        { return (strlen(row[i].c_str()) > 0) ? std::stoi(row[i]) : 0; };        
+                        { return (strlen(row[i].c_str()) > 0) ? std::stoi(row[i]) : 0; };
         //TskStatSpectra tss(std::stoi(row[1]), std::stoi(row[2]), std::stoi(row[3]),
         //                   std::stoi(row[4]), std::stoi(row[5]), std::stoi(row[6]));
         TskStatSpectra tss(str2Num(6), str2Num(7), str2Num(5),
@@ -660,13 +674,13 @@ bool DataMng::getRestartableTaskInputs(ProductList & inputFiles)
 {
     bool retVal = true;
     std::unique_ptr<DBHandler> dbHdl(new DBHdlPostgreSQL);
-    
+
     std::map<int,TaskInfo> taskSet;
-    
+
     try {
         // Check that connection with the DB is possible
         dbHdl->openConnection();
-        
+
         // Try to get tasks that must be restarted at core start time
         if (! dbHdl->retrieveRestartableTasks(taskSet)) { return false; }
 
@@ -678,18 +692,35 @@ bool DataMng::getRestartableTaskInputs(ProductList & inputFiles)
     // Close connection
     dbHdl->closeConnection();
 
+    inputFiles.clear();
     // A set of tasks have been retrieved, re-build these tasks
     for (auto & kv : taskSet) {
         int id = kv.first;
         TaskInfo & task = kv.second;
+        /*
         ProductMetadata m(task["inputs"][0]);
+        std::string url(m.url());
+        std::string oldFile(str::mid(url,7,1000));
+
         m["dirName"]  = cfg.storage.archive;
         m["urlSpace"] = LocalArchSpace;
         m["url"]      = ("file://" + cfg.storage.archive + "/" +
-                         m.baseName() + "." + m.extension());
-        inputFiles.products.push_back(m);
-    }    
-        
+                         std::string(basename(oldFile)));
+        */
+        std::string url(task["inputs"][0]["url"].asString());
+        std::string theFile(basename(str::mid(url,7,1000).c_str()));
+
+        FileNameSpec fs;
+        ProductMetadata m;
+        if (!fs.parseFileName(theFile, m)) {
+            WarnMsg("Problem while trying to parse filename with regex");
+            continue;
+        }
+        m["url"]      = "file://" + cfg.storage.archive + "/" + theFile;
+        m["urlSpace"] = LocalArchSpace;
+        inputFiles.append(m);
+    }
+
     return retVal;
 }
 

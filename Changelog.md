@@ -3,81 +3,58 @@ Change Log
 
 All notable changes to the [QPF] software project will be documented in this file.
 
-[V2.1rc1] / 2018-09-21
+----
+
+[V2.1] / 2019-10-15
 --------------------------
 
-(This is the output of the log messages, must be organised)
-Added tabbars and modified reprocessing dialog
-Symlinks managmnt., task status spec. loading and qpfapp
-Remove obsolete scripts
-Add coverage options
-Changed to install new qpfapp script
-Cleaned up
-Install qpfapp config file in folder HOME/.qpf
-Modify qpfapp and included scripts to solve output in console
-NEw dialog, icon and help function to request for user/password if needed
-Changes to allow for some flags from HMI move to task to be created
-Minor update of GRTAGS
-Minor modification of master
-Updates to send reprocessed products to VOSpace or IPython
-UTs for module str
-New getData() method for Json file handler class
-New method setData for JSON based file handlers
-UTs for filehdl package
-UTs for str package
-Preliminary setup for UTs for package uuid
-UTs for filehdl package
-UTs for InFix package
-Add uptime for Core and HMI
-New UTs for vos package
-Basic creation of objects in UTs for fmk
-Use return for VOS UTs
-Avoid non finished UTs
-Avoid unexisting sessions show messajes in stderr
-Copy scripts in WA
-Modifications to fix HOST suspend/stop/reactivate
-Set agStatus to STOPPED only in case host STOP
-Added nanomsg 1.0.0 package to source tree
-New storage of QDT reports into archive, and filtering from HMI
-Added name and specification to product query panels, and fix close tabs
-Added modification to install scripts lib
-Added function str::right()
-Changed version to 2.1beta
-Added D to obsmodes
-Added the storage of the QLA report (first approach)
-Update tasks status and refresh prod.mat.view
-New icons
-Changes to allow for some flags from HMI move to task to be created
-Updates to send reprocessed products to VOSpace or IPython
-UTs for module str
-New getData() method for Json file handler class
-Add uptime for Core and HMI
-Modifications to fix HOST suspend/stop/reactivate
-Merge from QPF/git after persistence-tests
-Corrected errors of automatic merge from GIT
-New set of UTs, and very minor modifications
-Minor fixes for the installation process
-Add switch_processors.sh bash script
-Updated by lconversi to change also LE1 processor:
-Updated to install harfbuzz-devel package and update main harfbuzz ones
-Minimum correction
-Fix usage message
-Fix docker group creation
-Last changes from Git repository
-Separation betweek LE1 and QLA
-Obsolete files
-Last modifications from Git/uts
-Last modifications from Git/uts (II)
-Commented out test for the time being
-Test sample3 split in 3a and 3b
-Solved scrolling/selection of Local Archive View while updated
-Set killed() comparison to false for Jenkins to work
-Removed killed() comparison (return code not stable)
+Release [V2.1] of the QPF.  The main changes with respect to
+the previous version are:
+
+### Improvements
+
+- Changed to install new qpfapp script (logs in HOMS/.qpf)
+- Add coverage options to build scripts
+- Symlinks managmnt., task status spec. loading and qpfapp
+- Solved scrolling/selection of Local Archive View while updated
+- Added new UTs
+
+### New Features
+
+- New storage of QDT reports into archive, and filtering from HMI
+- Updates to send reprocessed products to VOSpace or IPython
+- New dialog, icon and help function to request for user/password if needed
+- Persistence: restart of aborted tasks due to system shutdown
+
+### Fixed
+
+- HOST suspend/stop/reactivate
+- Added check to know if in Dck-in-Dck scenario
+- Added header parsing to QDT Report reading
+- Corrected allow direct nav. to alert for new QDT report schema
+- Implement terminal for ipython call dependent of (COLOR)TERM env.var.
+- Fix bad reading of new QDT reports
+- Fixed File Versioning increment for files already in local archive
+- Solve problems with Local Archive reports filtering
+
+### Cosmetic changes
+
+- Added tabbars and modified reprocessing dialog
+- Add uptime for Core and HMI
+- New icons for file viewers
+- Euclid QPF Splashscreen updated
+- Dirs are not traversed when processing a folder, and only EUC files are processed
+- Added mark showing what items get propagated upon config. apply
+
+### Removed
+- Remove obsolete scripts
+
+----
 
 [V2.0] / 2018-03-07
 --------------------------
 
-First release candidate for the QPF V2.0.  The main changes with respect to
+Release [V2.0] of the QPF.  The main changes with respect to
 the previous version are:
 
 ### Improvements
@@ -235,6 +212,7 @@ First official release of the [QPF].
 
 ----
 
+[V2.1]: http://euclid.esac.esa.int/svn/ESA/SOC/SOC-3-DEV/SOC-3-07-QLook/QPF/tags/V2.1
 [V2.0]: http://euclid.esac.esa.int/svn/ESA/SOC/SOC-3-DEV/SOC-3-07-QLook/QPF/tags/V2.0
 [V1.2]: http://euclid.esac.esa.int/svn/ESA/SOC/SOC-3-DEV/SOC-3-07-QLook/QPF/tags/V1.2
 [V1.1]: http://euclid.esac.esa.int/svn/ESA/SOC/SOC-3-DEV/SOC-3-07-QLook/QPF/tags/V1.1
@@ -252,7 +230,7 @@ Project:     QPF
 Author:      J C Gonzalez
 Affiliation: Euclid SOC Team @ ESAC - Telespazio Vega U.K. S.L.
 Web:         http://www.cosmos.esa.int/web/euclid
-Date:        2018-02-19
+Date:        2018-10-15
 
 Copyright (C) 2015-2018  Euclid SOC Team @ ESAC
 

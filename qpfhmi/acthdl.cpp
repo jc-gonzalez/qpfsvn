@@ -422,7 +422,6 @@ void ActionHandler::closeTab(int n)
         mw->removeRowInNav(n);
     }
     delete tb->widget(n);
-    tabWidgetSender = nullptr;
 }
 
 //----------------------------------------------------------------------
@@ -442,6 +441,7 @@ void ActionHandler::closeTabAction()
     } else if (tabWdgName == TabWidgetNames[TabWdg_LocalArch]) {
         if (nTab > 0) { closeTab(nTab);}
     }        
+    tabWidgetSender = nullptr;
 }
 
 //----------------------------------------------------------------------
@@ -459,6 +459,7 @@ void ActionHandler::closeAllTabAction()
             closeTab(i);
         }
     }        
+    tabWidgetSender = nullptr;
 }
 
 //----------------------------------------------------------------------
@@ -482,6 +483,7 @@ void ActionHandler::closeOtherTabAction()
             if (i != nTab) { closeTab(i); }
         }
     }        
+    tabWidgetSender = nullptr;
 }
 
 //----------------------------------------------------------------------

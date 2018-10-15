@@ -174,6 +174,29 @@ void DataMng::saveTaskToDB(TaskInfo & taskInfo, bool initialStore)
 
         URLHandler urlh;
 
+        // Get target type from first product, if different from NOMINAL then
+        // it should not be stored in DB nor in Local Archive, and the name should
+        // be preserved:
+        bool mustBeStoredInDbAndArchive = taskInfo.outputs.at(0).procTargetType() == UA_NOMINAL;
+        if (! mustBeStoredInDbAndArchive) {
+            // Target is not archive, so just move the products to their 
+            // final destination and return
+            for (auto & m : taskInfo.outputs.products) {
+                urlh.setProduct(m);
+                try {
+                    m = urlh.fromGateway2FinalDestination();
+                } catch(...) {
+                    RaiseSysAlert(Alert(Alert::System,
+                                        Alert::Warning,
+                                        Alert::Resource,
+                                        std::string(__FILE__ ":" Stringify(__LINE__)),
+                                        "Cannot copy the output product to target " + m.procTarget(),
+                                        0));
+                }
+            }
+            return;
+        }
+
         // Check version of products in gateway against DB
         TraceMsg("Will try to sanitize product versions:");
         sanitizeProductVersions(taskInfo.outputs);
@@ -194,20 +217,7 @@ void DataMng::saveTaskToDB(TaskInfo & taskInfo, bool initialStore)
         // Move products to local archive or to final destination
         for (auto & m : taskInfo.outputs.products) {
             urlh.setProduct(m);
-            if (m.procTargetType() == UA_NOMINAL) {
-                m = urlh.fromGateway2LocalArch();
-            } else {
-                try {
-                    m = urlh.fromGateway2FinalDestination();
-                } catch(...) {
-                    RaiseSysAlert(Alert(Alert::System,
-                                        Alert::Warning,
-                                        Alert::Resource,
-                                        std::string(__FILE__ ":" Stringify(__LINE__)),
-                                        "Cannot copy the output product to target " + m.procTarget(),
-                                        0));
-                }
-            }
+            m = urlh.fromGateway2LocalArch();
         }
 
         int flags = taskInfo.taskFlags();
@@ -274,8 +284,10 @@ void DataMng::sanitizeProductVersions(ProductList & prodList)
                 std::string url(m.url());
                 std::string oldFile(str::mid(url,7,1000));
 
-                std::string s("Found in database: " + m.baseName() + " [" + ver +
-                              "], changing " + origVer + " with " + newVer);
+                std::string s("Found in database: " +
+                              std::string(basename(oldFile.c_str())) +
+                              " [" + ver + "], changing " + origVer +
+                              " with " + newVer);
                 WarnMsg(s);
                 CreateSysAlert(Log::WARNING, Alert::Warning, s);
 

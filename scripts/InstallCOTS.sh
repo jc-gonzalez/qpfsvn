@@ -38,13 +38,14 @@ _OFF="\e[0m"
 STEP=0
 
 #- Options
-QT="no" 
+QT="no"
 PGSQL="no"
-NNMSG="no" 
-PCRE="no" 
-CURL="no" 
+NNMSG="no"
+PCRE="no"
+CURL="no"
 UUID="no"
 DOCKER="no"
+ENVQPF="no"
 
 #- Other
 DATE=$(date +"%Y%m%d%H%M%S")
@@ -78,6 +79,7 @@ usage () {
     say "  -c         Install libcurl"
     say "  -u         Install UUID library"
     say "  -d         Install Docker"
+    say "  -e         Regenerate env_qpf.sh file (default if anything is installed)"
     say ""
     exit 1
 }
@@ -102,41 +104,43 @@ die () {
 #### Parse command line and display grettings
 
 ## Parse command line
-while getopts :hAaqpnrcud OPT; do
+while getopts :hAaqpnrcude OPT; do
     case $OPT in
-        h|+h) usage 
+        h|+h) usage
               ;;
-        A|+A) QT="yes" 
+        A|+A) QT="yes"
               PGSQL="yes"
-              NNMSG="yes" 
-              PCRE="yes" 
-              CURL="yes" 
-              UUID="yes" 
-              DOCKER="yes" 
+              NNMSG="yes"
+              PCRE="yes"
+              CURL="yes"
+              UUID="yes"
+              DOCKER="yes"
               ;;
-        a|+a) QT="no" 
+        a|+a) QT="no"
               PGSQL="yes"
-              NNMSG="yes" 
-              PCRE="yes" 
-              CURL="yes" 
-              UUID="yes" 
-              DOCKER="yes" 
+              NNMSG="yes"
+              PCRE="yes"
+              CURL="yes"
+              UUID="yes"
+              DOCKER="yes"
               ;;
-        q|+q) QT="yes" 
+        q|+q) QT="yes"
               ;;
-        p|+p) PGSQL="yes" 
+        p|+p) PGSQL="yes"
               ;;
-        n|+n) NNMSG="yes" 
+        n|+n) NNMSG="yes"
               ;;
-        r|+r) PCRE="yes" 
+        r|+r) PCRE="yes"
               ;;
-        c|+c) CURL="yes" 
+        c|+c) CURL="yes"
               ;;
-        u|+u) UUID="yes" 
+        u|+u) UUID="yes"
               ;;
-        d|+d) DOCKER="yes" 
+        d|+d) DOCKER="yes"
               ;;
-        *)    usage 
+        e|+e) ENVQPF="yes"
+              ;;
+        *)    usage
               exit 2
               ;;
     esac
@@ -155,7 +159,7 @@ sudo yum install -y epel-release
 
 #### Installing COTS: I - Install PostgreSQL
 
-if [ "${PGSQL}" = "yes" ]; then 
+if [ "${PGSQL}" = "yes" ]; then
     step "Installing PostgreSQL"
 
     # Check if PostgreSQL is already installed in the system
@@ -172,13 +176,13 @@ if [ "${PGSQL}" = "yes" ]; then
 	# version by default is 9.2, but we need 9.4+
 	# We install a PGDG for 10, and then install the 10 packages
 	PSQL_PGDG="https://download.postgresql.org/pub/repos/yum/10/redhat/rhel-7-x86_64/pgdg-centos10-10-2.noarch.rpm"
-	PSQL_PKGS="postgresql10.x86_64" 
-	PSQL_PKGS="$PSQL_PKGS postgresql10-devel.x86_64" 
-	PSQL_PKGS="$PSQL_PKGS postgresql10-libs.x86_64" 
-	PSQL_PKGS="$PSQL_PKGS postgresql10-server.x86_64" 
+	PSQL_PKGS="postgresql10.x86_64"
+	PSQL_PKGS="$PSQL_PKGS postgresql10-devel.x86_64"
+	PSQL_PKGS="$PSQL_PKGS postgresql10-libs.x86_64"
+	PSQL_PKGS="$PSQL_PKGS postgresql10-server.x86_64"
 	PSQL_PKGS="$PSQL_PKGS postgresql10-docs.x86_64"
         PSQL_PKGS="$PSQL_PKGS postgresql10-contrib.x86_64"
-    
+
 	#- 1. Installing PostgreSQL
 	say ". Installing packages"
 	sudo yum -y install ${PSQL_PGDG}
@@ -198,21 +202,21 @@ if [ "${PGSQL}" = "yes" ]; then
 
     if [ "${PSQL_PTH}" != "/usr/pgsql" ]; then
         sudo rm /usr/pgsql
-	sudo ln -s ${PSQL_PTH} /usr/pgsql
+	    sudo ln -fs ${PSQL_PTH} /usr/pgsql
     fi
-    sudo ln -s ${PSQL_PTH} /opt/pgsql
-    
+    sudo ln -fs ${PSQL_PTH} /opt/pgsql
+
     PSQL_PTH=/usr/pgsql
     export PATH=$PATH:${PSQL_PTH}/bin
-   
-    sudo ln -s ${PSQL_PTH}/pg_ctl /usr/bin/pgctl
- 
-    # Then, for the creation of the local folder, initialization and server start, 
+
+    sudo ln -fs ${PSQL_PTH}/pg_ctl /usr/bin/pgctl
+
+    # Then, for the creation of the local folder, initialization and server start,
     # use the scripts =scripts/pgsql_start_server.sh= and =scripts/pgsql_initdb.sh=
 
     sudo -u postgres createuser -s eucops
 
-    if [ "${isInstalled}" = "yes" ]; then 
+    if [ "${isInstalled}" = "yes" ]; then
 	say ". Initializing database"
 	source ${SCRIPT_PATH}/maint/pgsql_initdb.sh
 	say ". Starting server"
@@ -222,7 +226,7 @@ fi
 
 #### Installing COTS: II - Install Qt
 
-if [ "${QT}" = "yes" ]; then 
+if [ "${QT}" = "yes" ]; then
     step "Installing Qt framework"
 
     # Check if PostgreSQL is already installed in the system
@@ -233,7 +237,7 @@ if [ "${QT}" = "yes" ]; then
     else
 	# Create QT5 list of packages
 	sudo yum -y list qt5-*x86_64 | grep -v -- -examples|grep qt5- | awk '{print $1;}' | tee /tmp/qt5pkgs.list
-	
+
 	# Install packages
 	sudo yum -y install --skip-broken $(cat /tmp/qt5pkgs.list) harfbuzz-devel.x86_64
 
@@ -243,7 +247,7 @@ fi
 
 #### Installing COTS: III - Install Nanomsg
 
-if [ "${NNMSG}" = "yes" ]; then 
+if [ "${NNMSG}" = "yes" ]; then
     step "Installing Nanomsg library"
 
     NNMSG_NAME="nanomsg-1.0.0"
@@ -264,7 +268,7 @@ fi
 
 #### Installing COTS: IV - Install PCRE2
 
-if [ "${PCRE}" = "yes" ]; then 
+if [ "${PCRE}" = "yes" ]; then
     step "Installing PCRE2 library"
     PCRE2_NAME="pcre2-10.30"
     PCRE2_PKG="${PCRE2_NAME}.tar.gz"
@@ -283,21 +287,21 @@ fi
 
 #### Installing COTS: V - Install curl
 
-if [ "${CURL}" = "yes" ]; then 
+if [ "${CURL}" = "yes" ]; then
     step "Installing Curl library"
     sudo yum -y install curl.x86_64 libcurl-devel.x86_64
 fi
 
 #### Installing COTS: VI - Install UUID
 
-if [ "${UUID}" = "yes" ]; then 
+if [ "${UUID}" = "yes" ]; then
     step "Installing UUID library"
     sudo yum -y install uuid-devel.x86_64 libuuid-devel.x86_64
 fi
 
 #### Installing COTS: VII - Install Docker
 
-if [ "${DOCKER}" = "yes" ]; then 
+if [ "${DOCKER}" = "yes" ]; then
     step "Installing Docker"
     say ". Installing packages"
     sudo yum check-update
@@ -316,7 +320,7 @@ step "Final comments"
 
 cat <<EOF> ${HOME}/env_qpf.sh
 #!/bin/bash
-# Mini-script to update PATH and LD_LIBRARY_PATH environment variables 
+# Mini-script to update PATH and LD_LIBRARY_PATH environment variables
 # for the compilation/execution of Euclid QPF
 # Creation date: ${DATE}
 
@@ -330,7 +334,7 @@ say ""
 say "-------------------------------------------------------------------------------"
 say "Please, do not forget to include folder /usr/lib64 in the LD_LIBRARY_PATH "
 say "variable, and the ${QT5_PTH}/bin folder in the PATH variable, with these"
-say "commands:" 
+say "commands:"
 say "  export PATH=${QT5_PTH}/bin:/usr/local/bin:${PSQL_PTH}/bin:\$PATH"
 say "  export LD_LIBRARY_PATH=/usr/lib64:/usr/local/lib:/usr/local/lib64:${PSQL_PTH}/lib:\$LD_LIBRARY_PATH"
 say ""

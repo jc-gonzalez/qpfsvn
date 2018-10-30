@@ -131,9 +131,15 @@ public:
 
     //----------------------------------------------------------------------
     // Method: kill
-    // Retrieves information about running service
+    // Kill running container
     //----------------------------------------------------------------------
     virtual bool kill(std::string id) {}
+
+    //----------------------------------------------------------------------
+    // Method: remove
+    // Removes exited container
+    //----------------------------------------------------------------------
+    virtual bool remove(std::string id) {}
 
     //----------------------------------------------------------------------
     // Method: leaveSwarm

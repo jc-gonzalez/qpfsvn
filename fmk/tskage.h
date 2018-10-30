@@ -108,6 +108,11 @@ public:
            const std::vector<std::string> & nds = std::vector<std::string>(),
            ServiceInfo * srvInfo = 0);
 
+    //----------------------------------------------------------------------
+    // Destructor
+    //----------------------------------------------------------------------
+    ~TskAge();
+    
 protected:
 
 #undef T
@@ -159,7 +164,7 @@ private:
     // Method: armHostInfoTimer
     //----------------------------------------------------------------------
     void armHostInfoTimer();
-    
+
     //----------------------------------------------------------------------
     // Method: sendTaskReport
     //----------------------------------------------------------------------
@@ -169,17 +174,17 @@ private:
     // Method: computeTaskStatus
     //----------------------------------------------------------------------
     TaskStatus computeTaskStatus(std::string & inspStatus, int & inspCode);
-    
+
     //----------------------------------------------------------------------
     // Method: taskEnded
     //----------------------------------------------------------------------
     bool taskEnded(TaskStatus & taskStatus);
-    
+
     //----------------------------------------------------------------------
     // Method: retrieveDockerInfo
     //----------------------------------------------------------------------
     json retrieveDockerInfo(std::string & contId, bool fullInfo);
-    
+
     //----------------------------------------------------------------------
     // Method: transferOutputProducts
     //----------------------------------------------------------------------
@@ -194,22 +199,42 @@ private:
     // Method: resetProgress
     //----------------------------------------------------------------------
     void resetProgress();
-    
+
     //----------------------------------------------------------------------
     // Method: startProgress
     //----------------------------------------------------------------------
     void startProgress();
-    
+
     //----------------------------------------------------------------------
     // Method: updateProgress
     //----------------------------------------------------------------------
     void updateProgress();
-    
+
     //----------------------------------------------------------------------
     // Method: endProgress
     //----------------------------------------------------------------------
     void endProgress();
-    
+
+    //----------------------------------------------------------------------
+    // Method: storecontidinfinishedlist
+    //----------------------------------------------------------------------
+    void storeContIdInFinishedList(std::string & contId);
+
+    //----------------------------------------------------------------------
+    // Method: checkFinishedContainers
+    //----------------------------------------------------------------------
+    void checkFinishedContainers();
+
+    //----------------------------------------------------------------------
+    // Method: removeOldContainers
+    //----------------------------------------------------------------------
+    void removeOldContainers(int numOfEpochsForRemoval);
+
+    //----------------------------------------------------------------------
+    // Method: killAllContainers
+    //----------------------------------------------------------------------
+    void killAllContainers();
+
     Property(TskAge, std::string, workDir, WorkDir);
     Property(TskAge, std::string, sysDir,  SysDir);
     Property(TskAge, bool,        remote,  Remote);
@@ -225,10 +250,12 @@ private:
 
     std::map<std::string, TaskInfo*> containerToTaskMap;
     std::map<std::string, time_t>    containerEpoch;
-    
+
+    std::map<std::string, int>       containerFinished;
+
     TaskStatus               taskStatus;
     TaskStatus               agStatus;
-    
+
     std::string              internalTaskNameIdx;
     std::string              exchangeDir;
     std::string              exchgIn;
@@ -258,12 +285,13 @@ private:
     int                      prevProgress;
     std::string              prevInspStatus;
     int                      prevInspCode;
-    
+
     URLHandler               urlh;
 
     HostInfo                 hostInfo;
 
     bool                     isTaskRequestActive;
+
 };
 
 //}

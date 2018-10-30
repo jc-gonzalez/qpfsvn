@@ -103,10 +103,10 @@ public:
     virtual bool getInfo(std::string id, std::stringstream & info);
 
     //----------------------------------------------------------------------
-    // Method: kill
-    // Retrieves information about running service
+    // Method: remove
+    // Removes exited container
     //----------------------------------------------------------------------
-    virtual bool kill(std::string id);
+    virtual bool remove(std::string id);
 
     //----------------------------------------------------------------------
     // Method: leaveSwarm

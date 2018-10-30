@@ -45,6 +45,7 @@
 #include "tools.h"
 
 #include <cassert>
+#include <iostream>
 #include <fstream>
 
 #include "config.h"
@@ -175,11 +176,51 @@ bool ContainerMng::getInfo(std::string id, std::stringstream & info)
 
 //----------------------------------------------------------------------
 // Method: kill
-// Stop a given container
+// Kill a running container
 //----------------------------------------------------------------------
 bool ContainerMng::kill(std::string id)
 {
+    if (id.length() < 1) {
+        procxx::process cntPs("docker", "ps", "-a");
+        cntPs.exec();
+
+        std::string line;
+        std::ofstream myfile;
+        myfile.open("/home/eucops/.qpf/dck.log", std::fstream::out | std::fstream::app); 
+        while (std::getline(cntPs.output(), line)) {
+            myfile << line << std::endl;
+            if (!cntPs.running() ||
+                !procxx::running(cntPs.id()) ||
+                !running(cntPs)) { break; }
+        }
+        cntPs.wait();
+        return (cntPs.code() == 0);
+    }
+    
+    procxx::process cntKill("docker", "kill");
+    {
+      std::ofstream myfile;
+      myfile.open("/home/eucops/.qpf/dck.log", std::fstream::out | std::fstream::app); 
+      myfile << "Trying to kill container: docker kill " << id << '\n';
+    }
+    cntKill.add_argument(id);
+    cntKill.exec();
+    cntKill.wait();
+    return (cntKill.code() == 0);
+}
+
+//----------------------------------------------------------------------
+// Method: remove
+// Remove a stopped container
+//----------------------------------------------------------------------
+bool ContainerMng::remove(std::string id)
+{
     procxx::process srvRm("docker", "rm");
+    {
+      std::ofstream myfile;
+      myfile.open("/home/eucops/.qpf/dck.log", std::fstream::out | std::fstream::app); 
+      myfile << "Trying to remove container: docker rm " << id << '\n';
+    }
     srvRm.add_argument(id);
     srvRm.exec();
     srvRm.wait();

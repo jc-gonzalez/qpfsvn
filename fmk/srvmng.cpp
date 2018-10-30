@@ -184,10 +184,10 @@ bool ServiceMng::getInfo(std::string srv, std::stringstream & info)
 }
 
 //----------------------------------------------------------------------
-// Method: kill
+// Method: remove
 // Shutdown a given service
 //----------------------------------------------------------------------
-bool ServiceMng::kill(std::string srv)
+bool ServiceMng::remove(std::string srv)
 {
     procxx::process srvRm("docker", "service", "rm");
     srvRm.add_argument(srv);

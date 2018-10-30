@@ -99,6 +99,15 @@ TskAge::TskAge(std::string name, std::string addr, Synchronizer * s,
 }
 
 //----------------------------------------------------------------------
+// Destructor
+//----------------------------------------------------------------------
+TskAge::~TskAge()
+{
+    killAllContainers();
+    std::cerr << "TaskAgent " << compName << " destroyed\n";
+}
+
+//----------------------------------------------------------------------
 // Method: fromRunningToOperational
 //----------------------------------------------------------------------
 void TskAge::fromRunningToOperational()
@@ -144,7 +153,7 @@ void TskAge::fromRunningToOperational()
     prevInspCode = -127;
 
     agStatus = TASK_RUNNING;
-    
+
     // Get initial values for Host Info structure
     hostInfo.hostIp = compAddress;
     hostInfo.cpuInfo.overallCpuLoad.timeInterval = 0;
@@ -190,7 +199,7 @@ void TskAge::runEachIterationForContainers()
                 msg.buildHdr(ChnlTskProc, MsgTskRqst, CHNLS_IF_VERSION,
                              compName, "TskMng",
                              "", "", "");
-                
+
                 std::string chnl(ChnlTskProc + "_" + compName);
                 pStatus = WAITING;
                 InfoMsg("Switching to status " + ProcStatusName[pStatus]);
@@ -221,6 +230,9 @@ void TskAge::runEachIterationForContainers()
         break;
     }
 
+    // Check the list of finished containers to kill those already obsolete
+    checkFinishedContainers();
+
     // Update status for running containers
     for (auto const & kv : containerEpoch) {
         std::string contId = kv.first;
@@ -237,7 +249,7 @@ void TskAge::runEachIterationForServices()
     // Every N iterations, check if this is the first agent in the
     // host, and if it is update the hostInfo structure, and send it
     // to the TskMng
-    
+
     if ((iteration % 50) == 0) {
         sendHostInfoUpdate();
     }
@@ -334,7 +346,7 @@ void TskAge::processTskProcMsg(ScalabilityProtocolRole* c, MessageString & m)
         // Save container info
         containerToTaskMap[contId]  = runningTask;
         containerEpoch[contId]      = time(0);
-        
+
         // Set processing status
         pStatus = PROCESSING;
         workingDuring = 0;
@@ -342,7 +354,7 @@ void TskAge::processTskProcMsg(ScalabilityProtocolRole* c, MessageString & m)
         startProgress();
     } else {
         WarnMsg("Couldn't execute docker container");
-        
+
         delete runningTask;
 
         pStatus = IDLE;
@@ -380,7 +392,7 @@ void TskAge::processSubcmdMsg(MessageString & m)
             }
             return;
         }
-        
+
         if (containerToTaskMap.find(subjName) == containerToTaskMap.end()) { return; }
         TRC("Trying to " + subCmd + " container with id " + subjName);
         applyActionOnContainer(subCmd, subjName);
@@ -425,7 +437,7 @@ void TskAge::processSubcmdMsg(MessageString & m)
     default:
         break;
     }
-    
+
     TRC("Processing of subcmd message done.");
 }
 
@@ -443,8 +455,13 @@ void TskAge::applyActionOnContainer(std::string & act, std::string & contId,
             dckMng->runCmd("pause",   noargs, contId);
             agStatus = TASK_PAUSED;
         } else if ((act == "CANCEL") || (act == "STOP")) {
-            dckMng->runCmd("stop",    noargs, contId);
-            agStatus = (act == "STOP") ? TASK_STOPPED : TASK_PAUSED;
+            if (isQuitting) {
+                storeContIdInFinishedList(contId);
+                dckMng->kill(contId);
+            } else {
+                dckMng->runCmd("stop",    noargs, contId);
+                agStatus = (act == "STOP") ? TASK_STOPPED : TASK_PAUSED;                
+            }
         }
         break;
     case TASK_PAUSED:
@@ -461,7 +478,7 @@ void TskAge::applyActionOnContainer(std::string & act, std::string & contId,
         break;
     default:
         break;
-    }    
+    }
 
     isTaskRequestActive = ((act == "RESUME") || (act == "REACTIVATE"));
     TRC("   - Applying " + act + " on container " + contId);
@@ -475,7 +492,7 @@ void TskAge::sendTaskReport(std::string contId)
     // Define and set task object
     auto const & itTaskInfo = containerToTaskMap.find(contId);
     if (itTaskInfo == containerToTaskMap.end()) { return; }
-    
+
     TaskInfo & task = (*(itTaskInfo->second));
     if ((task.taskStatus() == TASK_FAILED) ||
         (task.taskStatus() == TASK_FINISHED)) { return; }
@@ -492,8 +509,9 @@ void TskAge::sendTaskReport(std::string contId)
 
     if (taskHasEnded) {
         InfoMsg("Task container monitoring finished");
-        if (taskStatus == TASK_FINISHED) { 
-            endProgress(); 
+        if (taskStatus == TASK_FINISHED) {
+            endProgress();
+            storeContIdInFinishedList(contId);
         }
         taskData = retrieveDockerInfo(contId, true);
     } else {
@@ -502,11 +520,11 @@ void TskAge::sendTaskReport(std::string contId)
     }
 
     // Avoid unnecessary messages
-    if ((taskStatus == prevTaskStatus) && 
+    if ((taskStatus == prevTaskStatus) &&
         (progress   == prevProgress) &&
         (inspStatus == prevInspStatus) &&
         (inspCode   == prevInspCode)) { return; }
-    
+
     prevTaskStatus = taskStatus; 
     prevProgress   = progress; 
     prevInspStatus = inspStatus; 
@@ -528,7 +546,7 @@ void TskAge::sendTaskReport(std::string contId)
     addInfo["Inputs"]    = task.inputs.str();
     addInfo["MainInput"] = task.inputs.products.at(0).productId();
     addInfo["Flags"]     = task.taskFlags();
-    
+
     // Place all taskdata information into task structure
     taskData["Info"] = addInfo;
     task["taskData"] = taskData;
@@ -555,7 +573,7 @@ void TskAge::sendTaskReport(std::string contId)
         containerToTaskMap.erase(containerToTaskMap.find(contId));
         containerEpoch.erase(containerEpoch.find(contId));
     }
-    
+
 }
 
 //----------------------------------------------------------------------
@@ -647,7 +665,7 @@ void TskAge::transferOutputProducts(TaskInfo & task)
     task.outputs.products.clear();
 
     ProductMetadata imd = task.inputs.products.at(0);
-    
+
     FileNameSpec fs;
     for (unsigned int i = 0; i < outFiles.size(); ++i) {
         ProductMetadata m;
@@ -701,7 +719,7 @@ void TskAge::startProgress()
         logFilePos = 0;
         logDir = exchangeDir + "/log";
         logFile = "";
-        
+
         // Look for log file in <exchangeDirr>/log
         int numTrials = 0;
         bool isFoundLogFile = false;
@@ -742,13 +760,13 @@ void TskAge::updateProgress()
         startProgress();
         if (! isLogFileOpen) return;
     }
-    
+
     // See if new content can be obtained from the log file
     logFileHdl.seekg(0, logFileHdl.end);
     int length = logFileHdl.tellg();
-    
+
     const std::string ProgressTag(cfg.flags.progressString());
-    
+
     // If new content is there, read it and process it
     if (length > logFilePos) {
         logFileHdl.seekg(logFilePos, logFileHdl.beg);
@@ -763,7 +781,7 @@ void TskAge::updateProgress()
             std::getline(logFileHdl, line);
             if (line.length() < 1) { break; }
             size_t progressTagPos = line.find(ProgressTag);
-                      
+
             if (progressTagPos != std::string::npos) {
                 size_t porcEndsAt = line.find_first_of("%");
                 if (porcEndsAt != std::string::npos) {
@@ -778,7 +796,7 @@ void TskAge::updateProgress()
                 }
             }
         }
-        
+
         logFileHdl.clear();
         logFilePos = length;
     }
@@ -792,6 +810,55 @@ void TskAge::endProgress()
     progress = 100;
     logFileHdl.close();
     isLogFileOpen = false;
+}
+
+//----------------------------------------------------------------------
+// Method: storecontidinfinishedlist
+//----------------------------------------------------------------------
+void TskAge::storeContIdInFinishedList(std::string & contId)
+{
+    containerFinished[contId] = 0;
+}
+
+//----------------------------------------------------------------------
+// Method: checkFinishedContainers
+//----------------------------------------------------------------------
+void TskAge::checkFinishedContainers()
+{
+    static int NumOfEpochsToRemoveContainer = 20;
+
+    for (auto & kv : containerFinished) {
+        std::string const & contId = kv.first;
+        int & numEpochs = kv.second;
+        if (numEpochs < NumOfEpochsToRemoveContainer) { kv.second++; }
+    }
+
+    removeOldContainers(NumOfEpochsToRemoveContainer);
+}
+
+//----------------------------------------------------------------------
+// Method: removeOldContainers
+//----------------------------------------------------------------------
+void TskAge::removeOldContainers(int numOfEpochsForRemoval = 0)
+{
+    for (auto const & kv : containerFinished) {
+        if (kv.second >= numOfEpochsForRemoval) {
+            std::string contId = kv.first;
+            dckMng->remove(contId);
+            containerFinished.erase(contId);
+        }
+    }
+}
+
+//----------------------------------------------------------------------
+// Method: killAllContainers
+//----------------------------------------------------------------------
+void TskAge::killAllContainers()
+{
+    dckMng->kill("");
+    
+    // Kill all containers
+    removeOldContainers(0);
 }
 
 //}

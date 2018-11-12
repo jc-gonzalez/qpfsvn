@@ -292,6 +292,8 @@ private:
 
     bool                     isTaskRequestActive;
 
+    bool                     amQuitting;
+
 };
 
 //}

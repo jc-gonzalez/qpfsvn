@@ -319,7 +319,7 @@ bool EvtMng::isQuitRequested()
 // Method: isQuitRequested
 //----------------------------------------------------------------------
 void EvtMng::quit()
-{
+{/*
     // Send QUIT messages
     Message<MsgBodyCMD> msg;
     msg.buildHdr(ChnlCmd, MsgCmd, CHNLS_IF_VERSION,
@@ -334,10 +334,12 @@ void EvtMng::quit()
     this->send(ChnlCmd, msg.str());
 
     sleep(3);
-
+ */
     // Send STOP tasks command to agents
     sendStopAgentTasks();
-    
+
+    sleep(5);
+      
     // Transit to RUNNING (no way back)
     transitTo(RUNNING); 
 }

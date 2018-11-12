@@ -417,7 +417,7 @@ void Component::processCmdMsg(ScalabilityProtocolRole * c, MessageString & m)
 
         std::string newConfigString = msg.body["config"].asString();
         cfg.fromStr(newConfigString);
-        cfg.processConfig();        
+        cfg.processConfig();
         TraceMsg("New configuration applied");
 
     } else if (cmd == CmdProcHdl) {

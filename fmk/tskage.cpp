@@ -104,7 +104,7 @@ TskAge::TskAge(std::string name, std::string addr, Synchronizer * s,
 TskAge::~TskAge()
 {
     killAllContainers();
-    std::cerr << "TaskAgent " << compName << " destroyed\n";
+    TRC("TaskAgent " << compName << " destroyed");
 }
 
 //----------------------------------------------------------------------
@@ -146,6 +146,7 @@ void TskAge::fromRunningToOperational()
     numTask = 0;
 
     isTaskRequestActive = true;
+    amQuitting = false;    
 
     prevTaskStatus = TASK_UNKNOWN_STATE;
     prevProgress = -1;
@@ -387,6 +388,7 @@ void TskAge::processSubcmdMsg(MessageString & m)
                 if ((taskStatus != TASK_FAILED) &&
                     (taskStatus != TASK_FINISHED) &&
                     (time(0) - kv.second) < cfg.MaxContainerAge) {
+                    TRC("applyActionOnContainer(subCmd, contId, true)");
                     applyActionOnContainer(subCmd, contId, true);
                 }
             }
@@ -449,6 +451,8 @@ void TskAge::applyActionOnContainer(std::string & act, std::string & contId,
 {
     std::vector<std::string> noargs;
 
+    TRC("====> " << act << " - " << contId << " - " << (isQuitting?"QUIT":""));
+    
     switch (agStatus) {
     case TASK_RUNNING:
         if ((act == "PAUSE") || (act == "SUSPEND")) {
@@ -456,11 +460,13 @@ void TskAge::applyActionOnContainer(std::string & act, std::string & contId,
             agStatus = TASK_PAUSED;
         } else if ((act == "CANCEL") || (act == "STOP")) {
             if (isQuitting) {
+                TRC(">>>>>>>>>>>>>>> QUITTING <<<<<<<<<<<<<<<<<<<<<<<");
                 storeContIdInFinishedList(contId);
                 dckMng->kill(contId);
+                amQuitting = true;
             } else {
-                dckMng->runCmd("stop",    noargs, contId);
-                agStatus = (act == "STOP") ? TASK_STOPPED : TASK_PAUSED;                
+                dckMng->runCmd("stop", noargs, contId);
+                agStatus = (act == "STOP") ? TASK_STOPPED : TASK_PAUSED;
             }
         }
         break;
@@ -586,13 +592,14 @@ TaskStatus TskAge::computeTaskStatus(std::string & inspStatus, int & inspCode)
     } else if (inspStatus == "paused") {
         return TASK_PAUSED;
     } else if (inspStatus == "created") {
-        return TASK_STOPPED;
+        return TASK_ABORTED;
     } else if (inspStatus == "dead") {
         return TASK_STOPPED;
     } else if (inspStatus == "exited") {
         return ((inspCode == 0) ? TASK_FINISHED :
-                ((inspCode > 128) && (inspCode < 160)) ? TASK_STOPPED :
-                TASK_FAILED);
+                (((inspCode > 128) && (inspCode < 160)) ?
+                 (amQuitting ? TASK_RUNNING : TASK_STOPPED) :
+                 TASK_FAILED));
     } else {
         return TASK_UNKNOWN_STATE;
     }
@@ -859,6 +866,10 @@ void TskAge::killAllContainers()
     
     // Kill all containers
     removeOldContainers(0);
+
+    // Transit to RUNNING, to go to OFF
+    sleep(3);
+    transitTo(RUNNING);
 }
 
 //}

@@ -109,10 +109,10 @@ public:
     int run();
 
     //----------------------------------------------------------------------
-    // Method: actionOnSigInt
-    // Actions to be performed when capturing SigInt
+    // Method: actionOnClosingSignal
+    // Actions to be performed when a closing signal is catched
     //----------------------------------------------------------------------
-    void actionOnSigInt();
+    void actionOnClosingSignal();
 
 private:
     //----------------------------------------------------------------------
@@ -159,6 +159,12 @@ private:
     void readConfiguration();
 
     //----------------------------------------------------------------------
+    // Method: createWatchDog
+    // Create the watchdog for this QPF Core instance
+    //----------------------------------------------------------------------
+    void createWatchDog(int lapse);
+
+    //----------------------------------------------------------------------
     // Method: delay
     // Waits for a small time lapse for system sync
     //----------------------------------------------------------------------
@@ -199,13 +205,6 @@ private:
     void generateProcFmkInfoStructure();
 
 private:
-    //----------------------------------------------------------------------
-    // Variable: sigIntHandler
-    // Standard structure for signal handling
-    //----------------------------------------------------------------------
-    struct sigaction sigIntHandler;
-
-private:
     struct MasterNodeElements {
         EvtMng  * evtMng;
         TskMng  * tskMng;
@@ -229,6 +228,8 @@ private:
     std::string            masterAddress;
     bool                   isMasterHost;
 
+    int                    dckWatchDogPipefd[2];
+    int                    dckWatchDogCmdHdl;
 };
 
 //}

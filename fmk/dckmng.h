@@ -130,6 +130,12 @@ public:
     virtual bool getInfo(std::string id, std::stringstream & info) {}
 
     //----------------------------------------------------------------------
+    // Method: getInfo
+    // Retrieves information about running service
+    //----------------------------------------------------------------------
+    virtual bool getInfo(std::string id, std::string & info);
+
+    //----------------------------------------------------------------------
     // Method: kill
     // Kill running container
     //----------------------------------------------------------------------
@@ -152,6 +158,12 @@ public:
     //Shutdown entire swarm
     //----------------------------------------------------------------------
     virtual bool shutdown(std::string srv) {}
+
+    //----------------------------------------------------------------------
+    // Method: getContainerList
+    // Retrieves list of container ids in the form of a vector
+    //----------------------------------------------------------------------
+    virtual bool getContainerList(std::vector<std::string> & contList);
 
     //----------------------------------------------------------------------
     // Method: runCmd

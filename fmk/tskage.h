@@ -113,6 +113,12 @@ public:
     //----------------------------------------------------------------------
     ~TskAge();
     
+    //----------------------------------------------------------------------
+    // Method:L setWatchDogCmdHdl
+    // Set WatchDog handler
+    //----------------------------------------------------------------------
+    void setWatchDogCmdHdl(int wrPipe);
+
 protected:
 
 #undef T
@@ -235,6 +241,24 @@ private:
     //----------------------------------------------------------------------
     void killAllContainers();
 
+    //----------------------------------------------------------------------
+    // Method: armWatchDog
+    // (Re)Arm WatchDog handler
+    //----------------------------------------------------------------------
+    void armWatchDog();
+
+    //----------------------------------------------------------------------
+    // Method: addContainerToWatchDogList
+    // Add container ID to list of containers the watchdog must be aware of
+    //----------------------------------------------------------------------
+    void addContainerToWatchDogList(std::string contId);
+
+    //----------------------------------------------------------------------
+    // Method: removeContainerFromWatchDogList
+    // Remove container ID from list of conts. the watchdog must be aware of
+    //----------------------------------------------------------------------
+    void rmContainerFromWatchDogList(std::string contId);
+
     Property(TskAge, std::string, workDir, WorkDir);
     Property(TskAge, std::string, sysDir,  SysDir);
     Property(TskAge, bool,        remote,  Remote);
@@ -294,6 +318,7 @@ private:
 
     bool                     amQuitting;
 
+    int                      dckWatchDogCmdHdl;
 };
 
 //}

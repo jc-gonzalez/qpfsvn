@@ -83,6 +83,34 @@ bool DockerMng::getDockerInfo(std::stringstream & info, std::string filt = std::
 }
 
 //----------------------------------------------------------------------
+// Method: getInfo
+// Retrieves information about running Docker instance
+//----------------------------------------------------------------------
+bool DockerMng::getInfo(std::string id, std::string & info)
+{
+    procxx::process dckInspect("docker", "inspect");
+    if (info.length() > 0) {
+        dckInspect.add_argument("--format='" + info + "'");
+    }
+    dckInspect.add_argument(id);
+    dckInspect.exec();
+
+    info = "";
+    std::string line;
+    while (std::getline(dckInspect.output(), line)) {
+      info += line;
+        if (!dckInspect.running() ||
+            !procxx::running(dckInspect.id()) ||
+            !running(dckInspect)) {
+            break;
+        }
+    }
+
+    dckInspect.wait();
+    return (dckInspect.code() == 0);
+}
+
+//----------------------------------------------------------------------
 // Method: runCmd
 // Run docker command with arguments
 //----------------------------------------------------------------------
@@ -100,4 +128,28 @@ bool DockerMng::runCmd(std::string cmd, std::vector<std::string> args,
     dckCmd.wait();
     return (dckCmd.code() == 0);
 }
+
+//----------------------------------------------------------------------
+// Method: getContainerList
+// Retrieves list of container ids in the form of a vector
+//----------------------------------------------------------------------
+bool DockerMng::getContainerList(std::vector<std::string> & contList)
+{
+    procxx::process dckPs("docker", "ps", "-aq");
+    dckPs.exec();
+
+    std::string contId;
+    while (std::getline(dckPs.output(), contId)) {
+        contList.push_back(contId);
+        if (!dckPs.running() ||
+            !procxx::running(dckPs.id()) ||
+            !running(dckPs)) {
+            break;
+        }
+    }
+
+    dckPs.wait();
+    return (dckPs.code() == 0);
+}
+
 //}

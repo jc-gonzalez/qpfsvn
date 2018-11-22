@@ -23,6 +23,9 @@ set (libtools_hdr
   sm.h
   timer.h
   tools.h
+  watchdog.h
+  dckwatchdog.h
+  dckwatchdog_cmds.h
 )
 
 set (libtools_src
@@ -34,6 +37,8 @@ set (libtools_src
   sm.cpp
   timer.cpp
   tools.cpp
+  watchdog.cpp
+  dckwatchdog.cpp
 )
 
 #find_package(CURL REQUIRED)
@@ -43,6 +48,7 @@ target_include_directories (tools PUBLIC .
   ${CURLINCDIR}
   ${STR_ROOT_DIR}
   ${JSON_ROOT_DIR}
+  ${FMK_ROOT_DIR}
   ${NNCOMM_ROOT_DIR}
   ${TOOLS_ROOT_DIR})
 target_link_libraries (tools str json pthread)

@@ -47,6 +47,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/wait.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
@@ -62,6 +63,8 @@
 #include "str.h"
 #include "dbg.h"
 
+#include "dckwatchdog.h"
+
 using Configuration::cfg;
 
 #define MINOR_SYNC_DELAY_MS    500
@@ -75,7 +78,13 @@ Deployer * deployerCatcher;
 //----------------------------------------------------------------------
 void signalCatcher(int s)
 {
-    deployerCatcher->actionOnSigInt();
+    switch (s) {
+    case SIGTERM:
+	deployerCatcher->actionOnClosingSignal();
+	break;
+    default:     // Do nothing for other signals trapped (if any)
+	break;
+    }
 }
 
 //----------------------------------------------------------------------
@@ -94,10 +103,6 @@ Deployer::Deployer(int argc, char *argv[])
 
     //== ReadConfiguration
     readConfiguration();
-
-    //== Install signal handler
-    deployerCatcher = this;
-    installSignalHandlers();
 }
 
 //----------------------------------------------------------------------
@@ -108,16 +113,82 @@ Deployer::~Deployer()
 }
 
 //----------------------------------------------------------------------
+// Method: createWatchDog
+// Create the watchdog for this QPF Core instance
+//----------------------------------------------------------------------
+void Deployer::createWatchDog(int lapse)
+{
+    if (pipe(dckWatchDogPipefd) == -1) {
+        perror("pipe");
+        exit(EXIT_FAILURE);
+    }
+
+    dckWatchDogCmdHdl = dckWatchDogPipefd[1];
+
+    TRC("[[DEPL]] WD pipe is {" 
+	<< dckWatchDogPipefd[0] << ','
+	<< dckWatchDogPipefd[1] << '}');
+
+    pid_t pid1;
+    pid_t pid2;
+    int status;
+    if ((pid1 = fork())) { // parent process A
+        close(dckWatchDogPipefd[0]);
+        waitpid(pid1, &status, 0);
+        return;
+    } else if (! pid1) { // child process B 
+	TRC("[[DEPL]] WD pipe is in child 1 {" 
+	    << dckWatchDogPipefd[0] << ','
+	    << dckWatchDogPipefd[1] << '}');
+
+	if ((pid2 = fork())) { // child - new parent process B
+	    TRC("[[DEPL]] WD pipe is (still) in child 1 {" 
+		<< dckWatchDogPipefd[0] << ','
+		<< dckWatchDogPipefd[1] << '}');
+	    
+            close(dckWatchDogPipefd[0]);
+            close(dckWatchDogPipefd[1]);
+            exit(EXIT_SUCCESS);
+        } else if (!pid2) { // new child process C
+	    TRC("[[DEPL]] WD pipe is in child 2 {" 
+		<< dckWatchDogPipefd[0] << ','
+		<< dckWatchDogPipefd[1] << '}');
+
+            pid_t sid = setsid();
+            close(dckWatchDogPipefd[1]);
+            DckWatchDog wd(lapse, dckWatchDogPipefd[0]);
+            wd.start();
+            exit(EXIT_SUCCESS);
+        } else {
+            perror("fork(2)");
+            exit(EXIT_FAILURE);
+        }
+    } else {
+        perror("fork");
+        exit(EXIT_FAILURE);
+    }
+}
+
+//----------------------------------------------------------------------
 // Method: run
 // Launches the system components and starts the system
 //----------------------------------------------------------------------
 int Deployer::run()
 {
+    static const int msDckWatchDogLapse = 5000;
+
     // Greetings...
     sayHello();
 
+    // Create WatchDog
+    createWatchDog(msDckWatchDogLapse);
+
     // System components creation and setup
     createElementsNetwork();
+
+    //== Install signal handler
+    deployerCatcher = this;
+    installSignalHandlers();
 
     // START!
     delay(MINOR_SYNC_DELAY_MS);
@@ -382,11 +453,13 @@ void Deployer::getHostnameAndIp(std::string & hName, std::string & ipAddr)
 }
 
 //----------------------------------------------------------------------
-// Method: actionOnSigInt
-// Actions to be performed when capturing SigInt
+// Method: actionOnClosingSignal
+// Actions to be performed when a closing signal is catched
 //----------------------------------------------------------------------
-void Deployer::actionOnSigInt()
+void Deployer::actionOnClosingSignal()
 {
+    // Quit QPF Core (soft shutdown)
+    if (isMasterHost) { masterNodeElems.evtMng->quit(); }
 }
 
 //----------------------------------------------------------------------
@@ -405,11 +478,19 @@ bool Deployer::existsDir(std::string pathName)
 //----------------------------------------------------------------------
 void Deployer::installSignalHandlers()
 {
-    sigIntHandler.sa_handler = signalCatcher;
-    sigemptyset(&sigIntHandler.sa_mask);
-    sigIntHandler.sa_flags = 0;
+    struct sigaction sigIgnHandler;
+    sigIgnHandler.sa_handler = SIG_IGN;
+    sigemptyset(&sigIgnHandler.sa_mask);
+    sigIgnHandler.sa_flags = 0;
 
-    sigaction(SIGINT, &sigIntHandler, NULL);
+    sigaction(SIGINT,  &sigIgnHandler, nullptr);
+
+    struct sigaction sigActHandler;
+    sigActHandler.sa_handler = signalCatcher;
+    sigemptyset(&sigActHandler.sa_mask);
+    sigActHandler.sa_flags = 0;
+
+    sigaction(SIGTERM, &sigActHandler, nullptr);
 }
 
 //----------------------------------------------------------------------
@@ -510,9 +591,15 @@ void Deployer::createElementsNetwork()
 
     // Show agents created
     for (int i = 0; i < ag.size(); ++i) {
-        TRC("Agent 0x" + std::to_string((long)(ag.at(i))));
-    }
+	TskAge * aag = dynamic_cast<TskAge*>(ag.at(i));
+	if (aag != 0) {
+	    TRC("Agent 0x" + std::to_string((long)(aag)));
 
+	    // Provide pipe end for sending commands to watchdog
+	    aag->setWatchDogCmdHdl(dckWatchDogCmdHdl);
+	}
+    }
+    
     //======================================================================
     // 3. Create the connections
     // ======================================================================

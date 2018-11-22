@@ -52,6 +52,7 @@
 #include "srvmng.h"
 #include "filenamespec.h"
 #include "timer.h"
+#include "dckwatchdog_cmds.h"
 #include "filetools.h"
 using namespace FileTools;
 
@@ -72,6 +73,8 @@ const std::string TskAge::ProcStatusName[] { TLIST_PSTATUS };
 #undef T
 
 const int HOST_INFO_TIMER            = 10000;
+
+const int WATCHDOG_TIMER             = 500;
 
 const int MAX_WAITING_CYCLES         = 50;
 const int IDLE_CYCLES_BEFORE_REQUEST = 1;
@@ -162,6 +165,7 @@ void TskAge::fromRunningToOperational()
     hostInfo.cpuInfo.overallCpuLoad.timeInterval = 10;
 
     armHostInfoTimer();
+    armWatchDog();
 
     transitTo(OPERATIONAL);
     InfoMsg("New state: " + getStateName(getState()));
@@ -347,6 +351,9 @@ void TskAge::processTskProcMsg(ScalabilityProtocolRole* c, MessageString & m)
         // Save container info
         containerToTaskMap[contId]  = runningTask;
         containerEpoch[contId]      = time(0);
+
+	// Add it to the watchdog list
+	addContainerToWatchDogList(contId);
 
         // Set processing status
         pStatus = PROCESSING;
@@ -562,6 +569,7 @@ void TskAge::sendTaskReport(std::string contId)
         (taskStatus == TASK_STOPPED)) {
         transferOutputProducts(task);
         taskHasEnded = true;
+	rmContainerFromWatchDogList(contId);
     }
 
     sendBodyElem<MsgBodyTSK>(ChnlTskProc,
@@ -870,6 +878,61 @@ void TskAge::killAllContainers()
     // Transit to RUNNING, to go to OFF
     sleep(3);
     transitTo(RUNNING);
+}
+
+//----------------------------------------------------------------------
+// Method: setWatchDogCmdHdl
+// Set WatchDog handler
+//----------------------------------------------------------------------
+void TskAge::setWatchDogCmdHdl(int wrPipe)
+{
+    dckWatchDogCmdHdl = wrPipe;
+}
+
+//----------------------------------------------------------------------
+// Method: armWatchDog
+// (Re)Arm WatchDog handler
+//----------------------------------------------------------------------
+void TskAge::armWatchDog()
+{
+    char message[128];
+    int len;
+    len = sprintf(message, "%s;", DWD_CMD_ARM.c_str());
+    write(dckWatchDogCmdHdl, message, len);
+
+    TRC("<<<<<<<<<< RE_ARMING WATCHDOG >>>>>>>>>>");
+    TRC("[[" << compName << "]] Sending '" << message << "' through FD " << dckWatchDogCmdHdl);
+
+    Timer * rearmTimer = new Timer(WATCHDOG_TIMER, true,
+				   &TskAge::armWatchDog, this);
+}
+
+//----------------------------------------------------------------------
+// Method: addContainerToWatchDogList
+// Add container ID to list of containers the watchdog must be aware of
+//----------------------------------------------------------------------
+void TskAge::addContainerToWatchDogList(std::string contId)
+{
+    char message[256];
+    int len;
+    len = sprintf(message, "%s %s;", DWD_CMD_ADD.c_str(), contId.c_str());
+    write(dckWatchDogCmdHdl, message, len);
+
+    TRC("[[" << compName << "]] Sending '" << message << "' through FD " << dckWatchDogCmdHdl);
+}
+
+//----------------------------------------------------------------------
+// Method: removeContainerFromWatchDogList
+// Remove container ID from list of conts. the watchdog must be aware of
+//----------------------------------------------------------------------
+void TskAge::rmContainerFromWatchDogList(std::string contId)
+{
+    char message[256];
+    int len;
+    len = sprintf(message, "%s %s;", DWD_CMD_REMOVE.c_str(), contId.c_str());
+    write(dckWatchDogCmdHdl, message, len);
+
+    TRC("[[" << compName << "]] Sending '" << message << "' through FD " << dckWatchDogCmdHdl);
 }
 
 //}

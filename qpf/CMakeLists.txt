@@ -18,6 +18,7 @@ set (qpf_src
   main.cpp
   deployer.cpp
 )
+
 add_executable(qpf ${qpf_src})
 target_include_directories (qpf PUBLIC . ..
   ${NNMSG_ROOT_DIR}/include
